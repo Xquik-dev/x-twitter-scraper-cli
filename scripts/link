@@ -5,9 +5,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # Mark the necessary Go modules as private to avoid Go's proxy
-export GOPRIVATE="${GOPRIVATE:+$GOPRIVATE,}github.com/Xquik-dev/x-twitter-scraper-go,github.com/stainless-sdks/x-twitter-scraper-go"
+export GOPRIVATE="${GOPRIVATE:+$GOPRIVATE,}github.com/stainless-sdks/x-twitter-scraper-go"
 
 REPLACEMENT="${1:-"../x-twitter-scraper-go"}"
 echo "==> Replacing Go SDK with $REPLACEMENT"
-go mod edit -replace github.com/Xquik-dev/x-twitter-scraper-go="$REPLACEMENT"
+go mod edit -replace github.com/stainless-sdks/x-twitter-scraper-go="$REPLACEMENT"
 go mod tidy -e
