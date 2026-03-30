@@ -15,8 +15,32 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var xDmUpdate = cli.Command{
-	Name:    "update",
+var xDmRetrieveHistory = cli.Command{
+	Name:    "retrieve-history",
+	Usage:   "Get DM conversation history",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "user-id",
+			Required: true,
+		},
+		&requestflag.Flag[string]{
+			Name:      "cursor",
+			Usage:     "Pagination cursor from previous response",
+			QueryPath: "cursor",
+		},
+		&requestflag.Flag[string]{
+			Name:      "max-id",
+			Usage:     "Legacy pagination cursor (backward compat)",
+			QueryPath: "maxId",
+		},
+	},
+	Action:          handleXDmRetrieveHistory,
+	HideHelpCommand: true,
+}
+
+var xDmSend = cli.Command{
+	Name:    "send",
 	Usage:   "Send direct message",
 	Suggest: true,
 	Flags: []cli.Flag{
@@ -44,74 +68,8 @@ var xDmUpdate = cli.Command{
 			BodyPath: "reply_to_message_id",
 		},
 	},
-	Action:          handleXDmUpdate,
+	Action:          handleXDmSend,
 	HideHelpCommand: true,
-}
-
-var xDmRetrieveHistory = cli.Command{
-	Name:    "retrieve-history",
-	Usage:   "Get DM conversation history",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "user-id",
-			Required: true,
-		},
-		&requestflag.Flag[string]{
-			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
-			QueryPath: "cursor",
-		},
-		&requestflag.Flag[string]{
-			Name:      "max-id",
-			Usage:     "Legacy pagination cursor (backward compat)",
-			QueryPath: "maxId",
-		},
-	},
-	Action:          handleXDmRetrieveHistory,
-	HideHelpCommand: true,
-}
-
-func handleXDmUpdate(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("user-id") && len(unusedArgs) > 0 {
-		cmd.Set("user-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	params := xtwitterscraper.XDmUpdateParams{}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Dm.Update(
-		ctx,
-		cmd.Value("user-id").(string),
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:dm update", obj, format, transform)
 }
 
 func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
@@ -154,4 +112,46 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "x:dm retrieve-history", obj, format, transform)
+}
+
+func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("user-id") && len(unusedArgs) > 0 {
+		cmd.Set("user-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	params := xtwitterscraper.XDmSendParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Dm.Send(
+		ctx,
+		cmd.Value("user-id").(string),
+		params,
+		options...,
+	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:dm send", obj, format, transform)
 }

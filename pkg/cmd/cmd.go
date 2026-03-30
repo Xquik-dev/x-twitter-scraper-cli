@@ -299,7 +299,7 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
-					&xFollowersRetrieveCheck,
+					&xFollowersCheck,
 				},
 			},
 			{
@@ -307,8 +307,8 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
-					&xDmUpdate,
 					&xDmRetrieveHistory,
+					&xDmSend,
 				},
 			},
 			{
@@ -316,8 +316,8 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
-					&xMediaCreate,
 					&xMediaDownload,
+					&xMediaUpload,
 				},
 			},
 			{
@@ -325,7 +325,7 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
-					&xProfilePatchAll,
+					&xProfileUpdate,
 					&xProfileUpdateAvatar,
 					&xProfileUpdateBanner,
 				},
@@ -397,24 +397,6 @@ func init() {
 				Suggest:  true,
 				Commands: []*cli.Command{
 					&trendsList,
-				},
-			},
-			{
-				Name:     "bot",
-				Category: "API RESOURCE",
-				Suggest:  true,
-				Commands: []*cli.Command{
-					&botTrackUsage,
-				},
-			},
-			{
-				Name:     "bot:platform-links",
-				Category: "API RESOURCE",
-				Suggest:  true,
-				Commands: []*cli.Command{
-					&botPlatformLinksCreate,
-					&botPlatformLinksDelete,
-					&botPlatformLinksLookup,
 				},
 			},
 			{

@@ -67,7 +67,7 @@ snapshot:
 
 nfpms:
   - license: Apache-2.0
-    maintainer: 
+    maintainer: support@xquik.com
     bindir: /usr
     formats:
       - apk
