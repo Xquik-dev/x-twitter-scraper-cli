@@ -44,8 +44,10 @@ x-twitter-scraper [resource] <command> [flags...]
 ```
 
 ```sh
-x-twitter-scraper account retrieve \
-  --api-key 'My API Key'
+x-twitter-scraper x:tweets search \
+  --api-key 'My API Key' \
+  --q from:elonmusk \
+  --limit 10
 ```
 
 For details about specific commands, use the `--help` flag.

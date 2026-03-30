@@ -15,8 +15,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var xFollowersRetrieveCheck = cli.Command{
-	Name:    "retrieve-check",
+var xFollowersCheck = cli.Command{
+	Name:    "check",
 	Usage:   "Check follow relationship",
 	Suggest: true,
 	Flags: []cli.Flag{
@@ -33,11 +33,11 @@ var xFollowersRetrieveCheck = cli.Command{
 			QueryPath: "target",
 		},
 	},
-	Action:          handleXFollowersRetrieveCheck,
+	Action:          handleXFollowersCheck,
 	HideHelpCommand: true,
 }
 
-func handleXFollowersRetrieveCheck(ctx context.Context, cmd *cli.Command) error {
+func handleXFollowersCheck(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 
@@ -45,7 +45,7 @@ func handleXFollowersRetrieveCheck(ctx context.Context, cmd *cli.Command) error 
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XFollowerGetCheckParams{}
+	params := xtwitterscraper.XFollowerCheckParams{}
 
 	options, err := flagOptions(
 		cmd,
@@ -60,7 +60,7 @@ func handleXFollowersRetrieveCheck(ctx context.Context, cmd *cli.Command) error 
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Followers.GetCheck(ctx, params, options...)
+	_, err = client.X.Followers.Check(ctx, params, options...)
 	if err != nil {
 		return err
 	}
@@ -68,5 +68,5 @@ func handleXFollowersRetrieveCheck(ctx context.Context, cmd *cli.Command) error 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:followers retrieve-check", obj, format, transform)
+	return ShowJSON(os.Stdout, "x:followers check", obj, format, transform)
 }

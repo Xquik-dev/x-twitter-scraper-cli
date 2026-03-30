@@ -15,8 +15,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var xProfilePatchAll = cli.Command{
-	Name:    "patch-all",
+var xProfileUpdate = cli.Command{
+	Name:    "update",
 	Usage:   "Update X profile",
 	Suggest: true,
 	Flags: []cli.Flag{
@@ -46,7 +46,7 @@ var xProfilePatchAll = cli.Command{
 			BodyPath: "url",
 		},
 	},
-	Action:          handleXProfilePatchAll,
+	Action:          handleXProfileUpdate,
 	HideHelpCommand: true,
 }
 
@@ -94,7 +94,7 @@ var xProfileUpdateBanner = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleXProfilePatchAll(ctx context.Context, cmd *cli.Command) error {
+func handleXProfileUpdate(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 
@@ -102,7 +102,7 @@ func handleXProfilePatchAll(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XProfilePatchAllParams{}
+	params := xtwitterscraper.XProfileUpdateParams{}
 
 	options, err := flagOptions(
 		cmd,
@@ -117,7 +117,7 @@ func handleXProfilePatchAll(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Profile.PatchAll(ctx, params, options...)
+	_, err = client.X.Profile.Update(ctx, params, options...)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func handleXProfilePatchAll(ctx context.Context, cmd *cli.Command) error {
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:profile patch-all", obj, format, transform)
+	return ShowJSON(os.Stdout, "x:profile update", obj, format, transform)
 }
 
 func handleXProfileUpdateAvatar(ctx context.Context, cmd *cli.Command) error {

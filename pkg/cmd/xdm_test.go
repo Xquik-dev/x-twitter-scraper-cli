@@ -8,14 +8,29 @@ import (
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestXDmUpdate(t *testing.T) {
+func TestXDmRetrieveHistory(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"x:dm", "update",
+			"x:dm", "retrieve-history",
+			"--user-id", "userId",
+			"--cursor", "cursor",
+			"--max-id", "maxId",
+		)
+	})
+}
+
+func TestXDmSend(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:dm", "send",
 			"--user-id", "userId",
 			"--account", "account",
 			"--text", "text",
@@ -36,23 +51,8 @@ func TestXDmUpdate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"x:dm", "update",
+			"x:dm", "send",
 			"--user-id", "userId",
-		)
-	})
-}
-
-func TestXDmRetrieveHistory(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"x:dm", "retrieve-history",
-			"--user-id", "userId",
-			"--cursor", "cursor",
-			"--max-id", "maxId",
 		)
 	})
 }

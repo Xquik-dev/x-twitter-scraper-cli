@@ -15,32 +15,6 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var xMediaCreate = cli.Command{
-	Name:    "create",
-	Usage:   "Upload media",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "account",
-			Usage:    "X account (@username or account ID)",
-			Required: true,
-			BodyPath: "account",
-		},
-		&requestflag.Flag[string]{
-			Name:     "file",
-			Usage:    "Media file to upload",
-			Required: true,
-			BodyPath: "file",
-		},
-		&requestflag.Flag[bool]{
-			Name:     "is-long-video",
-			BodyPath: "is_long_video",
-		},
-	},
-	Action:          handleXMediaCreate,
-	HideHelpCommand: true,
-}
-
 var xMediaDownload = cli.Command{
 	Name:    "download",
 	Usage:   "Download tweet media",
@@ -61,38 +35,30 @@ var xMediaDownload = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleXMediaCreate(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	params := xtwitterscraper.XMediaNewParams{}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		MultipartFormEncoded,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Media.New(ctx, params, options...)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:media create", obj, format, transform)
+var xMediaUpload = cli.Command{
+	Name:    "upload",
+	Usage:   "Upload media",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "account",
+			Usage:    "X account (@username or account ID)",
+			Required: true,
+			BodyPath: "account",
+		},
+		&requestflag.Flag[string]{
+			Name:     "file",
+			Usage:    "Media file to upload",
+			Required: true,
+			BodyPath: "file",
+		},
+		&requestflag.Flag[bool]{
+			Name:     "is-long-video",
+			BodyPath: "is_long_video",
+		},
+	},
+	Action:          handleXMediaUpload,
+	HideHelpCommand: true,
 }
 
 func handleXMediaDownload(ctx context.Context, cmd *cli.Command) error {
@@ -127,4 +93,38 @@ func handleXMediaDownload(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "x:media download", obj, format, transform)
+}
+
+func handleXMediaUpload(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	params := xtwitterscraper.XMediaUploadParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		MultipartFormEncoded,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Media.Upload(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:media upload", obj, format, transform)
 }
