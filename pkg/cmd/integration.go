@@ -83,6 +83,7 @@ var integrationsUpdate = cli.Command{
 		},
 		&requestflag.Flag[map[string]any]{
 			Name:     "filters",
+			Usage:    "Event filter rules (JSON)",
 			BodyPath: "filters",
 		},
 		&requestflag.Flag[bool]{
@@ -91,6 +92,7 @@ var integrationsUpdate = cli.Command{
 		},
 		&requestflag.Flag[map[string]any]{
 			Name:     "message-template",
+			Usage:    "Custom message template (JSON)",
 			BodyPath: "messageTemplate",
 		},
 		&requestflag.Flag[string]{
