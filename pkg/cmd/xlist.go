@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
 	"github.com/urfave/cli/v3"
 )
 
