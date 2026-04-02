@@ -133,13 +133,9 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
-					&stylesRetrieve,
-					&stylesUpdate,
 					&stylesList,
-					&stylesDelete,
 					&stylesAnalyze,
 					&stylesCompare,
-					&stylesGetPerformance,
 				},
 			},
 			{
@@ -238,9 +234,7 @@ func init() {
 				Suggest:  true,
 				Commands: []*cli.Command{
 					&xTweetsCreate,
-					&xTweetsRetrieve,
 					&xTweetsList,
-					&xTweetsDelete,
 					&xTweetsGetFavoriters,
 					&xTweetsGetQuotes,
 					&xTweetsGetReplies,
@@ -250,29 +244,10 @@ func init() {
 				},
 			},
 			{
-				Name:     "x:tweets:like",
-				Category: "API RESOURCE",
-				Suggest:  true,
-				Commands: []*cli.Command{
-					&xTweetsLikeCreate,
-					&xTweetsLikeDelete,
-				},
-			},
-			{
-				Name:     "x:tweets:retweet",
-				Category: "API RESOURCE",
-				Suggest:  true,
-				Commands: []*cli.Command{
-					&xTweetsRetweetCreate,
-					&xTweetsRetweetDelete,
-				},
-			},
-			{
 				Name:     "x:users",
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
-					&xUsersRetrieve,
 					&xUsersRetrieveBatch,
 					&xUsersRetrieveFollowers,
 					&xUsersRetrieveFollowersYouKnow,
@@ -283,15 +258,6 @@ func init() {
 					&xUsersRetrieveSearch,
 					&xUsersRetrieveTweets,
 					&xUsersRetrieveVerifiedFollowers,
-				},
-			},
-			{
-				Name:     "x:users:follow",
-				Category: "API RESOURCE",
-				Suggest:  true,
-				Commands: []*cli.Command{
-					&xUsersFollowCreate,
-					&xUsersFollowDeleteAll,
 				},
 			},
 			{

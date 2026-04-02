@@ -6,67 +6,7 @@ import (
 	"testing"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 )
-
-func TestStylesRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"styles", "retrieve",
-			"--username", "username",
-		)
-	})
-}
-
-func TestStylesUpdate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"styles", "update",
-			"--username", "username",
-			"--label", "label",
-			"--tweet", "{text: text}",
-		)
-	})
-
-	t.Run("inner flags", func(t *testing.T) {
-		// Check that inner flags have been set up correctly
-		requestflag.CheckInnerFlags(stylesUpdate)
-
-		// Alternative argument passing style using inner flags
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"styles", "update",
-			"--username", "username",
-			"--label", "label",
-			"--tweet.text", "text",
-		)
-	})
-
-	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
-		pipeData := []byte("" +
-			"label: label\n" +
-			"tweets:\n" +
-			"  - text: text\n")
-		mocktest.TestRunMockTestWithPipeAndFlags(
-			t, pipeData,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"styles", "update",
-			"--username", "username",
-		)
-	})
-}
 
 func TestStylesList(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
@@ -76,19 +16,6 @@ func TestStylesList(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "list",
-		)
-	})
-}
-
-func TestStylesDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"styles", "delete",
-			"--username", "username",
 		)
 	})
 }
@@ -127,19 +54,6 @@ func TestStylesCompare(t *testing.T) {
 			"styles", "compare",
 			"--username1", "username1",
 			"--username2", "username2",
-		)
-	})
-}
-
-func TestStylesGetPerformance(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"styles", "get-performance",
-			"--username", "username",
 		)
 	})
 }
