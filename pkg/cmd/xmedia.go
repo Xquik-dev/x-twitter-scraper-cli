@@ -47,10 +47,11 @@ var xMediaUpload = cli.Command{
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:     "file",
-			Usage:    "Media file to upload",
-			Required: true,
-			BodyPath: "file",
+			Name:      "file",
+			Usage:     "Media file to upload",
+			Required:  true,
+			BodyPath:  "file",
+			FileInput: true,
 		},
 		&requestflag.Flag[bool]{
 			Name:     "is-long-video",

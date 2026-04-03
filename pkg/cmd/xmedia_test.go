@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
@@ -45,17 +46,20 @@ func TestXMediaUpload(t *testing.T) {
 			"--bearer-token", "string",
 			"x:media", "upload",
 			"--account", "account",
-			"--file", "Example data",
+			"--file", mocktest.TestFile(t, "Example data"),
 			"--is-long-video=true",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
+		testFile := mocktest.TestFile(t, "Example data")
 		// Test piping YAML data over stdin
-		pipeData := []byte("" +
+		pipeDataStr := "" +
 			"account: account\n" +
 			"file: Example data\n" +
-			"is_long_video: true\n")
+			"is_long_video: true\n"
+		pipeDataStr = strings.ReplaceAll(pipeDataStr, "Example data", testFile)
+		pipeData := []byte(pipeDataStr)
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
