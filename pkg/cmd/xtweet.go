@@ -56,20 +56,6 @@ var xTweetsCreate = cli.Command{
 	HideHelpCommand: true,
 }
 
-var xTweetsRetrieve = cli.Command{
-	Name:    "retrieve",
-	Usage:   "Look up tweet",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "tweet-id",
-			Required: true,
-		},
-	},
-	Action:          handleXTweetsRetrieve,
-	HideHelpCommand: true,
-}
-
 var xTweetsList = cli.Command{
 	Name:    "list",
 	Usage:   "Get multiple tweets by IDs",
@@ -83,26 +69,6 @@ var xTweetsList = cli.Command{
 		},
 	},
 	Action:          handleXTweetsList,
-	HideHelpCommand: true,
-}
-
-var xTweetsDelete = cli.Command{
-	Name:    "delete",
-	Usage:   "Delete tweet",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "tweet-id",
-			Required: true,
-		},
-		&requestflag.Flag[string]{
-			Name:     "account",
-			Usage:    "X account (@username or account ID)",
-			Required: true,
-			BodyPath: "account",
-		},
-	},
-	Action:          handleXTweetsDelete,
 	HideHelpCommand: true,
 }
 
@@ -244,7 +210,7 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Deprecated — use cursor-based pagination instead",
+			Usage:     "Max tweets to return (server paginates internally). Omit for single page (~20).",
 			Default:   20,
 			QueryPath: "limit",
 		},
@@ -303,41 +269,6 @@ func handleXTweetsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(os.Stdout, "x:tweets create", obj, format, transform)
 }
 
-func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("tweet-id") && len(unusedArgs) > 0 {
-		cmd.Set("tweet-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Tweets.Get(ctx, cmd.Value("tweet-id").(string), options...)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets retrieve", obj, format, transform)
-}
-
 func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
@@ -360,48 +291,6 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	return client.X.Tweets.List(ctx, params, options...)
-}
-
-func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("tweet-id") && len(unusedArgs) > 0 {
-		cmd.Set("tweet-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	params := xtwitterscraper.XTweetDeleteParams{}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Tweets.Delete(
-		ctx,
-		cmd.Value("tweet-id").(string),
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets delete", obj, format, transform)
 }
 
 func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {

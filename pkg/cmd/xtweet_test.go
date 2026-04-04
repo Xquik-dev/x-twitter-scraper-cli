@@ -46,19 +46,6 @@ func TestXTweetsCreate(t *testing.T) {
 	})
 }
 
-func TestXTweetsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"x:tweets", "retrieve",
-			"--tweet-id", "tweetId",
-		)
-	})
-}
-
 func TestXTweetsList(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
@@ -68,32 +55,6 @@ func TestXTweetsList(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets", "list",
 			"--ids", "ids",
-		)
-	})
-}
-
-func TestXTweetsDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"x:tweets", "delete",
-			"--tweet-id", "tweetId",
-			"--account", "account",
-		)
-	})
-
-	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
-		pipeData := []byte("account: account")
-		mocktest.TestRunMockTestWithPipeAndFlags(
-			t, pipeData,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"x:tweets", "delete",
-			"--tweet-id", "tweetId",
 		)
 	})
 }
