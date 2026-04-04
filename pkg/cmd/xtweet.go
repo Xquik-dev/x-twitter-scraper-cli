@@ -210,7 +210,7 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Deprecated — use cursor-based pagination instead",
+			Usage:     "Max tweets to return (server paginates internally). Omit for single page (~20).",
 			Default:   20,
 			QueryPath: "limit",
 		},
