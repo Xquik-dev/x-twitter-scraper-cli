@@ -26,11 +26,12 @@ var extractionsRetrieve = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "after",
-			Usage:     "Cursor for pagination",
+			Usage:     "Cursor for keyset pagination",
 			QueryPath: "after",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
+			Usage:     "Maximum number of results to return (1-1000, default 100)",
 			Default:   100,
 			QueryPath: "limit",
 		},
@@ -46,22 +47,23 @@ var extractionsList = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "after",
-			Usage:     "Cursor for pagination",
+			Usage:     "Cursor for keyset pagination",
 			QueryPath: "after",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
+			Usage:     "Maximum number of items to return (1-100, default 50)",
 			Default:   50,
 			QueryPath: "limit",
 		},
 		&requestflag.Flag[string]{
 			Name:      "status",
-			Usage:     `Allowed values: "running", "completed", "failed".`,
+			Usage:     "Filter by job status",
 			QueryPath: "status",
 		},
 		&requestflag.Flag[string]{
 			Name:      "tool-type",
-			Usage:     `Allowed values: "article_extractor", "community_extractor", "community_moderator_explorer", "community_post_extractor", "community_search", "follower_explorer", "following_explorer", "list_follower_explorer", "list_member_extractor", "list_post_extractor", "mention_extractor", "people_search", "post_extractor", "quote_extractor", "reply_extractor", "repost_extractor", "space_explorer", "thread_extractor", "tweet_search_extractor", "verified_follower_explorer".`,
+			Usage:     "Filter by extraction tool type",
 			QueryPath: "toolType",
 		},
 	},
@@ -76,23 +78,23 @@ var extractionsEstimateCost = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "tool-type",
-			Usage:    `Allowed values: "article_extractor", "community_extractor", "community_moderator_explorer", "community_post_extractor", "community_search", "follower_explorer", "following_explorer", "list_follower_explorer", "list_member_extractor", "list_post_extractor", "mention_extractor", "people_search", "post_extractor", "quote_extractor", "reply_extractor", "repost_extractor", "space_explorer", "thread_extractor", "tweet_search_extractor", "verified_follower_explorer".`,
+			Usage:    "Identifier for the extraction tool used to run a job.",
 			Required: true,
 			BodyPath: "toolType",
 		},
 		&requestflag.Flag[string]{
 			Name:     "advanced-query",
-			Usage:    "Raw advanced search query appended as-is (tweet_search_extractor)",
+			Usage:    "Raw advanced query string appended to the estimate (tweet_search_extractor)",
 			BodyPath: "advancedQuery",
 		},
 		&requestflag.Flag[string]{
 			Name:     "exact-phrase",
-			Usage:    "Exact phrase to match (tweet_search_extractor)",
+			Usage:    "Exact phrase filter for search estimation",
 			BodyPath: "exactPhrase",
 		},
 		&requestflag.Flag[string]{
 			Name:     "exclude-words",
-			Usage:    "Words to exclude from results (tweet_search_extractor)",
+			Usage:    "Words excluded from estimated search results",
 			BodyPath: "excludeWords",
 		},
 		&requestflag.Flag[string]{
@@ -135,7 +137,7 @@ var extractionsExportResults = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "format",
-			Usage:     `Allowed values: "csv", "json", "md", "md-document", "pdf", "txt", "xlsx".`,
+			Usage:     "Export file format",
 			Default:   "csv",
 			QueryPath: "format",
 		},
@@ -156,7 +158,7 @@ var extractionsRun = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "tool-type",
-			Usage:    `Allowed values: "article_extractor", "community_extractor", "community_moderator_explorer", "community_post_extractor", "community_search", "follower_explorer", "following_explorer", "list_follower_explorer", "list_member_extractor", "list_post_extractor", "mention_extractor", "people_search", "post_extractor", "quote_extractor", "reply_extractor", "repost_extractor", "space_explorer", "thread_extractor", "tweet_search_extractor", "verified_follower_explorer".`,
+			Usage:    "Identifier for the extraction tool used to run a job.",
 			Required: true,
 			BodyPath: "toolType",
 		},

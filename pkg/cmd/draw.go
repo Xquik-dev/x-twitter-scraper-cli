@@ -36,11 +36,12 @@ var drawsList = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "after",
-			Usage:     "Cursor for pagination",
+			Usage:     "Cursor for keyset pagination",
 			QueryPath: "after",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
+			Usage:     "Maximum number of items to return (1-100, default 50)",
 			Default:   50,
 			QueryPath: "limit",
 		},
@@ -60,7 +61,7 @@ var drawsExport = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "format",
-			Usage:     `Allowed values: "csv", "json", "md", "md-document", "pdf", "txt", "xlsx".`,
+			Usage:     "Export output format",
 			Default:   "csv",
 			QueryPath: "format",
 		},

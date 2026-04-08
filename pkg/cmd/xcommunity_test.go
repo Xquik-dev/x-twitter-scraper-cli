@@ -16,18 +16,18 @@ func TestXCommunitiesCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:communities", "create",
-			"--account", "account",
-			"--name", "name",
-			"--description", "description",
+			"--account", "@elonmusk",
+			"--name", "Example Name",
+			"--description", "A community for Tesla enthusiasts",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"account: account\n" +
-			"name: name\n" +
-			"description: description\n")
+			"account: '@elonmusk'\n" +
+			"name: Example Name\n" +
+			"description: A community for Tesla enthusiasts\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -46,16 +46,16 @@ func TestXCommunitiesDelete(t *testing.T) {
 			"--bearer-token", "string",
 			"x:communities", "delete",
 			"--id", "id",
-			"--account", "account",
-			"--community-name", "community_name",
+			"--account", "@elonmusk",
+			"--community-name", "Tesla Fans",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"account: account\n" +
-			"community_name: community_name\n")
+			"account: '@elonmusk'\n" +
+			"community_name: Tesla Fans\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

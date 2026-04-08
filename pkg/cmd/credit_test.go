@@ -28,13 +28,13 @@ func TestCreditsTopupBalance(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"credits", "topup-balance",
-			"--amount", "0",
+			"--amount", "10000",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("amount: 0")
+		pipeData := []byte("amount: 10000")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

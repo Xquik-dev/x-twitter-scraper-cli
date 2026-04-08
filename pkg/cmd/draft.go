@@ -65,6 +65,7 @@ var draftsList = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
+			Usage:     "Maximum number of items to return (1-100, default 50)",
 			Default:   50,
 			QueryPath: "limit",
 		},

@@ -59,39 +59,39 @@ func TestDrawsRun(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"draws", "run",
-			"--tweet-url", "https://example.com",
-			"--backup-count", "0",
-			"--filter-account-age-days", "0",
-			"--filter-language", "filterLanguage",
-			"--filter-min-followers", "0",
-			"--must-follow-username", "mustFollowUsername",
+			"--tweet-url", "https://x.com/elonmusk/status/1234567890",
+			"--backup-count", "2",
+			"--filter-account-age-days", "30",
+			"--filter-language", "en",
+			"--filter-min-followers", "50",
+			"--must-follow-username", "elonmusk",
 			"--must-retweet=true",
-			"--required-hashtag", "string",
-			"--required-keyword", "string",
-			"--required-mention", "string",
+			"--required-hashtag", "#giveaway",
+			"--required-keyword", "entered",
+			"--required-mention", "@elonmusk",
 			"--unique-authors-only=true",
-			"--winner-count", "0",
+			"--winner-count", "3",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"tweetUrl: https://example.com\n" +
-			"backupCount: 0\n" +
-			"filterAccountAgeDays: 0\n" +
-			"filterLanguage: filterLanguage\n" +
-			"filterMinFollowers: 0\n" +
-			"mustFollowUsername: mustFollowUsername\n" +
+			"tweetUrl: https://x.com/elonmusk/status/1234567890\n" +
+			"backupCount: 2\n" +
+			"filterAccountAgeDays: 30\n" +
+			"filterLanguage: en\n" +
+			"filterMinFollowers: 50\n" +
+			"mustFollowUsername: elonmusk\n" +
 			"mustRetweet: true\n" +
 			"requiredHashtags:\n" +
-			"  - string\n" +
+			"  - '#giveaway'\n" +
 			"requiredKeywords:\n" +
-			"  - string\n" +
+			"  - entered\n" +
 			"requiredMentions:\n" +
-			"  - string\n" +
+			"  - '@elonmusk'\n" +
 			"uniqueAuthorsOnly: true\n" +
-			"winnerCount: 0\n")
+			"winnerCount: 3\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

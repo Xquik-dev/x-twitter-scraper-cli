@@ -22,7 +22,7 @@ var xBookmarksList = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for bookmarks",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{

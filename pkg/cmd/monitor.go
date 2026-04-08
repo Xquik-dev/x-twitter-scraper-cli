@@ -22,6 +22,7 @@ var monitorsCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			Required: true,
 			BodyPath: "eventTypes",
 		},
@@ -61,6 +62,7 @@ var monitorsUpdate = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			BodyPath: "eventTypes",
 		},
 		&requestflag.Flag[bool]{

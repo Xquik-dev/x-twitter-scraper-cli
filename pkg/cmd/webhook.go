@@ -22,6 +22,7 @@ var webhooksCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			Required: true,
 			BodyPath: "eventTypes",
 		},
@@ -47,6 +48,7 @@ var webhooksUpdate = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			BodyPath: "eventTypes",
 		},
 		&requestflag.Flag[bool]{

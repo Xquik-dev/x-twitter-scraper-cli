@@ -42,7 +42,7 @@ var xMediaUpload = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) uploading media",
 			Required: true,
 			BodyPath: "account",
 		},

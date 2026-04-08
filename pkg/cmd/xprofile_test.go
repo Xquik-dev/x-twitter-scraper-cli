@@ -17,22 +17,22 @@ func TestXProfileUpdate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:profile", "update",
-			"--account", "account",
-			"--description", "description",
-			"--location", "location",
-			"--name", "name",
-			"--url", "url",
+			"--account", "@elonmusk",
+			"--description", "description_value",
+			"--location", "location_value",
+			"--name", "Example Name",
+			"--url", "https://xquik.com/example",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"account: account\n" +
-			"description: description\n" +
-			"location: location\n" +
-			"name: name\n" +
-			"url: url\n")
+			"account: '@elonmusk'\n" +
+			"description: description_value\n" +
+			"location: location_value\n" +
+			"name: Example Name\n" +
+			"url: https://xquik.com/example\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -50,7 +50,7 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:profile", "update-avatar",
-			"--account", "account",
+			"--account", "@elonmusk",
 			"--file", mocktest.TestFile(t, "Example data"),
 		)
 	})
@@ -59,7 +59,7 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 		testFile := mocktest.TestFile(t, "Example data")
 		// Test piping YAML data over stdin
 		pipeDataStr := "" +
-			"account: account\n" +
+			"account: '@elonmusk'\n" +
 			"file: Example data\n"
 		pipeDataStr = strings.ReplaceAll(pipeDataStr, "Example data", testFile)
 		pipeData := []byte(pipeDataStr)
@@ -80,7 +80,7 @@ func TestXProfileUpdateBanner(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:profile", "update-banner",
-			"--account", "account",
+			"--account", "@elonmusk",
 			"--file", mocktest.TestFile(t, "Example data"),
 		)
 	})
@@ -89,7 +89,7 @@ func TestXProfileUpdateBanner(t *testing.T) {
 		testFile := mocktest.TestFile(t, "Example data")
 		// Test piping YAML data over stdin
 		pipeDataStr := "" +
-			"account: account\n" +
+			"account: '@elonmusk'\n" +
 			"file: Example data\n"
 		pipeDataStr = strings.ReplaceAll(pipeDataStr, "Example data", testFile)
 		pipeData := []byte(pipeDataStr)

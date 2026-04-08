@@ -17,16 +17,16 @@ func TestComposeCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"compose", "create",
 			"--step", "compose",
-			"--additional-context", "additionalContext",
-			"--call-to-action", "callToAction",
-			"--draft", "draft",
+			"--additional-context", "https://x.com/elonmusk/status/1234567890",
+			"--call-to-action", "Follow for more",
+			"--draft", "AI is changing everything. Here's why.",
 			"--goal", "engagement",
-			"--has-link=true",
-			"--has-media=true",
-			"--media-type", "photo",
-			"--style-username", "styleUsername",
-			"--tone", "tone",
-			"--topic", "topic",
+			"--has-link=false",
+			"--has-media=false",
+			"--media-type", "none",
+			"--style-username", "elonmusk",
+			"--tone", "professional",
+			"--topic", "AI trends in 2025",
 		)
 	})
 
@@ -34,16 +34,16 @@ func TestComposeCreate(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"step: compose\n" +
-			"additionalContext: additionalContext\n" +
-			"callToAction: callToAction\n" +
-			"draft: draft\n" +
+			"additionalContext: https://x.com/elonmusk/status/1234567890\n" +
+			"callToAction: Follow for more\n" +
+			"draft: AI is changing everything. Here's why.\n" +
 			"goal: engagement\n" +
-			"hasLink: true\n" +
-			"hasMedia: true\n" +
-			"mediaType: photo\n" +
-			"styleUsername: styleUsername\n" +
-			"tone: tone\n" +
-			"topic: topic\n")
+			"hasLink: false\n" +
+			"hasMedia: false\n" +
+			"mediaType: none\n" +
+			"styleUsername: elonmusk\n" +
+			"tone: professional\n" +
+			"topic: AI trends in 2025\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

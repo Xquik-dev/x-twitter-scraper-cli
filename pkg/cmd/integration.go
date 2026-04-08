@@ -28,6 +28,7 @@ var integrationsCreate = requestflag.WithInnerFlags(cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			Required: true,
 			BodyPath: "eventTypes",
 		},
@@ -79,6 +80,7 @@ var integrationsUpdate = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			BodyPath: "eventTypes",
 		},
 		&requestflag.Flag[map[string]any]{
@@ -146,6 +148,7 @@ var integrationsListDeliveries = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
+			Usage:     "Maximum number of items to return (1-100, default 50)",
 			Default:   50,
 			QueryPath: "limit",
 		},

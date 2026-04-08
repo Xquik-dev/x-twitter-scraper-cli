@@ -22,7 +22,7 @@ var xProfileUpdate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) to update profile",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -57,7 +57,7 @@ var xProfileUpdateAvatar = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) for avatar update",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -80,7 +80,7 @@ var xProfileUpdateBanner = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) for banner update",
 			Required: true,
 			BodyPath: "account",
 		},

@@ -5,10 +5,13 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -23,7 +26,7 @@ var xListsRetrieveFollowers = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for list followers",
 			QueryPath: "cursor",
 		},
 	},
@@ -42,7 +45,7 @@ var xListsRetrieveMembers = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for list members",
 			QueryPath: "cursor",
 		},
 	},
@@ -61,7 +64,7 @@ var xListsRetrieveTweets = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for list tweets",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[bool]{
@@ -108,12 +111,22 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 		return err
 	}
 
-	return client.X.Lists.GetFollowers(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Lists.GetFollowers(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:lists retrieve-followers", obj, format, transform)
 }
 
 func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
@@ -140,12 +153,22 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.Lists.GetMembers(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Lists.GetMembers(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:lists retrieve-members", obj, format, transform)
 }
 
 func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
@@ -172,10 +195,20 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.Lists.GetTweets(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Lists.GetTweets(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:lists retrieve-tweets", obj, format, transform)
 }

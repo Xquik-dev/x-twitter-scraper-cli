@@ -28,13 +28,13 @@ func TestStylesAnalyze(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "analyze",
-			"--username", "username",
+			"--username", "elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("username: username")
+		pipeData := []byte("username: elonmusk")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

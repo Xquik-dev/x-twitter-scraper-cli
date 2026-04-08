@@ -83,7 +83,7 @@ var xTweetsGetFavoriters = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for favoriters",
 			QueryPath: "cursor",
 		},
 	},
@@ -102,22 +102,22 @@ var xTweetsGetQuotes = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for quote tweets",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[bool]{
 			Name:      "include-replies",
-			Usage:     "Include replies (default false)",
+			Usage:     "Include reply quotes (default false)",
 			QueryPath: "includeReplies",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "Unix timestamp - filter after",
+			Usage:     "Unix timestamp - return quotes posted after this time",
 			QueryPath: "sinceTime",
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "Unix timestamp - filter before",
+			Usage:     "Unix timestamp - return quotes posted before this time",
 			QueryPath: "untilTime",
 		},
 	},
@@ -136,17 +136,17 @@ var xTweetsGetReplies = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for tweet replies",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "Unix timestamp - filter after",
+			Usage:     "Unix timestamp - return replies posted after this time",
 			QueryPath: "sinceTime",
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "Unix timestamp - filter before",
+			Usage:     "Unix timestamp - return replies posted before this time",
 			QueryPath: "untilTime",
 		},
 	},
@@ -165,7 +165,7 @@ var xTweetsGetRetweeters = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for retweeters",
 			QueryPath: "cursor",
 		},
 	},
@@ -184,7 +184,7 @@ var xTweetsGetThread = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for thread tweets",
 			QueryPath: "cursor",
 		},
 	},
@@ -290,7 +290,17 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.Tweets.List(ctx, params, options...)
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Tweets.List(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:tweets list", obj, format, transform)
 }
 
 func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {

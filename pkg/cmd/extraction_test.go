@@ -34,7 +34,7 @@ func TestExtractionsList(t *testing.T) {
 			"--after", "after",
 			"--limit", "1",
 			"--status", "running",
-			"--tool-type", "article_extractor",
+			"--tool-type", "follower_explorer",
 		)
 	})
 }
@@ -47,32 +47,32 @@ func TestExtractionsEstimateCost(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"extractions", "estimate-cost",
-			"--tool-type", "article_extractor",
-			"--advanced-query", "advancedQuery",
-			"--exact-phrase", "exactPhrase",
-			"--exclude-words", "excludeWords",
-			"--search-query", "searchQuery",
-			"--target-community-id", "targetCommunityId",
-			"--target-list-id", "targetListId",
-			"--target-space-id", "targetSpaceId",
-			"--target-tweet-id", "targetTweetId",
-			"--target-username", "targetUsername",
+			"--tool-type", "follower_explorer",
+			"--advanced-query", "min_faves:100",
+			"--exact-phrase", "artificial intelligence",
+			"--exclude-words", "spam",
+			"--search-query", "AI trends 2025",
+			"--target-community-id", "1500000000000000000",
+			"--target-list-id", "1234567890",
+			"--target-space-id", "1vOGwMdBqpwGB",
+			"--target-tweet-id", "1234567890",
+			"--target-username", "elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"toolType: article_extractor\n" +
-			"advancedQuery: advancedQuery\n" +
-			"exactPhrase: exactPhrase\n" +
-			"excludeWords: excludeWords\n" +
-			"searchQuery: searchQuery\n" +
-			"targetCommunityId: targetCommunityId\n" +
-			"targetListId: targetListId\n" +
-			"targetSpaceId: targetSpaceId\n" +
-			"targetTweetId: targetTweetId\n" +
-			"targetUsername: targetUsername\n")
+			"toolType: follower_explorer\n" +
+			"advancedQuery: min_faves:100\n" +
+			"exactPhrase: artificial intelligence\n" +
+			"excludeWords: spam\n" +
+			"searchQuery: AI trends 2025\n" +
+			"targetCommunityId: '1500000000000000000'\n" +
+			"targetListId: '1234567890'\n" +
+			"targetSpaceId: 1vOGwMdBqpwGB\n" +
+			"targetTweetId: '1234567890'\n" +
+			"targetUsername: elonmusk\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -105,32 +105,32 @@ func TestExtractionsRun(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"extractions", "run",
-			"--tool-type", "article_extractor",
-			"--advanced-query", "advancedQuery",
-			"--exact-phrase", "exactPhrase",
-			"--exclude-words", "excludeWords",
-			"--search-query", "searchQuery",
-			"--target-community-id", "targetCommunityId",
-			"--target-list-id", "targetListId",
-			"--target-space-id", "targetSpaceId",
-			"--target-tweet-id", "targetTweetId",
-			"--target-username", "targetUsername",
+			"--tool-type", "follower_explorer",
+			"--advanced-query", "min_faves:100",
+			"--exact-phrase", "artificial intelligence",
+			"--exclude-words", "spam",
+			"--search-query", "AI trends 2025",
+			"--target-community-id", "1500000000000000000",
+			"--target-list-id", "1234567890",
+			"--target-space-id", "1vOGwMdBqpwGB",
+			"--target-tweet-id", "1234567890",
+			"--target-username", "elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"toolType: article_extractor\n" +
-			"advancedQuery: advancedQuery\n" +
-			"exactPhrase: exactPhrase\n" +
-			"excludeWords: excludeWords\n" +
-			"searchQuery: searchQuery\n" +
-			"targetCommunityId: targetCommunityId\n" +
-			"targetListId: targetListId\n" +
-			"targetSpaceId: targetSpaceId\n" +
-			"targetTweetId: targetTweetId\n" +
-			"targetUsername: targetUsername\n")
+			"toolType: follower_explorer\n" +
+			"advancedQuery: min_faves:100\n" +
+			"exactPhrase: artificial intelligence\n" +
+			"excludeWords: spam\n" +
+			"searchQuery: AI trends 2025\n" +
+			"targetCommunityId: '1500000000000000000'\n" +
+			"targetListId: '1234567890'\n" +
+			"targetSpaceId: 1vOGwMdBqpwGB\n" +
+			"targetTweetId: '1234567890'\n" +
+			"targetUsername: elonmusk\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
