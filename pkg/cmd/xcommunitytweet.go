@@ -36,10 +36,6 @@ var xCommunitiesTweetsList = cli.Command{
 			Usage:     "Sort order for cross-community results (Latest or Top)",
 			QueryPath: "queryType",
 		},
-		&requestflag.Flag[int64]{
-			Name:  "max-items",
-			Usage: "The maximum number of items to return (use -1 for unlimited).",
-		},
 	},
 	Action:          handleXCommunitiesTweetsList,
 	HideHelpCommand: true,
@@ -58,10 +54,6 @@ var xCommunitiesTweetsListByCommunity = cli.Command{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for community tweets",
 			QueryPath: "cursor",
-		},
-		&requestflag.Flag[int64]{
-			Name:  "max-items",
-			Usage: "The maximum number of items to return (use -1 for unlimited).",
 		},
 	},
 	Action:          handleXCommunitiesTweetsListByCommunity,
@@ -89,25 +81,17 @@ func handleXCommunitiesTweetsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Communities.Tweets.List(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	if format == "raw" {
-		var res []byte
-		options = append(options, option.WithResponseBodyInto(&res))
-		_, err = client.X.Communities.Tweets.List(ctx, params, options...)
-		if err != nil {
-			return err
-		}
-		obj := gjson.ParseBytes(res)
-		return ShowJSON(os.Stdout, "x:communities:tweets list", obj, format, transform)
-	} else {
-		iter := client.X.Communities.Tweets.ListAutoPaging(ctx, params, options...)
-		maxItems := int64(-1)
-		if cmd.IsSet("max-items") {
-			maxItems = cmd.Value("max-items").(int64)
-		}
-		return ShowJSONIterator(os.Stdout, "x:communities:tweets list", iter, format, transform, maxItems)
-	}
+	return ShowJSON(os.Stdout, "x:communities:tweets list", obj, format, transform)
 }
 
 func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Command) error {
@@ -134,33 +118,20 @@ func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Comma
 		return err
 	}
 
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Communities.Tweets.ListByCommunity(
+		ctx,
+		cmd.Value("id").(string),
+		params,
+		options...,
+	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	if format == "raw" {
-		var res []byte
-		options = append(options, option.WithResponseBodyInto(&res))
-		_, err = client.X.Communities.Tweets.ListByCommunity(
-			ctx,
-			cmd.Value("id").(string),
-			params,
-			options...,
-		)
-		if err != nil {
-			return err
-		}
-		obj := gjson.ParseBytes(res)
-		return ShowJSON(os.Stdout, "x:communities:tweets list-by-community", obj, format, transform)
-	} else {
-		iter := client.X.Communities.Tweets.ListByCommunityAutoPaging(
-			ctx,
-			cmd.Value("id").(string),
-			params,
-			options...,
-		)
-		maxItems := int64(-1)
-		if cmd.IsSet("max-items") {
-			maxItems = cmd.Value("max-items").(int64)
-		}
-		return ShowJSONIterator(os.Stdout, "x:communities:tweets list-by-community", iter, format, transform, maxItems)
-	}
+	return ShowJSON(os.Stdout, "x:communities:tweets list-by-community", obj, format, transform)
 }

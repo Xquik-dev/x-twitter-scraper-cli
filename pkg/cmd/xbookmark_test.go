@@ -16,7 +16,6 @@ func TestXBookmarksList(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:bookmarks", "list",
-			"--max-items", "10",
 			"--cursor", "folders_value",
 			"--folder-id", "folderId",
 		)
