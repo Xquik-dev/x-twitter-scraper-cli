@@ -16,7 +16,6 @@ func TestXCommunitiesTweetsList(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:communities:tweets", "list",
-			"--max-items", "10",
 			"--q", "q",
 			"--cursor", "cursor",
 			"--query-type", "queryType",
@@ -32,7 +31,6 @@ func TestXCommunitiesTweetsListByCommunity(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:communities:tweets", "list-by-community",
-			"--max-items", "10",
 			"--id", "id",
 			"--cursor", "cursor",
 		)

@@ -30,10 +30,6 @@ var xBookmarksList = cli.Command{
 			Usage:     "Optional bookmark folder ID",
 			QueryPath: "folderId",
 		},
-		&requestflag.Flag[int64]{
-			Name:  "max-items",
-			Usage: "The maximum number of items to return (use -1 for unlimited).",
-		},
 	},
 	Action:          handleXBookmarksList,
 	HideHelpCommand: true,
@@ -69,25 +65,17 @@ func handleXBookmarksList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Bookmarks.List(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	if format == "raw" {
-		var res []byte
-		options = append(options, option.WithResponseBodyInto(&res))
-		_, err = client.X.Bookmarks.List(ctx, params, options...)
-		if err != nil {
-			return err
-		}
-		obj := gjson.ParseBytes(res)
-		return ShowJSON(os.Stdout, "x:bookmarks list", obj, format, transform)
-	} else {
-		iter := client.X.Bookmarks.ListAutoPaging(ctx, params, options...)
-		maxItems := int64(-1)
-		if cmd.IsSet("max-items") {
-			maxItems = cmd.Value("max-items").(int64)
-		}
-		return ShowJSONIterator(os.Stdout, "x:bookmarks list", iter, format, transform, maxItems)
-	}
+	return ShowJSON(os.Stdout, "x:bookmarks list", obj, format, transform)
 }
 
 func handleXBookmarksRetrieveFolders(ctx context.Context, cmd *cli.Command) error {
