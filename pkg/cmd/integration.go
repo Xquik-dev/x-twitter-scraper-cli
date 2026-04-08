@@ -40,7 +40,8 @@ var integrationsCreate = requestflag.WithInnerFlags(cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "type",
 			Usage:    `Allowed values: "telegram".`,
-			Required: true,
+			Default:  "telegram",
+			Const:    true,
 			BodyPath: "type",
 		},
 	},
