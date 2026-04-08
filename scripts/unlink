@@ -5,4 +5,4 @@ set -e
 cd "$(dirname "$0")/.."
 
 echo "==> Unlinking with local directory"
-go mod edit -dropreplace github.com/Xquik-dev/x-twitter-scraper-go
+go mod edit -dropreplace github.com/stainless-sdks/x-twitter-scraper-go

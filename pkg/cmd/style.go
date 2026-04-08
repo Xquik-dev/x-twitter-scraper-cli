@@ -7,13 +7,60 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
+
+var stylesRetrieve = cli.Command{
+	Name:    "retrieve",
+	Usage:   "Get cached style profile",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "id",
+			Required: true,
+		},
+	},
+	Action:          handleStylesRetrieve,
+	HideHelpCommand: true,
+}
+
+var stylesUpdate = requestflag.WithInnerFlags(cli.Command{
+	Name:    "update",
+	Usage:   "Save style profile with custom tweets",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "id",
+			Required: true,
+		},
+		&requestflag.Flag[string]{
+			Name:     "label",
+			Usage:    "Display label for the style",
+			Required: true,
+			BodyPath: "label",
+		},
+		&requestflag.Flag[[]map[string]any]{
+			Name:     "tweet",
+			Usage:    "Array of tweet objects",
+			Required: true,
+			BodyPath: "tweets",
+		},
+	},
+	Action:          handleStylesUpdate,
+	HideHelpCommand: true,
+}, map[string][]requestflag.HasOuterFlag{
+	"tweet": {
+		&requestflag.InnerFlag[string]{
+			Name:       "tweet.text",
+			InnerField: "text",
+		},
+	},
+})
 
 var stylesList = cli.Command{
 	Name:            "list",
@@ -21,6 +68,20 @@ var stylesList = cli.Command{
 	Suggest:         true,
 	Flags:           []cli.Flag{},
 	Action:          handleStylesList,
+	HideHelpCommand: true,
+}
+
+var stylesDelete = cli.Command{
+	Name:    "delete",
+	Usage:   "Delete a style profile",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "id",
+			Required: true,
+		},
+	},
+	Action:          handleStylesDelete,
 	HideHelpCommand: true,
 }
 
@@ -62,6 +123,97 @@ var stylesCompare = cli.Command{
 	HideHelpCommand: true,
 }
 
+var stylesGetPerformance = cli.Command{
+	Name:    "get-performance",
+	Usage:   "Get engagement metrics for style tweets",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "id",
+			Required: true,
+		},
+	},
+	Action:          handleStylesGetPerformance,
+	HideHelpCommand: true,
+}
+
+func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Styles.Get(ctx, cmd.Value("id").(string), options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "styles retrieve", obj, format, transform)
+}
+
+func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	params := xtwitterscraper.StyleUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Styles.Update(
+		ctx,
+		cmd.Value("id").(string),
+		params,
+		options...,
+	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "styles update", obj, format, transform)
+}
+
 func handleStylesList(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
@@ -92,6 +244,31 @@ func handleStylesList(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "styles list", obj, format, transform)
+}
+
+func handleStylesDelete(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	return client.Styles.Delete(ctx, cmd.Value("id").(string), options...)
 }
 
 func handleStylesAnalyze(ctx context.Context, cmd *cli.Command) error {
@@ -160,4 +337,39 @@ func handleStylesCompare(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "styles compare", obj, format, transform)
+}
+
+func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Styles.GetPerformance(ctx, cmd.Value("id").(string), options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "styles get-performance", obj, format, transform)
 }

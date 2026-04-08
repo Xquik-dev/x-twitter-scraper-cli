@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -87,6 +87,15 @@ var xAccountsDelete = cli.Command{
 		},
 	},
 	Action:          handleXAccountsDelete,
+	HideHelpCommand: true,
+}
+
+var xAccountsBulkRetry = cli.Command{
+	Name:            "bulk-retry",
+	Usage:           "Clears loginFailedAt and loginFailureReason for all accounts with transient or\nautomated failure reasons, making them eligible for retry on next use.",
+	Suggest:         true,
+	Flags:           []cli.Flag{},
+	Action:          handleXAccountsBulkRetry,
 	HideHelpCommand: true,
 }
 
@@ -249,6 +258,38 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "x:accounts delete", obj, format, transform)
+}
+
+func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Accounts.BulkRetry(ctx, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:accounts bulk-retry", obj, format, transform)
 }
 
 func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {

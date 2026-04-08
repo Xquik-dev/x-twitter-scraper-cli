@@ -7,13 +7,27 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
+
+var xUsersRetrieve = cli.Command{
+	Name:    "retrieve",
+	Usage:   "Look up X user",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "id",
+			Required: true,
+		},
+	},
+	Action:          handleXUsersRetrieve,
+	HideHelpCommand: true,
+}
 
 var xUsersRetrieveBatch = cli.Command{
 	Name:    "retrieve-batch",
@@ -234,6 +248,41 @@ var xUsersRetrieveVerifiedFollowers = cli.Command{
 	},
 	Action:          handleXUsersRetrieveVerifiedFollowers,
 	HideHelpCommand: true,
+}
+
+func handleXUsersRetrieve(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Users.Get(ctx, cmd.Value("id").(string), options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:users retrieve", obj, format, transform)
 }
 
 func handleXUsersRetrieveBatch(ctx context.Context, cmd *cli.Command) error {

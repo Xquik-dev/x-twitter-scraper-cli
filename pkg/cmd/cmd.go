@@ -12,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/autocomplete"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/autocomplete"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
 	docs "github.com/urfave/cli-docs/v3"
 	"github.com/urfave/cli/v3"
 )
@@ -136,9 +136,13 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
+					&stylesRetrieve,
+					&stylesUpdate,
 					&stylesList,
+					&stylesDelete,
 					&stylesAnalyze,
 					&stylesCompare,
+					&stylesGetPerformance,
 				},
 			},
 			{
@@ -237,7 +241,9 @@ func init() {
 				Suggest:  true,
 				Commands: []*cli.Command{
 					&xTweetsCreate,
+					&xTweetsRetrieve,
 					&xTweetsList,
+					&xTweetsDelete,
 					&xTweetsGetFavoriters,
 					&xTweetsGetQuotes,
 					&xTweetsGetReplies,
@@ -247,10 +253,29 @@ func init() {
 				},
 			},
 			{
+				Name:     "x:tweets:like",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&xTweetsLikeCreate,
+					&xTweetsLikeDelete,
+				},
+			},
+			{
+				Name:     "x:tweets:retweet",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&xTweetsRetweetCreate,
+					&xTweetsRetweetDelete,
+				},
+			},
+			{
 				Name:     "x:users",
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
+					&xUsersRetrieve,
 					&xUsersRetrieveBatch,
 					&xUsersRetrieveFollowers,
 					&xUsersRetrieveFollowersYouKnow,
@@ -261,6 +286,15 @@ func init() {
 					&xUsersRetrieveSearch,
 					&xUsersRetrieveTweets,
 					&xUsersRetrieveVerifiedFollowers,
+				},
+			},
+			{
+				Name:     "x:users:follow",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&xUsersFollowCreate,
+					&xUsersFollowDeleteAll,
 				},
 			},
 			{
@@ -327,6 +361,7 @@ func init() {
 				Suggest:  true,
 				Commands: []*cli.Command{
 					&xCommunitiesTweetsList,
+					&xCommunitiesTweetsListByCommunity,
 				},
 			},
 			{
@@ -338,6 +373,7 @@ func init() {
 					&xAccountsRetrieve,
 					&xAccountsList,
 					&xAccountsDelete,
+					&xAccountsBulkRetry,
 					&xAccountsReauth,
 				},
 			},

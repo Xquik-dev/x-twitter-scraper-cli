@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXTweetsCreate(t *testing.T) {
@@ -46,6 +46,19 @@ func TestXTweetsCreate(t *testing.T) {
 	})
 }
 
+func TestXTweetsRetrieve(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:tweets", "retrieve",
+			"--id", "id",
+		)
+	})
+}
+
 func TestXTweetsList(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
@@ -55,6 +68,32 @@ func TestXTweetsList(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets", "list",
 			"--ids", "ids",
+		)
+	})
+}
+
+func TestXTweetsDelete(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:tweets", "delete",
+			"--id", "id",
+			"--account", "@elonmusk",
+		)
+	})
+
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("account: '@elonmusk'")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:tweets", "delete",
+			"--id", "id",
 		)
 	})
 }

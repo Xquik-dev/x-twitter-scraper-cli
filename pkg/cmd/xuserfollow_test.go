@@ -8,38 +8,54 @@ import (
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestCreditsRetrieveBalance(t *testing.T) {
+func TestXUsersFollowCreate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"credits", "retrieve-balance",
-		)
-	})
-}
-
-func TestCreditsTopupBalance(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"credits", "topup-balance",
-			"--amount", "10000",
+			"x:users:follow", "create",
+			"--id", "id",
+			"--account", "@elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("amount: 10000")
+		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"credits", "topup-balance",
+			"x:users:follow", "create",
+			"--id", "id",
+		)
+	})
+}
+
+func TestXUsersFollowDeleteAll(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:users:follow", "delete-all",
+			"--id", "id",
+			"--account", "@elonmusk",
+		)
+	})
+
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("account: '@elonmusk'")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:users:follow", "delete-all",
+			"--id", "id",
 		)
 	})
 }
