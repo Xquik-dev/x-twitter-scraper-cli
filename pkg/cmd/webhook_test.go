@@ -17,7 +17,8 @@ func TestWebhooksCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"webhooks", "create",
 			"--event-type", "tweet.new",
-			"--url", "https://example.com",
+			"--event-type", "follower.gained",
+			"--url", "https://example.com/webhook",
 		)
 	})
 
@@ -26,7 +27,8 @@ func TestWebhooksCreate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"url: https://example.com\n")
+			"  - follower.gained\n" +
+			"url: https://example.com/webhook\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -46,8 +48,9 @@ func TestWebhooksUpdate(t *testing.T) {
 			"webhooks", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
+			"--event-type", "follower.gained",
 			"--is-active=true",
-			"--url", "https://example.com",
+			"--url", "https://example.com/webhook",
 		)
 	})
 
@@ -56,8 +59,9 @@ func TestWebhooksUpdate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
+			"  - follower.gained\n" +
 			"isActive: true\n" +
-			"url: https://example.com\n")
+			"url: https://example.com/webhook\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

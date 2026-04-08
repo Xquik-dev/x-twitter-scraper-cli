@@ -16,27 +16,27 @@ func TestXTweetsCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:tweets", "create",
-			"--account", "account",
-			"--text", "text",
-			"--attachment-url", "attachment_url",
-			"--community-id", "community_id",
-			"--is-note-tweet=true",
-			"--media-id", "string",
-			"--reply-to-tweet-id", "reply_to_tweet_id",
+			"--account", "@elonmusk",
+			"--text", "Just launched our new feature!",
+			"--attachment-url", "https://x.com/elonmusk/status/1234567890",
+			"--community-id", "1500000000000000000",
+			"--is-note-tweet=false",
+			"--media-id", "1234567890123456789",
+			"--reply-to-tweet-id", "1234567890",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"account: account\n" +
-			"text: text\n" +
-			"attachment_url: attachment_url\n" +
-			"community_id: community_id\n" +
-			"is_note_tweet: true\n" +
+			"account: '@elonmusk'\n" +
+			"text: Just launched our new feature!\n" +
+			"attachment_url: https://x.com/elonmusk/status/1234567890\n" +
+			"community_id: '1500000000000000000'\n" +
+			"is_note_tweet: false\n" +
 			"media_ids:\n" +
-			"  - string\n" +
-			"reply_to_tweet_id: reply_to_tweet_id\n")
+			"  - '1234567890123456789'\n" +
+			"reply_to_tweet_id: '1234567890'\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

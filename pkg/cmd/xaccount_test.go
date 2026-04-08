@@ -16,22 +16,22 @@ func TestXAccountsCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:accounts", "create",
-			"--email", "email",
-			"--password", "password",
-			"--username", "username",
-			"--proxy-country", "proxy_country",
-			"--totp-secret", "totp_secret",
+			"--email", "user@example.com",
+			"--password", "s3cur3Pa$$w0rd",
+			"--username", "elonmusk",
+			"--proxy-country", "US",
+			"--totp-secret", "JBSWY3DPEHPK3PXP",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"email: email\n" +
-			"password: password\n" +
-			"username: username\n" +
-			"proxy_country: proxy_country\n" +
-			"totp_secret: totp_secret\n")
+			"email: user@example.com\n" +
+			"password: s3cur3Pa$$w0rd\n" +
+			"username: elonmusk\n" +
+			"proxy_country: US\n" +
+			"totp_secret: JBSWY3DPEHPK3PXP\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -88,16 +88,16 @@ func TestXAccountsReauth(t *testing.T) {
 			"--bearer-token", "string",
 			"x:accounts", "reauth",
 			"--id", "id",
-			"--password", "password",
-			"--totp-secret", "totp_secret",
+			"--password", "password_value",
+			"--totp-secret", "totp_secret_value",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"password: password\n" +
-			"totp_secret: totp_secret\n")
+			"password: password_value\n" +
+			"totp_secret: totp_secret_value\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

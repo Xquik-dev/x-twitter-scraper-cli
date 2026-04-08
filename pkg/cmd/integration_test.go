@@ -17,9 +17,10 @@ func TestIntegrationsCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"integrations", "create",
-			"--config", "{chatId: chatId}",
+			"--config", "{chatId: '-1001234567890'}",
 			"--event-type", "tweet.new",
-			"--name", "name",
+			"--event-type", "follower.gained",
+			"--name", "My Telegram Bot",
 			"--type", "telegram",
 		)
 	})
@@ -34,9 +35,10 @@ func TestIntegrationsCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"integrations", "create",
-			"--config.chat-id", "chatId",
+			"--config.chat-id", "-1001234567890",
 			"--event-type", "tweet.new",
-			"--name", "name",
+			"--event-type", "follower.gained",
+			"--name", "My Telegram Bot",
 			"--type", "telegram",
 		)
 	})
@@ -45,10 +47,11 @@ func TestIntegrationsCreate(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"config:\n" +
-			"  chatId: chatId\n" +
+			"  chatId: '-1001234567890'\n" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"name: name\n" +
+			"  - follower.gained\n" +
+			"name: My Telegram Bot\n" +
 			"type: telegram\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
@@ -82,12 +85,13 @@ func TestIntegrationsUpdate(t *testing.T) {
 			"integrations", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
-			"--filters", "{foo: bar}",
+			"--event-type", "follower.gained",
+			"--filters", "{}",
 			"--is-active=true",
-			"--message-template", "{foo: bar}",
-			"--name", "name",
+			"--message-template", "{}",
+			"--name", "My Telegram Bot",
 			"--scope-all-monitors=true",
-			"--silent-push=true",
+			"--silent-push=false",
 		)
 	})
 
@@ -96,14 +100,13 @@ func TestIntegrationsUpdate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"filters:\n" +
-			"  foo: bar\n" +
+			"  - follower.gained\n" +
+			"filters: {}\n" +
 			"isActive: true\n" +
-			"messageTemplate:\n" +
-			"  foo: bar\n" +
-			"name: name\n" +
+			"messageTemplate: {}\n" +
+			"name: My Telegram Bot\n" +
 			"scopeAllMonitors: true\n" +
-			"silentPush: true\n")
+			"silentPush: false\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

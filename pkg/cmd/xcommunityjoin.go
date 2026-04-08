@@ -26,7 +26,7 @@ var xCommunitiesJoinCreate = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -46,7 +46,7 @@ var xCommunitiesJoinDeleteAll = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
 		},

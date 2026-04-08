@@ -42,7 +42,7 @@ var xUsersRetrieveFollowers = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for followers list",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[int64]{
@@ -66,7 +66,7 @@ var xUsersRetrieveFollowersYouKnow = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for followers-you-know",
 			QueryPath: "cursor",
 		},
 	},
@@ -85,12 +85,12 @@ var xUsersRetrieveFollowing = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for following list",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Items per page (20-200, default 200)",
+			Usage:     "Results per page (20-200, default 200)",
 			QueryPath: "pageSize",
 		},
 	},
@@ -109,7 +109,7 @@ var xUsersRetrieveLikes = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for liked tweets",
 			QueryPath: "cursor",
 		},
 	},
@@ -128,7 +128,7 @@ var xUsersRetrieveMedia = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for media tweets",
 			QueryPath: "cursor",
 		},
 	},
@@ -147,17 +147,17 @@ var xUsersRetrieveMentions = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for mentions",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "Unix timestamp - filter after",
+			Usage:     "Unix timestamp - return mentions after this time",
 			QueryPath: "sinceTime",
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "Unix timestamp - filter before",
+			Usage:     "Unix timestamp - return mentions before this time",
 			QueryPath: "untilTime",
 		},
 	},
@@ -172,13 +172,13 @@ var xUsersRetrieveSearch = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "q",
-			Usage:     "Search query",
+			Usage:     "User search query",
 			Required:  true,
 			QueryPath: "q",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for user search",
 			QueryPath: "cursor",
 		},
 	},
@@ -197,7 +197,7 @@ var xUsersRetrieveTweets = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for user tweets",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[bool]{
@@ -228,7 +228,7 @@ var xUsersRetrieveVerifiedFollowers = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for verified followers",
 			QueryPath: "cursor",
 		},
 	},
@@ -257,7 +257,17 @@ func handleXUsersRetrieveBatch(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.Users.GetBatch(ctx, params, options...)
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Users.GetBatch(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:users retrieve-batch", obj, format, transform)
 }
 
 func handleXUsersRetrieveFollowers(ctx context.Context, cmd *cli.Command) error {
@@ -284,12 +294,22 @@ func handleXUsersRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 		return err
 	}
 
-	return client.X.Users.GetFollowers(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Users.GetFollowers(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:users retrieve-followers", obj, format, transform)
 }
 
 func handleXUsersRetrieveFollowersYouKnow(ctx context.Context, cmd *cli.Command) error {
@@ -358,12 +378,22 @@ func handleXUsersRetrieveFollowing(ctx context.Context, cmd *cli.Command) error 
 		return err
 	}
 
-	return client.X.Users.GetFollowing(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Users.GetFollowing(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:users retrieve-following", obj, format, transform)
 }
 
 func handleXUsersRetrieveLikes(ctx context.Context, cmd *cli.Command) error {
@@ -474,12 +504,22 @@ func handleXUsersRetrieveMentions(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.Users.GetMentions(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Users.GetMentions(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:users retrieve-mentions", obj, format, transform)
 }
 
 func handleXUsersRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
@@ -503,7 +543,17 @@ func handleXUsersRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.Users.GetSearch(ctx, params, options...)
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Users.GetSearch(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:users retrieve-search", obj, format, transform)
 }
 
 func handleXUsersRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
@@ -572,10 +622,20 @@ func handleXUsersRetrieveVerifiedFollowers(ctx context.Context, cmd *cli.Command
 		return err
 	}
 
-	return client.X.Users.GetVerifiedFollowers(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Users.GetVerifiedFollowers(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:users retrieve-verified-followers", obj, format, transform)
 }

@@ -32,21 +32,21 @@ func TestXDmSend(t *testing.T) {
 			"--bearer-token", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
-			"--account", "account",
-			"--text", "text",
-			"--media-id", "string",
-			"--reply-to-message-id", "reply_to_message_id",
+			"--account", "@elonmusk",
+			"--text", "Example text content",
+			"--media-id", "1234567890123456789",
+			"--reply-to-message-id", "1234567890123456789",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"account: account\n" +
-			"text: text\n" +
+			"account: '@elonmusk'\n" +
+			"text: Example text content\n" +
 			"media_ids:\n" +
-			"  - string\n" +
-			"reply_to_message_id: reply_to_message_id\n")
+			"  - '1234567890123456789'\n" +
+			"reply_to_message_id: '1234567890123456789'\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

@@ -101,13 +101,13 @@ var xAccountsReauth = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "password",
-			Usage:    "Account password",
+			Usage:    "Updated account password",
 			Required: true,
 			BodyPath: "password",
 		},
 		&requestflag.Flag[string]{
 			Name:     "totp-secret",
-			Usage:    "TOTP secret for 2FA",
+			Usage:    "TOTP secret for 2FA re-authentication",
 			BodyPath: "totp_secret",
 		},
 	},

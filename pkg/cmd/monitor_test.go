@@ -17,7 +17,8 @@ func TestMonitorsCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"monitors", "create",
 			"--event-type", "tweet.new",
-			"--username", "username",
+			"--event-type", "follower.gained",
+			"--username", "elonmusk",
 		)
 	})
 
@@ -26,7 +27,8 @@ func TestMonitorsCreate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"username: username\n")
+			"  - follower.gained\n" +
+			"username: elonmusk\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
