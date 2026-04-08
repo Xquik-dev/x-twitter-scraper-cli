@@ -16,8 +16,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/jsonview"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 
 	"github.com/charmbracelet/x/term"
 	"github.com/itchyny/json2yaml"
