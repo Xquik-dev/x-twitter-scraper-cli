@@ -16,7 +16,7 @@ func TestXUsersRetrieve(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:users", "retrieve",
-			"--username", "username",
+			"--id", "id",
 		)
 	})
 }

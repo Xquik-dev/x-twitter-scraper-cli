@@ -90,6 +90,15 @@ var xAccountsDelete = cli.Command{
 	HideHelpCommand: true,
 }
 
+var xAccountsBulkRetry = cli.Command{
+	Name:            "bulk-retry",
+	Usage:           "Clears loginFailedAt and loginFailureReason for all accounts with transient or\nautomated failure reasons, making them eligible for retry on next use.",
+	Suggest:         true,
+	Flags:           []cli.Flag{},
+	Action:          handleXAccountsBulkRetry,
+	HideHelpCommand: true,
+}
+
 var xAccountsReauth = cli.Command{
 	Name:    "reauth",
 	Usage:   "Re-authenticate X account",
@@ -101,13 +110,13 @@ var xAccountsReauth = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "password",
-			Usage:    "Account password",
+			Usage:    "Updated account password",
 			Required: true,
 			BodyPath: "password",
 		},
 		&requestflag.Flag[string]{
 			Name:     "totp-secret",
-			Usage:    "TOTP secret for 2FA",
+			Usage:    "TOTP secret for 2FA re-authentication",
 			BodyPath: "totp_secret",
 		},
 	},
@@ -249,6 +258,38 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "x:accounts delete", obj, format, transform)
+}
+
+func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Accounts.BulkRetry(ctx, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:accounts bulk-retry", obj, format, transform)
 }
 
 func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {

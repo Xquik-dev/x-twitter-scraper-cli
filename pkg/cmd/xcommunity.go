@@ -22,7 +22,7 @@ var xCommunitiesCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) creating the community",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -53,7 +53,7 @@ var xCommunitiesDelete = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) deleting the community",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -112,7 +112,7 @@ var xCommunitiesRetrieveModerators = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for community moderators",
 			QueryPath: "cursor",
 		},
 	},
@@ -133,7 +133,7 @@ var xCommunitiesRetrieveSearch = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for community search",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
@@ -281,12 +281,22 @@ func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) er
 		return err
 	}
 
-	return client.X.Communities.GetMembers(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Communities.GetMembers(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:communities retrieve-members", obj, format, transform)
 }
 
 func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command) error {
@@ -313,12 +323,22 @@ func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command)
 		return err
 	}
 
-	return client.X.Communities.GetModerators(
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Communities.GetModerators(
 		ctx,
 		cmd.Value("id").(string),
 		params,
 		options...,
 	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:communities retrieve-moderators", obj, format, transform)
 }
 
 func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
@@ -342,5 +362,15 @@ func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) err
 		return err
 	}
 
-	return client.X.Communities.GetSearch(ctx, params, options...)
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Communities.GetSearch(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:communities retrieve-search", obj, format, transform)
 }

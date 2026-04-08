@@ -16,16 +16,16 @@ func TestSupportTicketsCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"support:tickets", "create",
-			"--body", "body",
-			"--subject", "subject",
+			"--body", "I am unable to connect my X account. Please help.",
+			"--subject", "Cannot connect X account",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"body: body\n" +
-			"subject: subject\n")
+			"body: I am unable to connect my X account. Please help.\n" +
+			"subject: Cannot connect X account\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -43,7 +43,7 @@ func TestSupportTicketsRetrieve(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"support:tickets", "retrieve",
-			"--id", "id",
+			"--id", "messages_value",
 		)
 	})
 }
@@ -57,13 +57,13 @@ func TestSupportTicketsUpdate(t *testing.T) {
 			"--bearer-token", "string",
 			"support:tickets", "update",
 			"--id", "id",
-			"--status", "open",
+			"--status", "resolved",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("status: open")
+		pipeData := []byte("status: resolved")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -95,13 +95,13 @@ func TestSupportTicketsReply(t *testing.T) {
 			"--bearer-token", "string",
 			"support:tickets", "reply",
 			"--id", "id",
-			"--body", "body",
+			"--body", "Thank you for the update.",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("body: body")
+		pipeData := []byte("body: Thank you for the update.")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

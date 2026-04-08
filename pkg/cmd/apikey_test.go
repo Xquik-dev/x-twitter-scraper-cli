@@ -16,13 +16,13 @@ func TestAPIKeysCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"api-keys", "create",
-			"--name", "name",
+			"--name", "My API Key",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("name: name")
+		pipeData := []byte("name: My API Key")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

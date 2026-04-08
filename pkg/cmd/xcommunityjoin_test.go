@@ -17,13 +17,13 @@ func TestXCommunitiesJoinCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"x:communities:join", "create",
 			"--id", "id",
-			"--account", "account",
+			"--account", "@elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("account: account")
+		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -43,13 +43,13 @@ func TestXCommunitiesJoinDeleteAll(t *testing.T) {
 			"--bearer-token", "string",
 			"x:communities:join", "delete-all",
 			"--id", "id",
-			"--account", "account",
+			"--account", "@elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("account: account")
+		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

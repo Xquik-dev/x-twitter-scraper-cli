@@ -17,11 +17,12 @@ import (
 
 var trendsList = cli.Command{
 	Name:    "list",
-	Usage:   "Get trending topics",
+	Usage:   "Get regional trending topics",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:      "count",
+			Usage:     "Number of trending topics to return (1-50, default 30)",
 			Default:   30,
 			QueryPath: "count",
 		},

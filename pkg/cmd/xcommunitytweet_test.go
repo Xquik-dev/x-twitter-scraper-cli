@@ -22,3 +22,17 @@ func TestXCommunitiesTweetsList(t *testing.T) {
 		)
 	})
 }
+
+func TestXCommunitiesTweetsListByCommunity(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:communities:tweets", "list-by-community",
+			"--id", "id",
+			"--cursor", "cursor",
+		)
+	})
+}

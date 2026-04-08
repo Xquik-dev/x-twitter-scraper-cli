@@ -62,7 +62,7 @@ var xTweetsRetrieve = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "tweet-id",
+			Name:     "id",
 			Required: true,
 		},
 	},
@@ -92,12 +92,12 @@ var xTweetsDelete = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "tweet-id",
+			Name:     "id",
 			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -117,7 +117,7 @@ var xTweetsGetFavoriters = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for favoriters",
 			QueryPath: "cursor",
 		},
 	},
@@ -136,22 +136,22 @@ var xTweetsGetQuotes = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for quote tweets",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[bool]{
 			Name:      "include-replies",
-			Usage:     "Include replies (default false)",
+			Usage:     "Include reply quotes (default false)",
 			QueryPath: "includeReplies",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "Unix timestamp - filter after",
+			Usage:     "Unix timestamp - return quotes posted after this time",
 			QueryPath: "sinceTime",
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "Unix timestamp - filter before",
+			Usage:     "Unix timestamp - return quotes posted before this time",
 			QueryPath: "untilTime",
 		},
 	},
@@ -170,17 +170,17 @@ var xTweetsGetReplies = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for tweet replies",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "Unix timestamp - filter after",
+			Usage:     "Unix timestamp - return replies posted after this time",
 			QueryPath: "sinceTime",
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "Unix timestamp - filter before",
+			Usage:     "Unix timestamp - return replies posted before this time",
 			QueryPath: "untilTime",
 		},
 	},
@@ -199,7 +199,7 @@ var xTweetsGetRetweeters = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for retweeters",
 			QueryPath: "cursor",
 		},
 	},
@@ -218,7 +218,7 @@ var xTweetsGetThread = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor",
+			Usage:     "Pagination cursor for thread tweets",
 			QueryPath: "cursor",
 		},
 	},
@@ -244,7 +244,7 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Deprecated — use cursor-based pagination instead",
+			Usage:     "Max tweets to return (server paginates internally). Omit for single page (~20).",
 			Default:   20,
 			QueryPath: "limit",
 		},
@@ -306,8 +306,8 @@ func handleXTweetsCreate(ctx context.Context, cmd *cli.Command) error {
 func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("tweet-id") && len(unusedArgs) > 0 {
-		cmd.Set("tweet-id", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -327,7 +327,7 @@ func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Tweets.Get(ctx, cmd.Value("tweet-id").(string), options...)
+	_, err = client.X.Tweets.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -359,14 +359,24 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.Tweets.List(ctx, params, options...)
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.Tweets.List(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x:tweets list", obj, format, transform)
 }
 
 func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("tweet-id") && len(unusedArgs) > 0 {
-		cmd.Set("tweet-id", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -390,7 +400,7 @@ func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.Delete(
 		ctx,
-		cmd.Value("tweet-id").(string),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)

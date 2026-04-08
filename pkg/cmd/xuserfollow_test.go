@@ -16,20 +16,20 @@ func TestXUsersFollowCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:users:follow", "create",
-			"--user-id", "userId",
-			"--account", "account",
+			"--id", "id",
+			"--account", "@elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("account: account")
+		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:users:follow", "create",
-			"--user-id", "userId",
+			"--id", "id",
 		)
 	})
 }
@@ -42,20 +42,20 @@ func TestXUsersFollowDeleteAll(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:users:follow", "delete-all",
-			"--user-id", "userId",
-			"--account", "account",
+			"--id", "id",
+			"--account", "@elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("account: account")
+		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:users:follow", "delete-all",
-			"--user-id", "userId",
+			"--id", "id",
 		)
 	})
 }

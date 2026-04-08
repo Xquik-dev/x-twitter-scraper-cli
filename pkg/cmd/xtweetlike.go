@@ -21,12 +21,12 @@ var xTweetsLikeCreate = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "tweet-id",
+			Name:     "id",
 			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -41,12 +41,12 @@ var xTweetsLikeDelete = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "tweet-id",
+			Name:     "id",
 			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -58,8 +58,8 @@ var xTweetsLikeDelete = cli.Command{
 func handleXTweetsLikeCreate(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("tweet-id") && len(unusedArgs) > 0 {
-		cmd.Set("tweet-id", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -83,7 +83,7 @@ func handleXTweetsLikeCreate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.Like.New(
 		ctx,
-		cmd.Value("tweet-id").(string),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)
@@ -100,8 +100,8 @@ func handleXTweetsLikeCreate(ctx context.Context, cmd *cli.Command) error {
 func handleXTweetsLikeDelete(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("tweet-id") && len(unusedArgs) > 0 {
-		cmd.Set("tweet-id", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -125,7 +125,7 @@ func handleXTweetsLikeDelete(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.Like.Delete(
 		ctx,
-		cmd.Value("tweet-id").(string),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)

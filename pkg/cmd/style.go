@@ -21,7 +21,7 @@ var stylesRetrieve = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "username",
+			Name:     "id",
 			Required: true,
 		},
 	},
@@ -35,7 +35,7 @@ var stylesUpdate = requestflag.WithInnerFlags(cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "username",
+			Name:     "id",
 			Required: true,
 		},
 		&requestflag.Flag[string]{
@@ -77,7 +77,7 @@ var stylesDelete = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "username",
+			Name:     "id",
 			Required: true,
 		},
 	},
@@ -129,7 +129,7 @@ var stylesGetPerformance = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "username",
+			Name:     "id",
 			Required: true,
 		},
 	},
@@ -140,8 +140,8 @@ var stylesGetPerformance = cli.Command{
 func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("username") && len(unusedArgs) > 0 {
-		cmd.Set("username", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -161,7 +161,7 @@ func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Styles.Get(ctx, cmd.Value("username").(string), options...)
+	_, err = client.Styles.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -175,8 +175,8 @@ func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("username") && len(unusedArgs) > 0 {
-		cmd.Set("username", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -200,7 +200,7 @@ func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Styles.Update(
 		ctx,
-		cmd.Value("username").(string),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)
@@ -249,8 +249,8 @@ func handleStylesList(ctx context.Context, cmd *cli.Command) error {
 func handleStylesDelete(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("username") && len(unusedArgs) > 0 {
-		cmd.Set("username", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -268,7 +268,7 @@ func handleStylesDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Styles.Delete(ctx, cmd.Value("username").(string), options...)
+	return client.Styles.Delete(ctx, cmd.Value("id").(string), options...)
 }
 
 func handleStylesAnalyze(ctx context.Context, cmd *cli.Command) error {
@@ -342,8 +342,8 @@ func handleStylesCompare(ctx context.Context, cmd *cli.Command) error {
 func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("username") && len(unusedArgs) > 0 {
-		cmd.Set("username", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -363,7 +363,7 @@ func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Styles.GetPerformance(ctx, cmd.Value("username").(string), options...)
+	_, err = client.Styles.GetPerformance(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}

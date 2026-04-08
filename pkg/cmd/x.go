@@ -36,7 +36,7 @@ var xGetHomeTimeline = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for timeline",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
@@ -56,7 +56,7 @@ var xGetNotifications = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for notifications",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
@@ -201,5 +201,15 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.X.GetTrends(ctx, options...)
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.X.GetTrends(ctx, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "x get-trends", obj, format, transform)
 }

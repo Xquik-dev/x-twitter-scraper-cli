@@ -39,6 +39,9 @@ func init() {
 				Name:        "base-url",
 				DefaultText: "url",
 				Usage:       "Override the base URL for API requests",
+				Validator: func(baseURL string) error {
+					return ValidateBaseURL(baseURL, "--base-url")
+				},
 			},
 			&cli.StringFlag{
 				Name:  "format",
@@ -358,6 +361,7 @@ func init() {
 				Suggest:  true,
 				Commands: []*cli.Command{
 					&xCommunitiesTweetsList,
+					&xCommunitiesTweetsListByCommunity,
 				},
 			},
 			{
@@ -369,6 +373,7 @@ func init() {
 					&xAccountsRetrieve,
 					&xAccountsList,
 					&xAccountsDelete,
+					&xAccountsBulkRetry,
 					&xAccountsReauth,
 				},
 			},

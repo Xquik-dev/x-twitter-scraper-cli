@@ -28,6 +28,7 @@ var integrationsCreate = requestflag.WithInnerFlags(cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			Required: true,
 			BodyPath: "eventTypes",
 		},
@@ -39,7 +40,8 @@ var integrationsCreate = requestflag.WithInnerFlags(cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "type",
 			Usage:    `Allowed values: "telegram".`,
-			Required: true,
+			Default:  "telegram",
+			Const:    true,
 			BodyPath: "type",
 		},
 	},
@@ -79,10 +81,12 @@ var integrationsUpdate = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
+			Usage:    "Array of event types to subscribe to.",
 			BodyPath: "eventTypes",
 		},
 		&requestflag.Flag[map[string]any]{
 			Name:     "filters",
+			Usage:    "Event filter rules (JSON)",
 			BodyPath: "filters",
 		},
 		&requestflag.Flag[bool]{
@@ -91,6 +95,7 @@ var integrationsUpdate = cli.Command{
 		},
 		&requestflag.Flag[map[string]any]{
 			Name:     "message-template",
+			Usage:    "Custom message template (JSON)",
 			BodyPath: "messageTemplate",
 		},
 		&requestflag.Flag[string]{
@@ -144,6 +149,7 @@ var integrationsListDeliveries = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
+			Usage:     "Maximum number of items to return (1-100, default 50)",
 			Default:   50,
 			QueryPath: "limit",
 		},

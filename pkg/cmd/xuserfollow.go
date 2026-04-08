@@ -21,12 +21,12 @@ var xUsersFollowCreate = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "user-id",
+			Name:     "id",
 			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -41,12 +41,12 @@ var xUsersFollowDeleteAll = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "user-id",
+			Name:     "id",
 			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -58,8 +58,8 @@ var xUsersFollowDeleteAll = cli.Command{
 func handleXUsersFollowCreate(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("user-id") && len(unusedArgs) > 0 {
-		cmd.Set("user-id", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -83,7 +83,7 @@ func handleXUsersFollowCreate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.Follow.New(
 		ctx,
-		cmd.Value("user-id").(string),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)
@@ -100,8 +100,8 @@ func handleXUsersFollowCreate(ctx context.Context, cmd *cli.Command) error {
 func handleXUsersFollowDeleteAll(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("user-id") && len(unusedArgs) > 0 {
-		cmd.Set("user-id", unusedArgs[0])
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
@@ -125,7 +125,7 @@ func handleXUsersFollowDeleteAll(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.Follow.DeleteAll(
 		ctx,
-		cmd.Value("user-id").(string),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)

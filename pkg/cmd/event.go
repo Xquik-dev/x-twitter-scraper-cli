@@ -36,21 +36,23 @@ var eventsList = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "after",
-			Usage:     "Cursor for pagination",
+			Usage:     "Cursor for keyset pagination",
 			QueryPath: "after",
 		},
 		&requestflag.Flag[string]{
 			Name:      "event-type",
-			Usage:     `Allowed values: "tweet.new", "tweet.reply", "tweet.retweet", "tweet.quote", "follower.gained", "follower.lost".`,
+			Usage:     "Type of monitor event fired when account activity occurs.",
 			QueryPath: "eventType",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
+			Usage:     "Maximum number of items to return (1-100, default 50)",
 			Default:   50,
 			QueryPath: "limit",
 		},
 		&requestflag.Flag[string]{
 			Name:      "monitor-id",
+			Usage:     "Filter events by monitor ID",
 			QueryPath: "monitorId",
 		},
 	},

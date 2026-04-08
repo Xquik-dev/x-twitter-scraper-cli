@@ -22,7 +22,7 @@ var xProfileUpdate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) to update profile",
 			Required: true,
 			BodyPath: "account",
 		},
@@ -57,15 +57,16 @@ var xProfileUpdateAvatar = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) for avatar update",
 			Required: true,
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:     "file",
-			Usage:    "Avatar image (max 716KB)",
-			Required: true,
-			BodyPath: "file",
+			Name:      "file",
+			Usage:     "Avatar image (max 716KB)",
+			Required:  true,
+			BodyPath:  "file",
+			FileInput: true,
 		},
 	},
 	Action:          handleXProfileUpdateAvatar,
@@ -79,15 +80,16 @@ var xProfileUpdateBanner = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) for banner update",
 			Required: true,
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:     "file",
-			Usage:    "Banner image (max 2MB)",
-			Required: true,
-			BodyPath: "file",
+			Name:      "file",
+			Usage:     "Banner image (max 2MB)",
+			Required:  true,
+			BodyPath:  "file",
+			FileInput: true,
 		},
 	},
 	Action:          handleXProfileUpdateBanner,

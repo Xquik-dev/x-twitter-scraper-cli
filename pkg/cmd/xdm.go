@@ -26,7 +26,7 @@ var xDmRetrieveHistory = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Pagination cursor for DM history",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
@@ -50,7 +50,7 @@ var xDmSend = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or account ID)",
+			Usage:    "X account (@username or ID) sending the DM",
 			Required: true,
 			BodyPath: "account",
 		},

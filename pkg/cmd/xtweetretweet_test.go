@@ -16,20 +16,20 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:tweets:retweet", "create",
-			"--tweet-id", "tweetId",
-			"--account", "account",
+			"--id", "id",
+			"--account", "@elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("account: account")
+		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:tweets:retweet", "create",
-			"--tweet-id", "tweetId",
+			"--id", "id",
 		)
 	})
 }
@@ -42,20 +42,20 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:tweets:retweet", "delete",
-			"--tweet-id", "tweetId",
-			"--account", "account",
+			"--id", "id",
+			"--account", "@elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("account: account")
+		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:tweets:retweet", "delete",
-			"--tweet-id", "tweetId",
+			"--id", "id",
 		)
 	})
 }

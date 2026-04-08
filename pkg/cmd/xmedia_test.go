@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
@@ -16,8 +17,9 @@ func TestXMediaDownload(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:media", "download",
-			"--tweet-id", "string",
-			"--tweet-input", "tweetInput",
+			"--tweet-id", "1234567890",
+			"--tweet-id", "1234567891",
+			"--tweet-input", "https://x.com/elonmusk/status/1234567890",
 		)
 	})
 
@@ -25,8 +27,9 @@ func TestXMediaDownload(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"tweetIds:\n" +
-			"  - string\n" +
-			"tweetInput: tweetInput\n")
+			"  - '1234567890'\n" +
+			"  - '1234567891'\n" +
+			"tweetInput: https://x.com/elonmusk/status/1234567890\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -44,18 +47,21 @@ func TestXMediaUpload(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:media", "upload",
-			"--account", "account",
-			"--file", "Example data",
+			"--account", "@elonmusk",
+			"--file", mocktest.TestFile(t, "Example data"),
 			"--is-long-video=true",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
+		testFile := mocktest.TestFile(t, "Example data")
 		// Test piping YAML data over stdin
-		pipeData := []byte("" +
-			"account: account\n" +
+		pipeDataStr := "" +
+			"account: '@elonmusk'\n" +
 			"file: Example data\n" +
-			"is_long_video: true\n")
+			"is_long_video: true\n"
+		pipeDataStr = strings.ReplaceAll(pipeDataStr, "Example data", testFile)
+		pipeData := []byte(pipeDataStr)
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",

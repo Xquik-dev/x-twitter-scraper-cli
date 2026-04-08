@@ -17,7 +17,7 @@ func TestStylesRetrieve(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "retrieve",
-			"--username", "username",
+			"--id", "id",
 		)
 	})
 }
@@ -30,9 +30,9 @@ func TestStylesUpdate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "update",
-			"--username", "username",
-			"--label", "label",
-			"--tweet", "{text: text}",
+			"--id", "id",
+			"--label", "Professional Voice",
+			"--tweet", "{text: Excited to share our latest research findings.}",
 		)
 	})
 
@@ -46,24 +46,24 @@ func TestStylesUpdate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "update",
-			"--username", "username",
-			"--label", "label",
-			"--tweet.text", "text",
+			"--id", "id",
+			"--label", "Professional Voice",
+			"--tweet.text", "Excited to share our latest research findings.",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"label: label\n" +
+			"label: Professional Voice\n" +
 			"tweets:\n" +
-			"  - text: text\n")
+			"  - text: Excited to share our latest research findings.\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "update",
-			"--username", "username",
+			"--id", "id",
 		)
 	})
 }
@@ -88,7 +88,7 @@ func TestStylesDelete(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "delete",
-			"--username", "username",
+			"--id", "id",
 		)
 	})
 }
@@ -101,13 +101,13 @@ func TestStylesAnalyze(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "analyze",
-			"--username", "username",
+			"--username", "elonmusk",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("username: username")
+		pipeData := []byte("username: elonmusk")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
@@ -139,7 +139,7 @@ func TestStylesGetPerformance(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"styles", "get-performance",
-			"--username", "username",
+			"--id", "id",
 		)
 	})
 }

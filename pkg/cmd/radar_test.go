@@ -20,7 +20,7 @@ func TestRadarRetrieveTrendingTopics(t *testing.T) {
 			"--count", "0",
 			"--hours", "0",
 			"--region", "region",
-			"--source", "source",
+			"--source", "github",
 		)
 	})
 }
