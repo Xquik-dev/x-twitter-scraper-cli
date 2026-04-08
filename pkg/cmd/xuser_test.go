@@ -5,8 +5,21 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
+
+func TestXUsersRetrieve(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"x:users", "retrieve",
+			"--id", "id",
+		)
+	})
+}
 
 func TestXUsersRetrieveBatch(t *testing.T) {
 	t.Skip("Mock server tests are disabled")

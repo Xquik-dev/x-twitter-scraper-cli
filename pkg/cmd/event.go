@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -41,7 +41,7 @@ var eventsList = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "event-type",
-			Usage:     "Filter events by type",
+			Usage:     "Type of monitor event fired when account activity occurs.",
 			QueryPath: "eventType",
 		},
 		&requestflag.Flag[int64]{

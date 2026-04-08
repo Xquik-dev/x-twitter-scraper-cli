@@ -5,8 +5,8 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
 )
 
 func TestIntegrationsCreate(t *testing.T) {
@@ -85,7 +85,6 @@ func TestIntegrationsUpdate(t *testing.T) {
 			"integrations", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
-			"--event-type", "follower.gained",
 			"--filters", "{}",
 			"--is-active=true",
 			"--message-template", "{}",
@@ -100,7 +99,6 @@ func TestIntegrationsUpdate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"  - follower.gained\n" +
 			"filters: {}\n" +
 			"isActive: true\n" +
 			"messageTemplate: {}\n" +

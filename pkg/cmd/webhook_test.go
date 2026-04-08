@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestWebhooksCreate(t *testing.T) {
@@ -48,7 +48,6 @@ func TestWebhooksUpdate(t *testing.T) {
 			"webhooks", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
-			"--event-type", "follower.gained",
 			"--is-active=true",
 			"--url", "https://example.com/webhook",
 		)
@@ -59,7 +58,6 @@ func TestWebhooksUpdate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"  - follower.gained\n" +
 			"isActive: true\n" +
 			"url: https://example.com/webhook\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
