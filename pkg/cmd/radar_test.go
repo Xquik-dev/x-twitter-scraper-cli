@@ -14,7 +14,6 @@ func TestRadarRetrieveTrendingTopics(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"radar", "retrieve-trending-topics",
 			"--category", "category",
 			"--count", "0",

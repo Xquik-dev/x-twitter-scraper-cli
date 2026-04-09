@@ -14,7 +14,6 @@ func TestSubscribeCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"subscribe", "create",
 		)
 	})

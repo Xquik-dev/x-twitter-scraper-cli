@@ -14,7 +14,6 @@ func TestSupportTicketsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "create",
 			"--body", "I am unable to connect my X account. Please help.",
 			"--subject", "Cannot connect X account",
@@ -29,7 +28,6 @@ func TestSupportTicketsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "create",
 		)
 	})
@@ -41,7 +39,6 @@ func TestSupportTicketsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "retrieve",
 			"--id", "messages_value",
 		)
@@ -54,7 +51,6 @@ func TestSupportTicketsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "update",
 			"--id", "id",
 			"--status", "resolved",
@@ -67,7 +63,6 @@ func TestSupportTicketsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "update",
 			"--id", "id",
 		)
@@ -80,7 +75,6 @@ func TestSupportTicketsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "list",
 		)
 	})
@@ -92,7 +86,6 @@ func TestSupportTicketsReply(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "reply",
 			"--id", "id",
 			"--body", "Thank you for the update.",
@@ -105,7 +98,6 @@ func TestSupportTicketsReply(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"support:tickets", "reply",
 			"--id", "id",
 		)

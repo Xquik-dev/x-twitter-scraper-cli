@@ -15,7 +15,6 @@ func TestXMediaDownload(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:media", "download",
 			"--tweet-id", "1234567890",
 			"--tweet-id", "1234567891",
@@ -33,7 +32,6 @@ func TestXMediaDownload(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:media", "download",
 		)
 	})
@@ -45,7 +43,6 @@ func TestXMediaUpload(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:media", "upload",
 			"--account", "@elonmusk",
 			"--file", mocktest.TestFile(t, "Example data"),
@@ -65,7 +62,6 @@ func TestXMediaUpload(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:media", "upload",
 		)
 	})

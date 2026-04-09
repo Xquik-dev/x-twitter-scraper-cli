@@ -14,7 +14,6 @@ func TestCreditsRetrieveBalance(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"credits", "retrieve-balance",
 		)
 	})
@@ -26,7 +25,6 @@ func TestCreditsTopupBalance(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"credits", "topup-balance",
 			"--amount", "10000",
 		)
@@ -38,7 +36,6 @@ func TestCreditsTopupBalance(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"credits", "topup-balance",
 		)
 	})

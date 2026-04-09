@@ -71,10 +71,23 @@ var xGetNotifications = cli.Command{
 }
 
 var xGetTrends = cli.Command{
-	Name:            "get-trends",
-	Usage:           "Get trending topics",
-	Suggest:         true,
-	Flags:           []cli.Flag{},
+	Name:    "get-trends",
+	Usage:   "Get trending topics",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[int64]{
+			Name:      "count",
+			Usage:     "Number of trending topics to return (1-50, default 30)",
+			Default:   30,
+			QueryPath: "count",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "woeid",
+			Usage:     "Region WOEID (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
+			Default:   1,
+			QueryPath: "woeid",
+		},
+	},
 	Action:          handleXGetTrends,
 	HideHelpCommand: true,
 }
@@ -190,6 +203,8 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
+	params := xtwitterscraper.XGetTrendsParams{}
+
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -203,7 +218,7 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.GetTrends(ctx, options...)
+	_, err = client.X.GetTrends(ctx, params, options...)
 	if err != nil {
 		return err
 	}

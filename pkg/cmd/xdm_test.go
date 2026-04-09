@@ -14,7 +14,6 @@ func TestXDmRetrieveHistory(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:dm", "retrieve-history",
 			"--user-id", "userId",
 			"--cursor", "cursor",
@@ -29,7 +28,6 @@ func TestXDmSend(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 			"--account", "@elonmusk",
@@ -50,7 +48,6 @@ func TestXDmSend(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 		)

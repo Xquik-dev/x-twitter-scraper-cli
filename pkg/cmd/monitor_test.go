@@ -14,7 +14,6 @@ func TestMonitorsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"monitors", "create",
 			"--event-type", "tweet.new",
 			"--event-type", "follower.gained",
@@ -32,7 +31,6 @@ func TestMonitorsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"monitors", "create",
 		)
 	})
@@ -44,7 +42,6 @@ func TestMonitorsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"monitors", "retrieve",
 			"--id", "id",
 		)
@@ -57,7 +54,6 @@ func TestMonitorsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"monitors", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
@@ -74,7 +70,6 @@ func TestMonitorsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"monitors", "update",
 			"--id", "id",
 		)
@@ -87,7 +82,6 @@ func TestMonitorsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"monitors", "list",
 		)
 	})
@@ -99,7 +93,6 @@ func TestMonitorsDeactivate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"monitors", "deactivate",
 			"--id", "id",
 		)

@@ -14,7 +14,6 @@ func TestXTweetsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "create",
 			"--account", "@elonmusk",
 			"--text", "Just launched our new feature!",
@@ -40,7 +39,6 @@ func TestXTweetsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "create",
 		)
 	})
@@ -52,7 +50,6 @@ func TestXTweetsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "retrieve",
 			"--id", "id",
 		)
@@ -65,7 +62,6 @@ func TestXTweetsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "list",
 			"--ids", "ids",
 		)
@@ -78,7 +74,6 @@ func TestXTweetsDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -91,7 +86,6 @@ func TestXTweetsDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "delete",
 			"--id", "id",
 		)
@@ -104,7 +98,6 @@ func TestXTweetsGetFavoriters(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "get-favoriters",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -118,7 +111,6 @@ func TestXTweetsGetQuotes(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "get-quotes",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -135,7 +127,6 @@ func TestXTweetsGetReplies(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "get-replies",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -151,7 +142,6 @@ func TestXTweetsGetRetweeters(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "get-retweeters",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -165,7 +155,6 @@ func TestXTweetsGetThread(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "get-thread",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -179,7 +168,6 @@ func TestXTweetsSearch(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets", "search",
 			"--q", "q",
 			"--cursor", "cursor",

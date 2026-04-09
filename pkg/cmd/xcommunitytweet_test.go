@@ -14,7 +14,6 @@ func TestXCommunitiesTweetsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities:tweets", "list",
 			"--q", "q",
 			"--cursor", "cursor",
@@ -29,7 +28,6 @@ func TestXCommunitiesTweetsListByCommunity(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities:tweets", "list-by-community",
 			"--id", "id",
 			"--cursor", "cursor",

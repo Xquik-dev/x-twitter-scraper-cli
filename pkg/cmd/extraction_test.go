@@ -14,7 +14,6 @@ func TestExtractionsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"extractions", "retrieve",
 			"--id", "id",
 			"--after", "after",
@@ -29,7 +28,6 @@ func TestExtractionsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"extractions", "list",
 			"--after", "after",
 			"--limit", "1",
@@ -45,7 +43,6 @@ func TestExtractionsEstimateCost(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"extractions", "estimate-cost",
 			"--tool-type", "follower_explorer",
 			"--advanced-query", "min_faves:100",
@@ -76,7 +73,6 @@ func TestExtractionsEstimateCost(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"extractions", "estimate-cost",
 		)
 	})
@@ -88,7 +84,6 @@ func TestExtractionsExportResults(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"extractions", "export-results",
 			"--id", "id",
 			"--format", "csv",
@@ -103,7 +98,6 @@ func TestExtractionsRun(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"extractions", "run",
 			"--tool-type", "follower_explorer",
 			"--advanced-query", "min_faves:100",
@@ -134,7 +128,6 @@ func TestExtractionsRun(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"extractions", "run",
 		)
 	})
