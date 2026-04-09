@@ -14,7 +14,6 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:retweet", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -27,7 +26,6 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:retweet", "create",
 			"--id", "id",
 		)
@@ -40,7 +38,6 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:retweet", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -53,7 +50,6 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:retweet", "delete",
 			"--id", "id",
 		)

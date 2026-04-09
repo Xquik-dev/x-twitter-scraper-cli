@@ -15,7 +15,6 @@ func TestIntegrationsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "create",
 			"--config", "{chatId: '-1001234567890'}",
 			"--event-type", "tweet.new",
@@ -33,7 +32,6 @@ func TestIntegrationsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "create",
 			"--config.chat-id", "-1001234567890",
 			"--event-type", "tweet.new",
@@ -56,7 +54,6 @@ func TestIntegrationsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "create",
 		)
 	})
@@ -68,7 +65,6 @@ func TestIntegrationsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "retrieve",
 			"--id", "id",
 		)
@@ -81,7 +77,6 @@ func TestIntegrationsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
@@ -108,7 +103,6 @@ func TestIntegrationsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "update",
 			"--id", "id",
 		)
@@ -121,7 +115,6 @@ func TestIntegrationsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "list",
 		)
 	})
@@ -133,7 +126,6 @@ func TestIntegrationsDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "delete",
 			"--id", "id",
 		)
@@ -146,7 +138,6 @@ func TestIntegrationsListDeliveries(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "list-deliveries",
 			"--id", "id",
 			"--limit", "1",
@@ -160,7 +151,6 @@ func TestIntegrationsSendTest(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"integrations", "send-test",
 			"--id", "id",
 		)
