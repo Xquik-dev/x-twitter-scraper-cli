@@ -17,7 +17,7 @@ import (
 
 var xMediaDownload = cli.Command{
 	Name:    "download",
-	Usage:   "Download tweet media",
+	Usage:   "Download images & videos from tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{

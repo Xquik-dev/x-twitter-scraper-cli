@@ -58,7 +58,7 @@ var xTweetsCreate = cli.Command{
 
 var xTweetsRetrieve = cli.Command{
 	Name:    "retrieve",
-	Usage:   "Look up tweet",
+	Usage:   "Get tweet with full text, author, metrics & media",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -108,7 +108,7 @@ var xTweetsDelete = cli.Command{
 
 var xTweetsGetFavoriters = cli.Command{
 	Name:    "get-favoriters",
-	Usage:   "Get users who liked a tweet",
+	Usage:   "List users who liked a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -127,7 +127,7 @@ var xTweetsGetFavoriters = cli.Command{
 
 var xTweetsGetQuotes = cli.Command{
 	Name:    "get-quotes",
-	Usage:   "Get quote tweets of a tweet",
+	Usage:   "List quote tweets of a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -161,7 +161,7 @@ var xTweetsGetQuotes = cli.Command{
 
 var xTweetsGetReplies = cli.Command{
 	Name:    "get-replies",
-	Usage:   "Get replies to a tweet",
+	Usage:   "List replies to a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -190,7 +190,7 @@ var xTweetsGetReplies = cli.Command{
 
 var xTweetsGetRetweeters = cli.Command{
 	Name:    "get-retweeters",
-	Usage:   "Get users who retweeted a tweet",
+	Usage:   "List users who retweeted a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -209,7 +209,7 @@ var xTweetsGetRetweeters = cli.Command{
 
 var xTweetsGetThread = cli.Command{
 	Name:    "get-thread",
-	Usage:   "Get thread context for a tweet",
+	Usage:   "Get full conversation thread for a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -228,7 +228,7 @@ var xTweetsGetThread = cli.Command{
 
 var xTweetsSearch = cli.Command{
 	Name:    "search",
-	Usage:   "Search tweets",
+	Usage:   "Search tweets with X query operators & pagination",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

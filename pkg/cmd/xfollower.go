@@ -17,7 +17,7 @@ import (
 
 var xFollowersCheck = cli.Command{
 	Name:    "check",
-	Usage:   "Check follow relationship",
+	Usage:   "Check if one user follows another",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

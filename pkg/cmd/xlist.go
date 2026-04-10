@@ -17,7 +17,7 @@ import (
 
 var xListsRetrieveFollowers = cli.Command{
 	Name:    "retrieve-followers",
-	Usage:   "Get list followers",
+	Usage:   "List followers of an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -36,7 +36,7 @@ var xListsRetrieveFollowers = cli.Command{
 
 var xListsRetrieveMembers = cli.Command{
 	Name:    "retrieve-members",
-	Usage:   "Get list members",
+	Usage:   "List members of an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -55,7 +55,7 @@ var xListsRetrieveMembers = cli.Command{
 
 var xListsRetrieveTweets = cli.Command{
 	Name:    "retrieve-tweets",
-	Usage:   "Get list tweets",
+	Usage:   "List tweets from an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

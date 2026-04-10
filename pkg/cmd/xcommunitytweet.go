@@ -17,7 +17,7 @@ import (
 
 var xCommunitiesTweetsList = cli.Command{
 	Name:    "list",
-	Usage:   "Search tweets across all communities",
+	Usage:   "List tweets across all communities",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -43,7 +43,7 @@ var xCommunitiesTweetsList = cli.Command{
 
 var xCommunitiesTweetsListByCommunity = cli.Command{
 	Name:    "list-by-community",
-	Usage:   "Get community tweets",
+	Usage:   "List tweets posted in a community",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
