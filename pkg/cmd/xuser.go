@@ -17,7 +17,7 @@ import (
 
 var xUsersRetrieve = cli.Command{
 	Name:    "retrieve",
-	Usage:   "Look up X user",
+	Usage:   "Get user profile with follower counts & verification",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -31,7 +31,7 @@ var xUsersRetrieve = cli.Command{
 
 var xUsersRetrieveBatch = cli.Command{
 	Name:    "retrieve-batch",
-	Usage:   "Get multiple users by IDs",
+	Usage:   "Look up multiple users by IDs in one call",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -47,7 +47,7 @@ var xUsersRetrieveBatch = cli.Command{
 
 var xUsersRetrieveFollowers = cli.Command{
 	Name:    "retrieve-followers",
-	Usage:   "Get user followers",
+	Usage:   "List followers of a user",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -71,7 +71,7 @@ var xUsersRetrieveFollowers = cli.Command{
 
 var xUsersRetrieveFollowersYouKnow = cli.Command{
 	Name:    "retrieve-followers-you-know",
-	Usage:   "Get followers you know for a user",
+	Usage:   "List mutual followers between you and a user",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -90,7 +90,7 @@ var xUsersRetrieveFollowersYouKnow = cli.Command{
 
 var xUsersRetrieveFollowing = cli.Command{
 	Name:    "retrieve-following",
-	Usage:   "Get users this user follows",
+	Usage:   "List accounts a user follows",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -114,7 +114,7 @@ var xUsersRetrieveFollowing = cli.Command{
 
 var xUsersRetrieveLikes = cli.Command{
 	Name:    "retrieve-likes",
-	Usage:   "Get tweets liked by a user",
+	Usage:   "List tweets liked by a user",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -133,7 +133,7 @@ var xUsersRetrieveLikes = cli.Command{
 
 var xUsersRetrieveMedia = cli.Command{
 	Name:    "retrieve-media",
-	Usage:   "Get media tweets by a user",
+	Usage:   "List media tweets posted by a user",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -152,7 +152,7 @@ var xUsersRetrieveMedia = cli.Command{
 
 var xUsersRetrieveMentions = cli.Command{
 	Name:    "retrieve-mentions",
-	Usage:   "Get tweets mentioning a user",
+	Usage:   "List tweets mentioning a user",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -202,7 +202,7 @@ var xUsersRetrieveSearch = cli.Command{
 
 var xUsersRetrieveTweets = cli.Command{
 	Name:    "retrieve-tweets",
-	Usage:   "Get recent tweets by a user",
+	Usage:   "List recent tweets posted by a user",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -233,7 +233,7 @@ var xUsersRetrieveTweets = cli.Command{
 
 var xUsersRetrieveVerifiedFollowers = cli.Command{
 	Name:    "retrieve-verified-followers",
-	Usage:   "Get verified followers",
+	Usage:   "List verified followers of a user",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

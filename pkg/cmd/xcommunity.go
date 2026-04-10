@@ -70,7 +70,7 @@ var xCommunitiesDelete = cli.Command{
 
 var xCommunitiesRetrieveInfo = cli.Command{
 	Name:    "retrieve-info",
-	Usage:   "Get community details",
+	Usage:   "Get community name, description & member count",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -84,7 +84,7 @@ var xCommunitiesRetrieveInfo = cli.Command{
 
 var xCommunitiesRetrieveMembers = cli.Command{
 	Name:    "retrieve-members",
-	Usage:   "Get community members",
+	Usage:   "List members of a community",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -103,7 +103,7 @@ var xCommunitiesRetrieveMembers = cli.Command{
 
 var xCommunitiesRetrieveModerators = cli.Command{
 	Name:    "retrieve-moderators",
-	Usage:   "Get community moderators",
+	Usage:   "List moderators of a community",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -122,7 +122,7 @@ var xCommunitiesRetrieveModerators = cli.Command{
 
 var xCommunitiesRetrieveSearch = cli.Command{
 	Name:    "retrieve-search",
-	Usage:   "Search tweets across communities",
+	Usage:   "Search for communities by keyword",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
