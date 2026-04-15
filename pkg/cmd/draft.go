@@ -118,8 +118,9 @@ func handleDraftsCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "drafts create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "drafts create", obj, format, explicitFormat, transform)
 }
 
 func handleDraftsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -153,8 +154,9 @@ func handleDraftsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "drafts retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "drafts retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleDraftsList(ctx context.Context, cmd *cli.Command) error {
@@ -187,8 +189,9 @@ func handleDraftsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "drafts list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "drafts list", obj, format, explicitFormat, transform)
 }
 
 func handleDraftsDelete(ctx context.Context, cmd *cli.Command) error {

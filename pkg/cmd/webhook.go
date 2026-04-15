@@ -145,8 +145,9 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "webhooks create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "webhooks create", obj, format, explicitFormat, transform)
 }
 
 func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -187,8 +188,9 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "webhooks update", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "webhooks update", obj, format, explicitFormat, transform)
 }
 
 func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
@@ -219,8 +221,9 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "webhooks list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "webhooks list", obj, format, explicitFormat, transform)
 }
 
 func handleWebhooksDeactivate(ctx context.Context, cmd *cli.Command) error {
@@ -254,8 +257,9 @@ func handleWebhooksDeactivate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "webhooks deactivate", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "webhooks deactivate", obj, format, explicitFormat, transform)
 }
 
 func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
@@ -289,8 +293,9 @@ func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "webhooks list-deliveries", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "webhooks list-deliveries", obj, format, explicitFormat, transform)
 }
 
 func handleWebhooksTest(ctx context.Context, cmd *cli.Command) error {
@@ -324,6 +329,7 @@ func handleWebhooksTest(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "webhooks test", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "webhooks test", obj, format, explicitFormat, transform)
 }

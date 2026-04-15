@@ -281,8 +281,9 @@ func handleXUsersRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveBatch(ctx context.Context, cmd *cli.Command) error {
@@ -315,8 +316,9 @@ func handleXUsersRetrieveBatch(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-batch", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-batch", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveFollowers(ctx context.Context, cmd *cli.Command) error {
@@ -357,8 +359,9 @@ func handleXUsersRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-followers", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-followers", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveFollowersYouKnow(ctx context.Context, cmd *cli.Command) error {
@@ -399,8 +402,9 @@ func handleXUsersRetrieveFollowersYouKnow(ctx context.Context, cmd *cli.Command)
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-followers-you-know", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-followers-you-know", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveFollowing(ctx context.Context, cmd *cli.Command) error {
@@ -441,8 +445,9 @@ func handleXUsersRetrieveFollowing(ctx context.Context, cmd *cli.Command) error 
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-following", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-following", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveLikes(ctx context.Context, cmd *cli.Command) error {
@@ -483,8 +488,9 @@ func handleXUsersRetrieveLikes(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-likes", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-likes", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveMedia(ctx context.Context, cmd *cli.Command) error {
@@ -525,8 +531,9 @@ func handleXUsersRetrieveMedia(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-media", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-media", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveMentions(ctx context.Context, cmd *cli.Command) error {
@@ -567,8 +574,9 @@ func handleXUsersRetrieveMentions(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-mentions", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-mentions", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
@@ -601,8 +609,9 @@ func handleXUsersRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-search", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-search", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
@@ -643,8 +652,9 @@ func handleXUsersRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-tweets", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-tweets", obj, format, explicitFormat, transform)
 }
 
 func handleXUsersRetrieveVerifiedFollowers(ctx context.Context, cmd *cli.Command) error {
@@ -685,6 +695,7 @@ func handleXUsersRetrieveVerifiedFollowers(ctx context.Context, cmd *cli.Command
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:users retrieve-verified-followers", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:users retrieve-verified-followers", obj, format, explicitFormat, transform)
 }

@@ -93,8 +93,9 @@ func handleXTweetsLikeCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets:like create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:tweets:like create", obj, format, explicitFormat, transform)
 }
 
 func handleXTweetsLikeDelete(ctx context.Context, cmd *cli.Command) error {
@@ -135,6 +136,7 @@ func handleXTweetsLikeDelete(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets:like delete", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:tweets:like delete", obj, format, explicitFormat, transform)
 }

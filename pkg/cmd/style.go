@@ -168,8 +168,9 @@ func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "styles retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "styles retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -210,8 +211,9 @@ func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "styles update", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "styles update", obj, format, explicitFormat, transform)
 }
 
 func handleStylesList(ctx context.Context, cmd *cli.Command) error {
@@ -242,8 +244,9 @@ func handleStylesList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "styles list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "styles list", obj, format, explicitFormat, transform)
 }
 
 func handleStylesDelete(ctx context.Context, cmd *cli.Command) error {
@@ -301,8 +304,9 @@ func handleStylesAnalyze(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "styles analyze", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "styles analyze", obj, format, explicitFormat, transform)
 }
 
 func handleStylesCompare(ctx context.Context, cmd *cli.Command) error {
@@ -335,8 +339,9 @@ func handleStylesCompare(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "styles compare", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "styles compare", obj, format, explicitFormat, transform)
 }
 
 func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
@@ -370,6 +375,7 @@ func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "styles get-performance", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "styles get-performance", obj, format, explicitFormat, transform)
 }

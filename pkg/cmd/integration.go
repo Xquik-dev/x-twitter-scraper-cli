@@ -202,8 +202,9 @@ func handleIntegrationsCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "integrations create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "integrations create", obj, format, explicitFormat, transform)
 }
 
 func handleIntegrationsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -237,8 +238,9 @@ func handleIntegrationsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "integrations retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "integrations retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleIntegrationsUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -279,8 +281,9 @@ func handleIntegrationsUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "integrations update", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "integrations update", obj, format, explicitFormat, transform)
 }
 
 func handleIntegrationsList(ctx context.Context, cmd *cli.Command) error {
@@ -311,8 +314,9 @@ func handleIntegrationsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "integrations list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "integrations list", obj, format, explicitFormat, transform)
 }
 
 func handleIntegrationsDelete(ctx context.Context, cmd *cli.Command) error {
@@ -346,8 +350,9 @@ func handleIntegrationsDelete(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "integrations delete", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "integrations delete", obj, format, explicitFormat, transform)
 }
 
 func handleIntegrationsListDeliveries(ctx context.Context, cmd *cli.Command) error {
@@ -388,8 +393,9 @@ func handleIntegrationsListDeliveries(ctx context.Context, cmd *cli.Command) err
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "integrations list-deliveries", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "integrations list-deliveries", obj, format, explicitFormat, transform)
 }
 
 func handleIntegrationsSendTest(ctx context.Context, cmd *cli.Command) error {
@@ -423,6 +429,7 @@ func handleIntegrationsSendTest(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "integrations send-test", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "integrations send-test", obj, format, explicitFormat, transform)
 }

@@ -111,6 +111,7 @@ func handleComposeCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "compose create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "compose create", obj, format, explicitFormat, transform)
 }

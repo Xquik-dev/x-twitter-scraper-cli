@@ -244,8 +244,9 @@ func handleExtractionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "extractions retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "extractions retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleExtractionsList(ctx context.Context, cmd *cli.Command) error {
@@ -278,8 +279,9 @@ func handleExtractionsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "extractions list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "extractions list", obj, format, explicitFormat, transform)
 }
 
 func handleExtractionsEstimateCost(ctx context.Context, cmd *cli.Command) error {
@@ -312,8 +314,9 @@ func handleExtractionsEstimateCost(ctx context.Context, cmd *cli.Command) error 
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "extractions estimate-cost", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "extractions estimate-cost", obj, format, explicitFormat, transform)
 }
 
 func handleExtractionsExportResults(ctx context.Context, cmd *cli.Command) error {
@@ -386,6 +389,7 @@ func handleExtractionsRun(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "extractions run", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "extractions run", obj, format, explicitFormat, transform)
 }

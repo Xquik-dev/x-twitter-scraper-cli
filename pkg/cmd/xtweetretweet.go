@@ -93,8 +93,9 @@ func handleXTweetsRetweetCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets:retweet create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:tweets:retweet create", obj, format, explicitFormat, transform)
 }
 
 func handleXTweetsRetweetDelete(ctx context.Context, cmd *cli.Command) error {
@@ -135,6 +136,7 @@ func handleXTweetsRetweetDelete(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets:retweet delete", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:tweets:retweet delete", obj, format, explicitFormat, transform)
 }

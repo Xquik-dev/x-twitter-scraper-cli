@@ -84,8 +84,9 @@ func handleAccountRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "account retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "account retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
@@ -118,8 +119,9 @@ func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "account set-x-username", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "account set-x-username", obj, format, explicitFormat, transform)
 }
 
 func handleAccountUpdateLocale(ctx context.Context, cmd *cli.Command) error {
@@ -152,6 +154,7 @@ func handleAccountUpdateLocale(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "account update-locale", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "account update-locale", obj, format, explicitFormat, transform)
 }
