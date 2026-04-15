@@ -125,8 +125,9 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:lists retrieve-followers", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:lists retrieve-followers", obj, format, explicitFormat, transform)
 }
 
 func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
@@ -167,8 +168,9 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:lists retrieve-members", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:lists retrieve-members", obj, format, explicitFormat, transform)
 }
 
 func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
@@ -209,6 +211,7 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:lists retrieve-tweets", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:lists retrieve-tweets", obj, format, explicitFormat, transform)
 }

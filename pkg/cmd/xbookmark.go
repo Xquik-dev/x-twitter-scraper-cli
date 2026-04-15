@@ -74,8 +74,9 @@ func handleXBookmarksList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:bookmarks list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:bookmarks list", obj, format, explicitFormat, transform)
 }
 
 func handleXBookmarksRetrieveFolders(ctx context.Context, cmd *cli.Command) error {
@@ -106,6 +107,7 @@ func handleXBookmarksRetrieveFolders(ctx context.Context, cmd *cli.Command) erro
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:bookmarks retrieve-folders", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:bookmarks retrieve-folders", obj, format, explicitFormat, transform)
 }

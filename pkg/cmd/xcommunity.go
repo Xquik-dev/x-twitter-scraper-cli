@@ -176,8 +176,9 @@ func handleXCommunitiesCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities create", obj, format, explicitFormat, transform)
 }
 
 func handleXCommunitiesDelete(ctx context.Context, cmd *cli.Command) error {
@@ -218,8 +219,9 @@ func handleXCommunitiesDelete(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities delete", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities delete", obj, format, explicitFormat, transform)
 }
 
 func handleXCommunitiesRetrieveInfo(ctx context.Context, cmd *cli.Command) error {
@@ -253,8 +255,9 @@ func handleXCommunitiesRetrieveInfo(ctx context.Context, cmd *cli.Command) error
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities retrieve-info", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities retrieve-info", obj, format, explicitFormat, transform)
 }
 
 func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
@@ -295,8 +298,9 @@ func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) er
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities retrieve-members", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities retrieve-members", obj, format, explicitFormat, transform)
 }
 
 func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command) error {
@@ -337,8 +341,9 @@ func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command)
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities retrieve-moderators", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities retrieve-moderators", obj, format, explicitFormat, transform)
 }
 
 func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
@@ -371,6 +376,7 @@ func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) err
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities retrieve-search", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities retrieve-search", obj, format, explicitFormat, transform)
 }

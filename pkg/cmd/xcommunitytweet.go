@@ -90,8 +90,9 @@ func handleXCommunitiesTweetsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities:tweets list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities:tweets list", obj, format, explicitFormat, transform)
 }
 
 func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Command) error {
@@ -132,6 +133,7 @@ func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Comma
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities:tweets list-by-community", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities:tweets list-by-community", obj, format, explicitFormat, transform)
 }

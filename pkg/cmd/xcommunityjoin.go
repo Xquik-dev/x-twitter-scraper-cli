@@ -93,8 +93,9 @@ func handleXCommunitiesJoinCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities:join create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities:join create", obj, format, explicitFormat, transform)
 }
 
 func handleXCommunitiesJoinDeleteAll(ctx context.Context, cmd *cli.Command) error {
@@ -135,6 +136,7 @@ func handleXCommunitiesJoinDeleteAll(ctx context.Context, cmd *cli.Command) erro
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities:join delete-all", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:communities:join delete-all", obj, format, explicitFormat, transform)
 }

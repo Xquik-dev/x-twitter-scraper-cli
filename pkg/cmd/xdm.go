@@ -110,8 +110,9 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:dm retrieve-history", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:dm retrieve-history", obj, format, explicitFormat, transform)
 }
 
 func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
@@ -152,6 +153,7 @@ func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:dm send", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:dm send", obj, format, explicitFormat, transform)
 }

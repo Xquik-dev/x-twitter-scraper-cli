@@ -127,8 +127,9 @@ func handleMonitorsCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "monitors create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "monitors create", obj, format, explicitFormat, transform)
 }
 
 func handleMonitorsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -162,8 +163,9 @@ func handleMonitorsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "monitors retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "monitors retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleMonitorsUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -204,8 +206,9 @@ func handleMonitorsUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "monitors update", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "monitors update", obj, format, explicitFormat, transform)
 }
 
 func handleMonitorsList(ctx context.Context, cmd *cli.Command) error {
@@ -236,8 +239,9 @@ func handleMonitorsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "monitors list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "monitors list", obj, format, explicitFormat, transform)
 }
 
 func handleMonitorsDeactivate(ctx context.Context, cmd *cli.Command) error {
@@ -271,6 +275,7 @@ func handleMonitorsDeactivate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "monitors deactivate", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "monitors deactivate", obj, format, explicitFormat, transform)
 }

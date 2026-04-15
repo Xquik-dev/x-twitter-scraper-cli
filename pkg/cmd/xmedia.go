@@ -92,8 +92,9 @@ func handleXMediaDownload(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:media download", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:media download", obj, format, explicitFormat, transform)
 }
 
 func handleXMediaUpload(ctx context.Context, cmd *cli.Command) error {
@@ -126,6 +127,7 @@ func handleXMediaUpload(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:media upload", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:media upload", obj, format, explicitFormat, transform)
 }

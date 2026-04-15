@@ -172,8 +172,9 @@ func handleDrawsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "draws retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "draws retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleDrawsList(ctx context.Context, cmd *cli.Command) error {
@@ -206,8 +207,9 @@ func handleDrawsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "draws list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "draws list", obj, format, explicitFormat, transform)
 }
 
 func handleDrawsExport(ctx context.Context, cmd *cli.Command) error {
@@ -280,6 +282,7 @@ func handleDrawsRun(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "draws run", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "draws run", obj, format, explicitFormat, transform)
 }

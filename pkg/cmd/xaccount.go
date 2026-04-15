@@ -154,8 +154,9 @@ func handleXAccountsCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:accounts create", obj, format, explicitFormat, transform)
 }
 
 func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -189,8 +190,9 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:accounts retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
@@ -221,8 +223,9 @@ func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:accounts list", obj, format, explicitFormat, transform)
 }
 
 func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
@@ -256,8 +259,9 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts delete", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:accounts delete", obj, format, explicitFormat, transform)
 }
 
 func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
@@ -288,8 +292,9 @@ func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts bulk-retry", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:accounts bulk-retry", obj, format, explicitFormat, transform)
 }
 
 func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
@@ -330,6 +335,7 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts reauth", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x:accounts reauth", obj, format, explicitFormat, transform)
 }

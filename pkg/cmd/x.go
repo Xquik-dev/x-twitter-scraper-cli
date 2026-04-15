@@ -123,8 +123,9 @@ func handleXGetArticle(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-article", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x get-article", obj, format, explicitFormat, transform)
 }
 
 func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
@@ -157,8 +158,9 @@ func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-home-timeline", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x get-home-timeline", obj, format, explicitFormat, transform)
 }
 
 func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
@@ -191,8 +193,9 @@ func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-notifications", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x get-notifications", obj, format, explicitFormat, transform)
 }
 
 func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
@@ -225,6 +228,7 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-trends", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "x get-trends", obj, format, explicitFormat, transform)
 }
