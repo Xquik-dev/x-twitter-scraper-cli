@@ -246,7 +246,12 @@ func handleExtractionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "extractions retrieve", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "extractions retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleExtractionsList(ctx context.Context, cmd *cli.Command) error {
@@ -281,7 +286,12 @@ func handleExtractionsList(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "extractions list", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "extractions list",
+		Transform:      transform,
+	})
 }
 
 func handleExtractionsEstimateCost(ctx context.Context, cmd *cli.Command) error {
@@ -316,7 +326,12 @@ func handleExtractionsEstimateCost(ctx context.Context, cmd *cli.Command) error 
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "extractions estimate-cost", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "extractions estimate-cost",
+		Transform:      transform,
+	})
 }
 
 func handleExtractionsExportResults(ctx context.Context, cmd *cli.Command) error {
@@ -391,5 +406,10 @@ func handleExtractionsRun(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "extractions run", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "extractions run",
+		Transform:      transform,
+	})
 }
