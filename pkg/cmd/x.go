@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
@@ -125,7 +124,12 @@ func handleXGetArticle(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x get-article", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x get-article",
+		Transform:      transform,
+	})
 }
 
 func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
@@ -160,7 +164,12 @@ func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x get-home-timeline", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x get-home-timeline",
+		Transform:      transform,
+	})
 }
 
 func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
@@ -195,7 +204,12 @@ func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x get-notifications", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x get-notifications",
+		Transform:      transform,
+	})
 }
 
 func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
@@ -230,5 +244,10 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x get-trends", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x get-trends",
+		Transform:      transform,
+	})
 }

@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
@@ -156,7 +155,12 @@ func handleXAccountsCreate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x:accounts create", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x:accounts create",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -192,7 +196,12 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x:accounts retrieve", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x:accounts retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
@@ -225,7 +234,12 @@ func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x:accounts list", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x:accounts list",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
@@ -261,7 +275,12 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x:accounts delete", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x:accounts delete",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
@@ -294,7 +313,12 @@ func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x:accounts bulk-retry", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x:accounts bulk-retry",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
@@ -337,5 +361,10 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "x:accounts reauth", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "x:accounts reauth",
+		Transform:      transform,
+	})
 }

@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
@@ -120,7 +119,12 @@ func handleDraftsCreate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "drafts create", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "drafts create",
+		Transform:      transform,
+	})
 }
 
 func handleDraftsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -156,7 +160,12 @@ func handleDraftsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "drafts retrieve", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "drafts retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleDraftsList(ctx context.Context, cmd *cli.Command) error {
@@ -191,7 +200,12 @@ func handleDraftsList(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "drafts list", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "drafts list",
+		Transform:      transform,
+	})
 }
 
 func handleDraftsDelete(ctx context.Context, cmd *cli.Command) error {

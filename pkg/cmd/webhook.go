@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
@@ -147,7 +146,12 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "webhooks create", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "webhooks create",
+		Transform:      transform,
+	})
 }
 
 func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -190,7 +194,12 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "webhooks update", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "webhooks update",
+		Transform:      transform,
+	})
 }
 
 func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
@@ -223,7 +232,12 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "webhooks list", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "webhooks list",
+		Transform:      transform,
+	})
 }
 
 func handleWebhooksDeactivate(ctx context.Context, cmd *cli.Command) error {
@@ -259,7 +273,12 @@ func handleWebhooksDeactivate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "webhooks deactivate", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "webhooks deactivate",
+		Transform:      transform,
+	})
 }
 
 func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
@@ -295,7 +314,12 @@ func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "webhooks list-deliveries", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "webhooks list-deliveries",
+		Transform:      transform,
+	})
 }
 
 func handleWebhooksTest(ctx context.Context, cmd *cli.Command) error {
@@ -331,5 +355,10 @@ func handleWebhooksTest(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "webhooks test", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "webhooks test",
+		Transform:      transform,
+	})
 }
