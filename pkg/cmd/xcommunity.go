@@ -180,6 +180,7 @@ func handleXCommunitiesCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities create",
 		Transform:      transform,
 	})
@@ -228,6 +229,7 @@ func handleXCommunitiesDelete(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities delete",
 		Transform:      transform,
 	})
@@ -269,6 +271,7 @@ func handleXCommunitiesRetrieveInfo(ctx context.Context, cmd *cli.Command) error
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities retrieve-info",
 		Transform:      transform,
 	})
@@ -317,6 +320,7 @@ func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) er
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities retrieve-members",
 		Transform:      transform,
 	})
@@ -365,6 +369,7 @@ func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command)
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities retrieve-moderators",
 		Transform:      transform,
 	})
@@ -405,6 +410,7 @@ func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) err
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities retrieve-search",
 		Transform:      transform,
 	})

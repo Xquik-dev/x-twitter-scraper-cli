@@ -97,6 +97,7 @@ func handleXTweetsRetweetCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets:retweet create",
 		Transform:      transform,
 	})
@@ -145,6 +146,7 @@ func handleXTweetsRetweetDelete(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets:retweet delete",
 		Transform:      transform,
 	})

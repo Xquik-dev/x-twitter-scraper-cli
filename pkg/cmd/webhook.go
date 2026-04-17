@@ -149,6 +149,7 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "webhooks create",
 		Transform:      transform,
 	})
@@ -197,6 +198,7 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "webhooks update",
 		Transform:      transform,
 	})
@@ -235,6 +237,7 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "webhooks list",
 		Transform:      transform,
 	})
@@ -276,6 +279,7 @@ func handleWebhooksDeactivate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "webhooks deactivate",
 		Transform:      transform,
 	})
@@ -317,6 +321,7 @@ func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "webhooks list-deliveries",
 		Transform:      transform,
 	})
@@ -358,6 +363,7 @@ func handleWebhooksTest(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "webhooks test",
 		Transform:      transform,
 	})

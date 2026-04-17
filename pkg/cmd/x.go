@@ -127,6 +127,7 @@ func handleXGetArticle(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x get-article",
 		Transform:      transform,
 	})
@@ -167,6 +168,7 @@ func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x get-home-timeline",
 		Transform:      transform,
 	})
@@ -207,6 +209,7 @@ func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x get-notifications",
 		Transform:      transform,
 	})
@@ -247,6 +250,7 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x get-trends",
 		Transform:      transform,
 	})

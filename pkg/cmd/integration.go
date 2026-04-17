@@ -206,6 +206,7 @@ func handleIntegrationsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "integrations create",
 		Transform:      transform,
 	})
@@ -247,6 +248,7 @@ func handleIntegrationsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "integrations retrieve",
 		Transform:      transform,
 	})
@@ -295,6 +297,7 @@ func handleIntegrationsUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "integrations update",
 		Transform:      transform,
 	})
@@ -333,6 +336,7 @@ func handleIntegrationsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "integrations list",
 		Transform:      transform,
 	})
@@ -374,6 +378,7 @@ func handleIntegrationsDelete(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "integrations delete",
 		Transform:      transform,
 	})
@@ -422,6 +427,7 @@ func handleIntegrationsListDeliveries(ctx context.Context, cmd *cli.Command) err
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "integrations list-deliveries",
 		Transform:      transform,
 	})
@@ -463,6 +469,7 @@ func handleIntegrationsSendTest(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "integrations send-test",
 		Transform:      transform,
 	})
