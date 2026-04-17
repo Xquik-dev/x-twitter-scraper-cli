@@ -114,6 +114,7 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:dm retrieve-history",
 		Transform:      transform,
 	})
@@ -162,6 +163,7 @@ func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:dm send",
 		Transform:      transform,
 	})

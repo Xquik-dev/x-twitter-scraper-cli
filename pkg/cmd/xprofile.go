@@ -130,6 +130,7 @@ func handleXProfileUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:profile update",
 		Transform:      transform,
 	})
@@ -170,6 +171,7 @@ func handleXProfileUpdateAvatar(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:profile update-avatar",
 		Transform:      transform,
 	})
@@ -210,6 +212,7 @@ func handleXProfileUpdateBanner(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:profile update-banner",
 		Transform:      transform,
 	})

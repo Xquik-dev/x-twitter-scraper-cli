@@ -129,6 +129,7 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:lists retrieve-followers",
 		Transform:      transform,
 	})
@@ -177,6 +178,7 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:lists retrieve-members",
 		Transform:      transform,
 	})
@@ -225,6 +227,7 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:lists retrieve-tweets",
 		Transform:      transform,
 	})

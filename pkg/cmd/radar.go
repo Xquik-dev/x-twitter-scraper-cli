@@ -84,6 +84,7 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "radar retrieve-trending-topics",
 		Transform:      transform,
 	})

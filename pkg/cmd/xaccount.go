@@ -158,6 +158,7 @@ func handleXAccountsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:accounts create",
 		Transform:      transform,
 	})
@@ -199,6 +200,7 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:accounts retrieve",
 		Transform:      transform,
 	})
@@ -237,6 +239,7 @@ func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:accounts list",
 		Transform:      transform,
 	})
@@ -278,6 +281,7 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:accounts delete",
 		Transform:      transform,
 	})
@@ -316,6 +320,7 @@ func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:accounts bulk-retry",
 		Transform:      transform,
 	})
@@ -364,6 +369,7 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:accounts reauth",
 		Transform:      transform,
 	})

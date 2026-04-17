@@ -285,6 +285,7 @@ func handleXUsersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve",
 		Transform:      transform,
 	})
@@ -325,6 +326,7 @@ func handleXUsersRetrieveBatch(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-batch",
 		Transform:      transform,
 	})
@@ -373,6 +375,7 @@ func handleXUsersRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-followers",
 		Transform:      transform,
 	})
@@ -421,6 +424,7 @@ func handleXUsersRetrieveFollowersYouKnow(ctx context.Context, cmd *cli.Command)
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-followers-you-know",
 		Transform:      transform,
 	})
@@ -469,6 +473,7 @@ func handleXUsersRetrieveFollowing(ctx context.Context, cmd *cli.Command) error 
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-following",
 		Transform:      transform,
 	})
@@ -517,6 +522,7 @@ func handleXUsersRetrieveLikes(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-likes",
 		Transform:      transform,
 	})
@@ -565,6 +571,7 @@ func handleXUsersRetrieveMedia(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-media",
 		Transform:      transform,
 	})
@@ -613,6 +620,7 @@ func handleXUsersRetrieveMentions(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-mentions",
 		Transform:      transform,
 	})
@@ -653,6 +661,7 @@ func handleXUsersRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-search",
 		Transform:      transform,
 	})
@@ -701,6 +710,7 @@ func handleXUsersRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-tweets",
 		Transform:      transform,
 	})
@@ -749,6 +759,7 @@ func handleXUsersRetrieveVerifiedFollowers(ctx context.Context, cmd *cli.Command
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users retrieve-verified-followers",
 		Transform:      transform,
 	})

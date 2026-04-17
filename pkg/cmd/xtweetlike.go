@@ -97,6 +97,7 @@ func handleXTweetsLikeCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets:like create",
 		Transform:      transform,
 	})
@@ -145,6 +146,7 @@ func handleXTweetsLikeDelete(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets:like delete",
 		Transform:      transform,
 	})

@@ -97,6 +97,7 @@ func handleXUsersFollowCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users:follow create",
 		Transform:      transform,
 	})
@@ -145,6 +146,7 @@ func handleXUsersFollowDeleteAll(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:users:follow delete-all",
 		Transform:      transform,
 	})

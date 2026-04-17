@@ -249,6 +249,7 @@ func handleExtractionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "extractions retrieve",
 		Transform:      transform,
 	})
@@ -289,6 +290,7 @@ func handleExtractionsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "extractions list",
 		Transform:      transform,
 	})
@@ -329,6 +331,7 @@ func handleExtractionsEstimateCost(ctx context.Context, cmd *cli.Command) error 
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "extractions estimate-cost",
 		Transform:      transform,
 	})
@@ -409,6 +412,7 @@ func handleExtractionsRun(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "extractions run",
 		Transform:      transform,
 	})

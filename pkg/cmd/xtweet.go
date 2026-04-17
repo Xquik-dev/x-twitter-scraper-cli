@@ -303,6 +303,7 @@ func handleXTweetsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets create",
 		Transform:      transform,
 	})
@@ -344,6 +345,7 @@ func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets retrieve",
 		Transform:      transform,
 	})
@@ -384,6 +386,7 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets list",
 		Transform:      transform,
 	})
@@ -432,6 +435,7 @@ func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets delete",
 		Transform:      transform,
 	})
@@ -480,6 +484,7 @@ func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets get-favoriters",
 		Transform:      transform,
 	})
@@ -528,6 +533,7 @@ func handleXTweetsGetQuotes(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets get-quotes",
 		Transform:      transform,
 	})
@@ -576,6 +582,7 @@ func handleXTweetsGetReplies(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets get-replies",
 		Transform:      transform,
 	})
@@ -624,6 +631,7 @@ func handleXTweetsGetRetweeters(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets get-retweeters",
 		Transform:      transform,
 	})
@@ -672,6 +680,7 @@ func handleXTweetsGetThread(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets get-thread",
 		Transform:      transform,
 	})
@@ -712,6 +721,7 @@ func handleXTweetsSearch(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:tweets search",
 		Transform:      transform,
 	})

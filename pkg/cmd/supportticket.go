@@ -131,6 +131,7 @@ func handleSupportTicketsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "support:tickets create",
 		Transform:      transform,
 	})
@@ -172,6 +173,7 @@ func handleSupportTicketsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "support:tickets retrieve",
 		Transform:      transform,
 	})
@@ -220,6 +222,7 @@ func handleSupportTicketsUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "support:tickets update",
 		Transform:      transform,
 	})
@@ -258,6 +261,7 @@ func handleSupportTicketsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "support:tickets list",
 		Transform:      transform,
 	})
@@ -306,6 +310,7 @@ func handleSupportTicketsReply(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "support:tickets reply",
 		Transform:      transform,
 	})

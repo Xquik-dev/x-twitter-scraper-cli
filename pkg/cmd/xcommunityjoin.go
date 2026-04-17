@@ -97,6 +97,7 @@ func handleXCommunitiesJoinCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities:join create",
 		Transform:      transform,
 	})
@@ -145,6 +146,7 @@ func handleXCommunitiesJoinDeleteAll(ctx context.Context, cmd *cli.Command) erro
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "x:communities:join delete-all",
 		Transform:      transform,
 	})

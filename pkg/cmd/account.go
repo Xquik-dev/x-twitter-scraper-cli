@@ -88,6 +88,7 @@ func handleAccountRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "account retrieve",
 		Transform:      transform,
 	})
@@ -128,6 +129,7 @@ func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "account set-x-username",
 		Transform:      transform,
 	})
@@ -168,6 +170,7 @@ func handleAccountUpdateLocale(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(obj, ShowJSONOpts{
 		ExplicitFormat: explicitFormat,
 		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
 		Title:          "account update-locale",
 		Transform:      transform,
 	})
