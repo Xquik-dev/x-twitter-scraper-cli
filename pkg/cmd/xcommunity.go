@@ -69,7 +69,7 @@ var xCommunitiesDelete = cli.Command{
 
 var xCommunitiesRetrieveInfo = cli.Command{
 	Name:    "retrieve-info",
-	Usage:   "Get community name, description & member count",
+	Usage:   "Get community name, description and member count",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

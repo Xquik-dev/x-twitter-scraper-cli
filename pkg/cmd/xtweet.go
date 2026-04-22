@@ -63,7 +63,7 @@ var xTweetsCreate = cli.Command{
 
 var xTweetsRetrieve = cli.Command{
 	Name:    "retrieve",
-	Usage:   "Get tweet with full text, author, metrics & media",
+	Usage:   "Get tweet with full text, author, metrics and media",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -233,7 +233,7 @@ var xTweetsGetThread = cli.Command{
 
 var xTweetsSearch = cli.Command{
 	Name:    "search",
-	Usage:   "Search tweets with X query operators & pagination",
+	Usage:   "Search tweets with X query operators and pagination",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
