@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXMediaDownload(t *testing.T) {

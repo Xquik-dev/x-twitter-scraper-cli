@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/jsonview"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/jsonview"
 )
 
 func TestStreamOutput(t *testing.T) {
