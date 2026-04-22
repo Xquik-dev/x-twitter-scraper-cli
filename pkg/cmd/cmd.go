@@ -12,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/autocomplete"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/autocomplete"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	docs "github.com/urfave/cli-docs/v3"
 	"github.com/urfave/cli/v3"
 )

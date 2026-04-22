@@ -10,8 +10,8 @@ import (
 	"os"
 	"slices"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/pkg/cmd"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/pkg/cmd"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
