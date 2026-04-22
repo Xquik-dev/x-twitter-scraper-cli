@@ -216,20 +216,6 @@ func init() {
 				},
 			},
 			{
-				Name:     "integrations",
-				Category: "API RESOURCE",
-				Suggest:  true,
-				Commands: []*cli.Command{
-					&integrationsCreate,
-					&integrationsRetrieve,
-					&integrationsUpdate,
-					&integrationsList,
-					&integrationsDelete,
-					&integrationsListDeliveries,
-					&integrationsSendTest,
-				},
-			},
-			{
 				Name:     "x",
 				Category: "API RESOURCE",
 				Suggest:  true,

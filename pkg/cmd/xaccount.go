@@ -114,6 +114,16 @@ var xAccountsReauth = cli.Command{
 			BodyPath: "password",
 		},
 		&requestflag.Flag[string]{
+			Name:     "email",
+			Usage:    "Email for the X account (updates stored email)",
+			BodyPath: "email",
+		},
+		&requestflag.Flag[string]{
+			Name:     "proxy-country",
+			Usage:    "Two-letter country code for login proxy region",
+			BodyPath: "proxy_country",
+		},
+		&requestflag.Flag[string]{
 			Name:     "totp-secret",
 			Usage:    "TOTP secret for 2FA re-authentication",
 			BodyPath: "totp_secret",

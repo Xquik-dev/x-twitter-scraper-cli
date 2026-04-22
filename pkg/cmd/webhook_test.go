@@ -16,7 +16,7 @@ func TestWebhooksCreate(t *testing.T) {
 			"--api-key", "string",
 			"webhooks", "create",
 			"--event-type", "tweet.new",
-			"--event-type", "follower.gained",
+			"--event-type", "tweet.reply",
 			"--url", "https://example.com/webhook",
 		)
 	})
@@ -26,7 +26,7 @@ func TestWebhooksCreate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"  - follower.gained\n" +
+			"  - tweet.reply\n" +
 			"url: https://example.com/webhook\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
