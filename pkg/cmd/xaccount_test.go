@@ -94,6 +94,8 @@ func TestXAccountsReauth(t *testing.T) {
 			"x:accounts", "reauth",
 			"--id", "id",
 			"--password", "password_value",
+			"--email", "user@example.com",
+			"--proxy-country", "US",
 			"--totp-secret", "totp_secret_value",
 		)
 	})
@@ -102,6 +104,8 @@ func TestXAccountsReauth(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"password: password_value\n" +
+			"email: user@example.com\n" +
+			"proxy_country: US\n" +
 			"totp_secret: totp_secret_value\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,

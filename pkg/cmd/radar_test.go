@@ -15,9 +15,10 @@ func TestRadarRetrieveTrendingTopics(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"radar", "retrieve-trending-topics",
-			"--category", "category",
-			"--count", "0",
-			"--hours", "0",
+			"--after", "after",
+			"--category", "general",
+			"--hours", "1",
+			"--limit", "1",
 			"--region", "region",
 			"--source", "github",
 		)

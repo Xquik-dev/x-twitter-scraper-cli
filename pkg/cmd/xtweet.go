@@ -26,11 +26,6 @@ var xTweetsCreate = cli.Command{
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:     "text",
-			Required: true,
-			BodyPath: "text",
-		},
-		&requestflag.Flag[string]{
 			Name:     "attachment-url",
 			BodyPath: "attachment_url",
 		},
@@ -43,12 +38,23 @@ var xTweetsCreate = cli.Command{
 			BodyPath: "is_note_tweet",
 		},
 		&requestflag.Flag[[]string]{
+			Name:     "media",
+			Usage:    "Array of media URLs to attach (mutually exclusive with media_ids)",
+			BodyPath: "media",
+		},
+		&requestflag.Flag[[]string]{
 			Name:     "media-id",
+			Usage:    "Array of media IDs to attach (mutually exclusive with media)",
 			BodyPath: "media_ids",
 		},
 		&requestflag.Flag[string]{
 			Name:     "reply-to-tweet-id",
 			BodyPath: "reply_to_tweet_id",
+		},
+		&requestflag.Flag[string]{
+			Name:     "text",
+			Usage:    "Tweet text (optional when media is provided)",
+			BodyPath: "text",
 		},
 	},
 	Action:          handleXTweetsCreate,
