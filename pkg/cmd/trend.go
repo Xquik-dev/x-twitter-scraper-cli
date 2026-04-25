@@ -16,7 +16,7 @@ import (
 
 var trendsList = cli.Command{
 	Name:    "list",
-	Usage:   "Get trending hashtags & topics by region (alias)",
+	Usage:   "Get trending hashtags and topics by region (alias)",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{

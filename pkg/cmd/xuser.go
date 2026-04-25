@@ -16,7 +16,7 @@ import (
 
 var xUsersRetrieve = cli.Command{
 	Name:    "retrieve",
-	Usage:   "Get user profile with follower counts & verification",
+	Usage:   "Get user profile with follower counts and verification",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

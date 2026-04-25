@@ -71,7 +71,7 @@ var xGetNotifications = cli.Command{
 
 var xGetTrends = cli.Command{
 	Name:    "get-trends",
-	Usage:   "Get trending hashtags & topics from X by region",
+	Usage:   "Get trending hashtags and topics from X by region",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
