@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -115,6 +114,16 @@ var xAccountsReauth = cli.Command{
 			BodyPath: "password",
 		},
 		&requestflag.Flag[string]{
+			Name:     "email",
+			Usage:    "Email for the X account (updates stored email)",
+			BodyPath: "email",
+		},
+		&requestflag.Flag[string]{
+			Name:     "proxy-country",
+			Usage:    "Two-letter country code for login proxy region",
+			BodyPath: "proxy_country",
+		},
+		&requestflag.Flag[string]{
 			Name:     "totp-secret",
 			Usage:    "TOTP secret for 2FA re-authentication",
 			BodyPath: "totp_secret",
@@ -154,8 +163,15 @@ func handleXAccountsCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts create", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:accounts create",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -189,8 +205,15 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts retrieve", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:accounts retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
@@ -221,8 +244,15 @@ func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts list", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:accounts list",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
@@ -256,8 +286,15 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts delete", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:accounts delete",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
@@ -288,8 +325,15 @@ func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts bulk-retry", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:accounts bulk-retry",
+		Transform:      transform,
+	})
 }
 
 func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
@@ -330,6 +374,13 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:accounts reauth", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:accounts reauth",
+		Transform:      transform,
+	})
 }

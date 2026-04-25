@@ -14,7 +14,6 @@ func TestXAccountsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "create",
 			"--email", "user@example.com",
 			"--password", "s3cur3Pa$$w0rd",
@@ -35,7 +34,6 @@ func TestXAccountsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "create",
 		)
 	})
@@ -47,7 +45,6 @@ func TestXAccountsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "retrieve",
 			"--id", "id",
 		)
@@ -60,7 +57,6 @@ func TestXAccountsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "list",
 		)
 	})
@@ -72,7 +68,6 @@ func TestXAccountsDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "delete",
 			"--id", "id",
 		)
@@ -85,7 +80,6 @@ func TestXAccountsBulkRetry(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "bulk-retry",
 		)
 	})
@@ -97,10 +91,11 @@ func TestXAccountsReauth(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "reauth",
 			"--id", "id",
 			"--password", "password_value",
+			"--email", "user@example.com",
+			"--proxy-country", "US",
 			"--totp-secret", "totp_secret_value",
 		)
 	})
@@ -109,11 +104,12 @@ func TestXAccountsReauth(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"password: password_value\n" +
+			"email: user@example.com\n" +
+			"proxy_country: US\n" +
 			"totp_secret: totp_secret_value\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:accounts", "reauth",
 			"--id", "id",
 		)

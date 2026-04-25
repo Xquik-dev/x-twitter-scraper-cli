@@ -14,10 +14,9 @@ func TestWebhooksCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "create",
 			"--event-type", "tweet.new",
-			"--event-type", "follower.gained",
+			"--event-type", "tweet.reply",
 			"--url", "https://example.com/webhook",
 		)
 	})
@@ -27,12 +26,11 @@ func TestWebhooksCreate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"  - follower.gained\n" +
+			"  - tweet.reply\n" +
 			"url: https://example.com/webhook\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "create",
 		)
 	})
@@ -44,7 +42,6 @@ func TestWebhooksUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
@@ -63,7 +60,6 @@ func TestWebhooksUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "update",
 			"--id", "id",
 		)
@@ -76,7 +72,6 @@ func TestWebhooksList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "list",
 		)
 	})
@@ -88,7 +83,6 @@ func TestWebhooksDeactivate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "deactivate",
 			"--id", "id",
 		)
@@ -101,7 +95,6 @@ func TestWebhooksListDeliveries(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "list-deliveries",
 			"--id", "id",
 		)
@@ -114,7 +107,6 @@ func TestWebhooksTest(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"webhooks", "test",
 			"--id", "id",
 		)

@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -17,7 +16,7 @@ import (
 
 var trendsList = cli.Command{
 	Name:    "list",
-	Usage:   "Get regional trending topics",
+	Usage:   "Get trending hashtags and topics by region (alias)",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
@@ -67,6 +66,13 @@ func handleTrendsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "trends list", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "trends list",
+		Transform:      transform,
+	})
 }

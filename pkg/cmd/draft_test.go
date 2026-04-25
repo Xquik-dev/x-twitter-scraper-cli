@@ -14,7 +14,6 @@ func TestDraftsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"drafts", "create",
 			"--text", "AI is the future of productivity",
 			"--goal", "engagement",
@@ -31,7 +30,6 @@ func TestDraftsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"drafts", "create",
 		)
 	})
@@ -43,7 +41,6 @@ func TestDraftsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"drafts", "retrieve",
 			"--id", "id",
 		)
@@ -56,7 +53,6 @@ func TestDraftsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"drafts", "list",
 			"--after-cursor", "afterCursor",
 			"--limit", "1",
@@ -70,7 +66,6 @@ func TestDraftsDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"drafts", "delete",
 			"--id", "id",
 		)

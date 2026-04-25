@@ -14,7 +14,6 @@ func TestXCommunitiesCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "create",
 			"--account", "@elonmusk",
 			"--name", "Example Name",
@@ -31,7 +30,6 @@ func TestXCommunitiesCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "create",
 		)
 	})
@@ -43,7 +41,6 @@ func TestXCommunitiesDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -59,7 +56,6 @@ func TestXCommunitiesDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "delete",
 			"--id", "id",
 		)
@@ -72,7 +68,6 @@ func TestXCommunitiesRetrieveInfo(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "retrieve-info",
 			"--id", "id",
 		)
@@ -85,7 +80,6 @@ func TestXCommunitiesRetrieveMembers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "retrieve-members",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -99,7 +93,6 @@ func TestXCommunitiesRetrieveModerators(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "retrieve-moderators",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -113,7 +106,6 @@ func TestXCommunitiesRetrieveSearch(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:communities", "retrieve-search",
 			"--q", "q",
 			"--cursor", "cursor",

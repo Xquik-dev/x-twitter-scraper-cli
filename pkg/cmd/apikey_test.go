@@ -14,7 +14,6 @@ func TestAPIKeysCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"api-keys", "create",
 			"--name", "My API Key",
 		)
@@ -26,7 +25,6 @@ func TestAPIKeysCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"api-keys", "create",
 		)
 	})
@@ -38,7 +36,6 @@ func TestAPIKeysList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"api-keys", "list",
 		)
 	})
@@ -50,7 +47,6 @@ func TestAPIKeysRevoke(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"api-keys", "revoke",
 			"--id", "id",
 		)

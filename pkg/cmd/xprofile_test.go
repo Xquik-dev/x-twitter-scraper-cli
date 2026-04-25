@@ -15,7 +15,6 @@ func TestXProfileUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:profile", "update",
 			"--account", "@elonmusk",
 			"--description", "description_value",
@@ -36,7 +35,6 @@ func TestXProfileUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:profile", "update",
 		)
 	})
@@ -48,7 +46,6 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:profile", "update-avatar",
 			"--account", "@elonmusk",
 			"--file", mocktest.TestFile(t, "Example data"),
@@ -66,7 +63,6 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:profile", "update-avatar",
 		)
 	})
@@ -78,7 +74,6 @@ func TestXProfileUpdateBanner(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:profile", "update-banner",
 			"--account", "@elonmusk",
 			"--file", mocktest.TestFile(t, "Example data"),
@@ -96,7 +91,6 @@ func TestXProfileUpdateBanner(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:profile", "update-banner",
 		)
 	})

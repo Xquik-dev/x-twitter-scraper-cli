@@ -14,7 +14,6 @@ func TestXGetArticle(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x", "get-article",
 			"--tweet-id", "tweetId",
 		)
@@ -27,7 +26,6 @@ func TestXGetHomeTimeline(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x", "get-home-timeline",
 			"--cursor", "cursor",
 			"--seen-tweet-ids", "seenTweetIds",
@@ -41,7 +39,6 @@ func TestXGetNotifications(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x", "get-notifications",
 			"--cursor", "cursor",
 			"--type", "All",
@@ -55,8 +52,9 @@ func TestXGetTrends(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x", "get-trends",
+			"--count", "1",
+			"--woeid", "0",
 		)
 	})
 }
