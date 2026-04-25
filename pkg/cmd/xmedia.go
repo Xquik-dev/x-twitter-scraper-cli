@@ -6,17 +6,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
 var xMediaDownload = cli.Command{
 	Name:    "download",
-	Usage:   "Download images and videos from tweets",
+	Usage:   "Download images & videos from tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{

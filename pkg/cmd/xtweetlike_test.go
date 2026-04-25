@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXTweetsLikeCreate(t *testing.T) {

@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -69,7 +69,7 @@ var xCommunitiesDelete = cli.Command{
 
 var xCommunitiesRetrieveInfo = cli.Command{
 	Name:    "retrieve-info",
-	Usage:   "Get community name, description and member count",
+	Usage:   "Get community name, description & member count",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -94,6 +94,11 @@ var xCommunitiesRetrieveMembers = cli.Command{
 			Name:      "cursor",
 			Usage:     "Pagination cursor",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Items per page (20-200, default 20)",
+			QueryPath: "pageSize",
 		},
 	},
 	Action:          handleXCommunitiesRetrieveMembers,

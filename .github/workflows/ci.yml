@@ -15,7 +15,7 @@ on:
       - 'stl-preview-base/**'
 
 env:
-  GOPRIVATE: github.com/Xquik-dev/x-twitter-scraper-go,github.com/stainless-sdks/x-twitter-scraper-go
+  GOPRIVATE: github.com/stainless-sdks/x-twitter-scraper-go
 
 jobs:
   lint:

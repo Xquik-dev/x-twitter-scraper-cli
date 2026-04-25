@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -71,7 +71,7 @@ var xGetNotifications = cli.Command{
 
 var xGetTrends = cli.Command{
 	Name:    "get-trends",
-	Usage:   "Get trending hashtags and topics from X by region",
+	Usage:   "Get trending hashtags & topics from X by region",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{

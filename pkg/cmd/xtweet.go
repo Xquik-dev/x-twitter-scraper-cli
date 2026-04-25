@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -39,13 +39,8 @@ var xTweetsCreate = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "media",
-			Usage:    "Array of media URLs to attach (mutually exclusive with media_ids)",
+			Usage:    "Array of public image URLs to attach (max 4). Each URL must be publicly reachable - the browser composer fetches them directly.",
 			BodyPath: "media",
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "media-id",
-			Usage:    "Array of media IDs to attach (mutually exclusive with media)",
-			BodyPath: "media_ids",
 		},
 		&requestflag.Flag[string]{
 			Name:     "reply-to-tweet-id",
@@ -63,7 +58,7 @@ var xTweetsCreate = cli.Command{
 
 var xTweetsRetrieve = cli.Command{
 	Name:    "retrieve",
-	Usage:   "Get tweet with full text, author, metrics and media",
+	Usage:   "Get tweet with full text, author, metrics & media",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -233,7 +228,7 @@ var xTweetsGetThread = cli.Command{
 
 var xTweetsSearch = cli.Command{
 	Name:    "search",
-	Usage:   "Search tweets with X query operators and pagination",
+	Usage:   "Search tweets with X query operators & pagination",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -255,18 +250,18 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "query-type",
-			Usage:     "Sort order — Latest (chronological) or Top (engagement-ranked)",
+			Usage:     "Sort order - Latest (chronological) or Top (engagement-ranked)",
 			Default:   "Latest",
 			QueryPath: "queryType",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "ISO 8601 timestamp — only return tweets after this time",
+			Usage:     "ISO 8601 timestamp - only return tweets after this time",
 			QueryPath: "sinceTime",
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "ISO 8601 timestamp — only return tweets before this time",
+			Usage:     "ISO 8601 timestamp - only return tweets before this time",
 			QueryPath: "untilTime",
 		},
 	},

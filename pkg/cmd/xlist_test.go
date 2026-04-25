@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXListsRetrieveFollowers(t *testing.T) {
@@ -30,6 +30,7 @@ func TestXListsRetrieveMembers(t *testing.T) {
 			"x:lists", "retrieve-members",
 			"--id", "id",
 			"--cursor", "cursor",
+			"--page-size", "0",
 		)
 	})
 }

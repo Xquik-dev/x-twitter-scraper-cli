@@ -6,28 +6,28 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
 var trendsList = cli.Command{
 	Name:    "list",
-	Usage:   "Get trending hashtags and topics by region (alias)",
+	Usage:   "Get trending hashtags & topics by region (alias)",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:      "count",
-			Usage:     "Number of trending topics to return (1-50, default 30)",
+			Usage:     "Number of trending topics returned (1-50, default 30)",
 			Default:   30,
 			QueryPath: "count",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "woeid",
-			Usage:     "Region WOEID (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
+			Usage:     "Region Yahoo WOEID code (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
 			Default:   1,
 			QueryPath: "woeid",
 		},

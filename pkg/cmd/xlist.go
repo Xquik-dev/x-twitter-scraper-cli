@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -46,6 +46,11 @@ var xListsRetrieveMembers = cli.Command{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for list members",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Members per page (20-200, default 20)",
+			QueryPath: "pageSize",
 		},
 	},
 	Action:          handleXListsRetrieveMembers,
