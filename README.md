@@ -1,4 +1,4 @@
-# X Twitter Scraper CLI
+# Xquik
 
 The official CLI for the [X Twitter Scraper REST API](https://xquik.com).
 
