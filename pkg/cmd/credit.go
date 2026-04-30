@@ -86,8 +86,6 @@ func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.CreditTopupBalanceParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -98,6 +96,8 @@ func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.CreditTopupBalanceParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

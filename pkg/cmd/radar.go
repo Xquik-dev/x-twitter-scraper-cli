@@ -64,8 +64,6 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.RadarGetTrendingTopicsParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -76,6 +74,8 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.RadarGetTrendingTopicsParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
