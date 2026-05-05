@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -27,11 +26,6 @@ var xTweetsCreate = cli.Command{
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:     "text",
-			Required: true,
-			BodyPath: "text",
-		},
-		&requestflag.Flag[string]{
 			Name:     "attachment-url",
 			BodyPath: "attachment_url",
 		},
@@ -44,12 +38,23 @@ var xTweetsCreate = cli.Command{
 			BodyPath: "is_note_tweet",
 		},
 		&requestflag.Flag[[]string]{
+			Name:     "media",
+			Usage:    "Array of media URLs to attach (mutually exclusive with media_ids)",
+			BodyPath: "media",
+		},
+		&requestflag.Flag[[]string]{
 			Name:     "media-id",
+			Usage:    "Array of media IDs to attach (mutually exclusive with media)",
 			BodyPath: "media_ids",
 		},
 		&requestflag.Flag[string]{
 			Name:     "reply-to-tweet-id",
 			BodyPath: "reply_to_tweet_id",
+		},
+		&requestflag.Flag[string]{
+			Name:     "text",
+			Usage:    "Tweet text (optional when media is provided)",
+			BodyPath: "text",
 		},
 	},
 	Action:          handleXTweetsCreate,
@@ -58,7 +63,7 @@ var xTweetsCreate = cli.Command{
 
 var xTweetsRetrieve = cli.Command{
 	Name:    "retrieve",
-	Usage:   "Look up tweet",
+	Usage:   "Get tweet with full text, author, metrics and media",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -108,7 +113,7 @@ var xTweetsDelete = cli.Command{
 
 var xTweetsGetFavoriters = cli.Command{
 	Name:    "get-favoriters",
-	Usage:   "Get users who liked a tweet",
+	Usage:   "List users who liked a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -127,7 +132,7 @@ var xTweetsGetFavoriters = cli.Command{
 
 var xTweetsGetQuotes = cli.Command{
 	Name:    "get-quotes",
-	Usage:   "Get quote tweets of a tweet",
+	Usage:   "List quote tweets of a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -161,7 +166,7 @@ var xTweetsGetQuotes = cli.Command{
 
 var xTweetsGetReplies = cli.Command{
 	Name:    "get-replies",
-	Usage:   "Get replies to a tweet",
+	Usage:   "List replies to a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -190,7 +195,7 @@ var xTweetsGetReplies = cli.Command{
 
 var xTweetsGetRetweeters = cli.Command{
 	Name:    "get-retweeters",
-	Usage:   "Get users who retweeted a tweet",
+	Usage:   "List users who retweeted a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -209,7 +214,7 @@ var xTweetsGetRetweeters = cli.Command{
 
 var xTweetsGetThread = cli.Command{
 	Name:    "get-thread",
-	Usage:   "Get thread context for a tweet",
+	Usage:   "Get full conversation thread for a tweet",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -228,7 +233,7 @@ var xTweetsGetThread = cli.Command{
 
 var xTweetsSearch = cli.Command{
 	Name:    "search",
-	Usage:   "Search tweets",
+	Usage:   "Search tweets with X query operators and pagination",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -299,8 +304,15 @@ func handleXTweetsCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets create", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets create",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -334,8 +346,15 @@ func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets retrieve", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
@@ -368,8 +387,15 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets list", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets list",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
@@ -410,8 +436,15 @@ func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets delete", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets delete",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {
@@ -452,8 +485,15 @@ func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets get-favoriters", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets get-favoriters",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsGetQuotes(ctx context.Context, cmd *cli.Command) error {
@@ -494,8 +534,15 @@ func handleXTweetsGetQuotes(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets get-quotes", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets get-quotes",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsGetReplies(ctx context.Context, cmd *cli.Command) error {
@@ -536,8 +583,15 @@ func handleXTweetsGetReplies(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets get-replies", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets get-replies",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsGetRetweeters(ctx context.Context, cmd *cli.Command) error {
@@ -578,8 +632,15 @@ func handleXTweetsGetRetweeters(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets get-retweeters", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets get-retweeters",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsGetThread(ctx context.Context, cmd *cli.Command) error {
@@ -620,8 +681,15 @@ func handleXTweetsGetThread(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets get-thread", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets get-thread",
+		Transform:      transform,
+	})
 }
 
 func handleXTweetsSearch(ctx context.Context, cmd *cli.Command) error {
@@ -654,6 +722,13 @@ func handleXTweetsSearch(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:tweets search", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:tweets search",
+		Transform:      transform,
+	})
 }

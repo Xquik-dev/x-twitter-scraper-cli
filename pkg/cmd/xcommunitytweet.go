@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -17,7 +16,7 @@ import (
 
 var xCommunitiesTweetsList = cli.Command{
 	Name:    "list",
-	Usage:   "Search tweets across all communities",
+	Usage:   "List tweets across all communities",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -43,7 +42,7 @@ var xCommunitiesTweetsList = cli.Command{
 
 var xCommunitiesTweetsListByCommunity = cli.Command{
 	Name:    "list-by-community",
-	Usage:   "Get community tweets",
+	Usage:   "List tweets posted in a community",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -90,8 +89,15 @@ func handleXCommunitiesTweetsList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities:tweets list", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:communities:tweets list",
+		Transform:      transform,
+	})
 }
 
 func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Command) error {
@@ -132,6 +138,13 @@ func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Comma
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:communities:tweets list-by-community", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:communities:tweets list-by-community",
+		Transform:      transform,
+	})
 }

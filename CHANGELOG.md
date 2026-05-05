@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.4.0 (2026-04-25)
+
+Full Changelog: [v0.3.0...v0.4.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.3.0...v0.4.0)
+
+### Features
+
+* **api:** api update ([e9d6bea](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/e9d6beaf3b434b0c063fb0a25d92da9aebc8c970))
+* **api:** api update ([607c495](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/607c49591bc8d2f0c93a99ba360f46540373b4c4))
+* **api:** api update ([7197e8f](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/7197e8f7ae0b37957eec880dd03a9786eb23caa8))
+* **cli:** add `--raw-output`/`-r` option to print raw (non-JSON) strings ([28be4fa](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/28be4fac015d4fa532e8714b15634baafab111c0))
+* **cli:** alias parameters in data with `x-stainless-cli-data-alias` ([96d1bfc](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/96d1bfca315fcfa3b602b6007e6452efc7ef869b))
+* **cli:** send filename and content type when reading input from files ([4dc5824](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/4dc58248eec53b50faf98eb2869e27ddf15618d4))
+
+
+### Bug Fixes
+
+* escape ampersand in OpenAPI summaries for C# XML docs ([6d5da37](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/6d5da374e3a40fcaf3d31945666770843d537ee5))
+* fix for failing to drop invalid module replace in link script ([a086faf](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/a086fafbb77d57fb4b2c1330e526c299b2c8e0de))
+
+
+### Chores
+
+* add documentation for ./scripts/link ([1fe38e3](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/1fe38e359d3863fc12c588dcd2db8164a67a10e1))
+* **ci:** support manually triggering release workflow ([c947c68](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c947c68b51f8141b8ed6030b641f34ef783c53e3))
+* **cli:** additional test cases for `ShowJSONIterator` ([3d20d69](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/3d20d69c87f77ece9fb46b3f58da0948fa21f601))
+* **cli:** fall back to JSON when using default "explore" with non-TTY ([f48c1f0](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/f48c1f013e9c850b7780e4d1760dca7ac16f62b8))
+* **cli:** let `--format raw` be used in conjunction with `--transform` ([5a0010a](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5a0010abd09ae3e5d51b8a3536a4b662b328bd8e))
+* **cli:** switch long lists of positional args over to param structs ([21a0bc9](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/21a0bc997e853879adc640cc2114861ab9f4018a))
+* **cli:** use `ShowJSONOpts` as argument to `formatJSON` instead of many positionals ([9a34472](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/9a344724e7f20169211f27eb1f3d3122a7aa78ca))
+* **internal:** codegen related update ([f783c02](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/f783c028f7ca4fbd5dd87b83488930c007598a8f))
+* **internal:** more robust bootstrap script ([262e4d3](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/262e4d3ee4b8d64258ffda8ca1f8d283bdbc35bf))
+* sync OpenAPI spec ([0f0687b](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/0f0687b9a0ea1e35149eb38d2899c649a1991195))
+* wire production_repo for all targets ([d46e8ec](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/d46e8ecbc08aac3f02d31b6d2674a19f27393662))
+
+
+### Documentation
+
+* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+
 ## 0.3.0 (2026-04-08)
 
 Full Changelog: [v0.2.0...v0.3.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.2.0...v0.3.0)

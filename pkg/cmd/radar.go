@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -21,19 +20,26 @@ var radarRetrieveTrendingTopics = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
+			Name:      "after",
+			Usage:     "Cursor for pagination (from prior response nextCursor).",
+			QueryPath: "after",
+		},
+		&requestflag.Flag[string]{
 			Name:      "category",
-			Usage:     "Filter by category (general, tech, dev, etc.)",
+			Usage:     "Filter by category.",
 			QueryPath: "category",
 		},
 		&requestflag.Flag[int64]{
-			Name:      "count",
-			Usage:     "Number of items to return",
-			QueryPath: "count",
+			Name:      "hours",
+			Usage:     "Lookback window in hours (1-168, default 24).",
+			Default:   24,
+			QueryPath: "hours",
 		},
 		&requestflag.Flag[int64]{
-			Name:      "hours",
-			Usage:     "Lookback window in hours",
-			QueryPath: "hours",
+			Name:      "limit",
+			Usage:     "Number of items to return (1-100, default 50).",
+			Default:   50,
+			QueryPath: "limit",
 		},
 		&requestflag.Flag[string]{
 			Name:      "region",
@@ -80,6 +86,13 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "radar retrieve-trending-topics", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "radar retrieve-trending-topics",
+		Transform:      transform,
+	})
 }

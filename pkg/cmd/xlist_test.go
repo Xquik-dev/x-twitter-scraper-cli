@@ -14,7 +14,6 @@ func TestXListsRetrieveFollowers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:lists", "retrieve-followers",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -28,7 +27,6 @@ func TestXListsRetrieveMembers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:lists", "retrieve-members",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -42,7 +40,6 @@ func TestXListsRetrieveTweets(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:lists", "retrieve-tweets",
 			"--id", "id",
 			"--cursor", "cursor",

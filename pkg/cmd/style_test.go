@@ -15,7 +15,6 @@ func TestStylesRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "retrieve",
 			"--id", "id",
 		)
@@ -28,7 +27,6 @@ func TestStylesUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "update",
 			"--id", "id",
 			"--label", "Professional Voice",
@@ -44,7 +42,6 @@ func TestStylesUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "update",
 			"--id", "id",
 			"--label", "Professional Voice",
@@ -61,7 +58,6 @@ func TestStylesUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "update",
 			"--id", "id",
 		)
@@ -74,7 +70,6 @@ func TestStylesList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "list",
 		)
 	})
@@ -86,7 +81,6 @@ func TestStylesDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "delete",
 			"--id", "id",
 		)
@@ -99,7 +93,6 @@ func TestStylesAnalyze(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "analyze",
 			"--username", "elonmusk",
 		)
@@ -111,7 +104,6 @@ func TestStylesAnalyze(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "analyze",
 		)
 	})
@@ -123,7 +115,6 @@ func TestStylesCompare(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "compare",
 			"--username1", "username1",
 			"--username2", "username2",
@@ -137,7 +128,6 @@ func TestStylesGetPerformance(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"styles", "get-performance",
 			"--id", "id",
 		)

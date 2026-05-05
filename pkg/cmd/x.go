@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -71,10 +70,23 @@ var xGetNotifications = cli.Command{
 }
 
 var xGetTrends = cli.Command{
-	Name:            "get-trends",
-	Usage:           "Get trending topics",
-	Suggest:         true,
-	Flags:           []cli.Flag{},
+	Name:    "get-trends",
+	Usage:   "Get trending hashtags and topics from X by region",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[int64]{
+			Name:      "count",
+			Usage:     "Number of trending topics to return (1-50, default 30)",
+			Default:   30,
+			QueryPath: "count",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "woeid",
+			Usage:     "Region WOEID (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
+			Default:   1,
+			QueryPath: "woeid",
+		},
+	},
 	Action:          handleXGetTrends,
 	HideHelpCommand: true,
 }
@@ -110,8 +122,15 @@ func handleXGetArticle(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-article", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x get-article",
+		Transform:      transform,
+	})
 }
 
 func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
@@ -144,8 +163,15 @@ func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-home-timeline", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x get-home-timeline",
+		Transform:      transform,
+	})
 }
 
 func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
@@ -178,8 +204,15 @@ func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-notifications", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x get-notifications",
+		Transform:      transform,
+	})
 }
 
 func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
@@ -189,6 +222,8 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
+	params := xtwitterscraper.XGetTrendsParams{}
 
 	options, err := flagOptions(
 		cmd,
@@ -203,13 +238,20 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.GetTrends(ctx, options...)
+	_, err = client.X.GetTrends(ctx, params, options...)
 	if err != nil {
 		return err
 	}
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x get-trends", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x get-trends",
+		Transform:      transform,
+	})
 }

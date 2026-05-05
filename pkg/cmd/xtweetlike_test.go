@@ -14,7 +14,6 @@ func TestXTweetsLikeCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:like", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -27,7 +26,6 @@ func TestXTweetsLikeCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:like", "create",
 			"--id", "id",
 		)
@@ -40,7 +38,6 @@ func TestXTweetsLikeDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:like", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -53,7 +50,6 @@ func TestXTweetsLikeDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:tweets:like", "delete",
 			"--id", "id",
 		)

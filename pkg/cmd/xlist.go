@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -17,7 +16,7 @@ import (
 
 var xListsRetrieveFollowers = cli.Command{
 	Name:    "retrieve-followers",
-	Usage:   "Get list followers",
+	Usage:   "List followers of an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -36,7 +35,7 @@ var xListsRetrieveFollowers = cli.Command{
 
 var xListsRetrieveMembers = cli.Command{
 	Name:    "retrieve-members",
-	Usage:   "Get list members",
+	Usage:   "List members of an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -55,7 +54,7 @@ var xListsRetrieveMembers = cli.Command{
 
 var xListsRetrieveTweets = cli.Command{
 	Name:    "retrieve-tweets",
-	Usage:   "Get list tweets",
+	Usage:   "List tweets from an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -125,8 +124,15 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:lists retrieve-followers", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:lists retrieve-followers",
+		Transform:      transform,
+	})
 }
 
 func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
@@ -167,8 +173,15 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:lists retrieve-members", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:lists retrieve-members",
+		Transform:      transform,
+	})
 }
 
 func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
@@ -209,6 +222,13 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "x:lists retrieve-tweets", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "x:lists retrieve-tweets",
+		Transform:      transform,
+	})
 }

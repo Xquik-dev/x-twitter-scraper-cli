@@ -14,7 +14,6 @@ func TestXUsersRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve",
 			"--id", "id",
 		)
@@ -27,7 +26,6 @@ func TestXUsersRetrieveBatch(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-batch",
 			"--ids", "ids",
 		)
@@ -40,7 +38,6 @@ func TestXUsersRetrieveFollowers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-followers",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -55,7 +52,6 @@ func TestXUsersRetrieveFollowersYouKnow(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-followers-you-know",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -69,7 +65,6 @@ func TestXUsersRetrieveFollowing(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-following",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -84,7 +79,6 @@ func TestXUsersRetrieveLikes(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-likes",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -98,7 +92,6 @@ func TestXUsersRetrieveMedia(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-media",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -112,7 +105,6 @@ func TestXUsersRetrieveMentions(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-mentions",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -128,7 +120,6 @@ func TestXUsersRetrieveSearch(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-search",
 			"--q", "q",
 			"--cursor", "cursor",
@@ -142,7 +133,6 @@ func TestXUsersRetrieveTweets(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-tweets",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -158,7 +148,6 @@ func TestXUsersRetrieveVerifiedFollowers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
-			"--bearer-token", "string",
 			"x:users", "retrieve-verified-followers",
 			"--id", "id",
 			"--cursor", "cursor",
