@@ -1,5 +1,7 @@
 # X Twitter Scraper CLI
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg?url=https%3A%2F%2Fgithub.com%2FXquik-dev%2Fx-twitter-scraper-cli)](https://deepwiki.com/Xquik-dev/x-twitter-scraper-cli)
+
 The official CLI for the [X Twitter Scraper REST API](https://xquik.com).
 
 It is generated with [Stainless](https://www.stainless.com/).
