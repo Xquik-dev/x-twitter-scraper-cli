@@ -1,6 +1,7 @@
 # X (Twitter) Scraper CLI: Search Tweets, Get Profile Tweets, Followers & Post Replies
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg?url=https%3A%2F%2Fgithub.com%2FXquik-dev%2Fx-twitter-scraper-cli)](https://deepwiki.com/Xquik-dev/x-twitter-scraper-cli)
+[![Skills.sh x-twitter-scraper Skill](https://skills.sh/b/xquik-dev/x-twitter-scraper)](https://skills.sh/xquik-dev/x-twitter-scraper)
 <a href="https://nothumansearch.ai/site/xquik.com" target="_blank" rel="noopener"><img src="https://nothumansearch.ai/badge/xquik.com.svg" alt="NHS Agentic Readiness Score" height="28"></a>
 
 The official CLI for the [X Twitter Scraper REST API](https://xquik.com), a command line Twitter API alternative for tweet search, advanced Twitter search queries, profile tweets, user lookup, follower export, media download, monitoring, webhooks, and posting automation.
