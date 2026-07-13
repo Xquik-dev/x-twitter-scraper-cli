@@ -15,7 +15,6 @@ func TestAccountRetrieve(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"account", "retrieve",
 		)
 	})
@@ -28,7 +27,6 @@ func TestAccountSetXUsername(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"account", "set-x-username",
 			"--username", "elonmusk",
 		)
@@ -41,7 +39,6 @@ func TestAccountSetXUsername(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"account", "set-x-username",
 		)
 	})
@@ -54,7 +51,6 @@ func TestAccountUpdateLocale(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"account", "update-locale",
 			"--locale", "en",
 		)
@@ -67,7 +63,6 @@ func TestAccountUpdateLocale(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"account", "update-locale",
 		)
 	})

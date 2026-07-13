@@ -87,11 +87,6 @@ func init() {
 				Usage:   "OAuth 2.1 access token",
 				Sources: cli.EnvVars("X_TWITTER_SCRAPER_BEARER_TOKEN"),
 			},
-			&requestflag.Flag[string]{
-				Name:    "cookie-session",
-				Usage:   "Secure Xquik browser session cookie",
-				Sources: cli.EnvVars("X_TWITTER_SCRAPER_SESSION"),
-			},
 		},
 		Commands: []*cli.Command{
 			{
@@ -102,16 +97,6 @@ func init() {
 					&accountRetrieve,
 					&accountSetXUsername,
 					&accountUpdateLocale,
-				},
-			},
-			{
-				Name:     "api-keys",
-				Category: "API RESOURCE",
-				Suggest:  true,
-				Commands: []*cli.Command{
-					&apiKeysCreate,
-					&apiKeysList,
-					&apiKeysRevoke,
 				},
 			},
 			{
@@ -448,7 +433,6 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
-					&creditsQuickTopupBalance,
 					&creditsRedirectTopupCheckout,
 					&creditsRetrieveBalance,
 					&creditsRetrieveTopupStatus,

@@ -15,7 +15,6 @@ func TestXAccountConnectionChallengesSubmit(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:account-connection-challenges", "submit",
 			"--id", "id",
 			"--email-code", "123456",
@@ -29,7 +28,6 @@ func TestXAccountConnectionChallengesSubmit(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:account-connection-challenges", "submit",
 			"--id", "id",
 		)

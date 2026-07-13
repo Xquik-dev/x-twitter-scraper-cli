@@ -14,22 +14,6 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var creditsQuickTopupBalance = cli.Command{
-	Name:    "quick-topup-balance",
-	Usage:   "Instantly charge saved card for credits",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[float64]{
-			Name:     "dollars",
-			Usage:    "Dollar amount for the top-up",
-			Required: true,
-			BodyPath: "dollars",
-		},
-	},
-	Action:          handleCreditsQuickTopupBalance,
-	HideHelpCommand: true,
-}
-
 var creditsRedirectTopupCheckout = cli.Command{
 	Name:    "redirect-topup-checkout",
 	Usage:   "Redirect to an active top-up payment page",
@@ -90,47 +74,6 @@ var creditsTopupBalance = cli.Command{
 	},
 	Action:          handleCreditsTopupBalance,
 	HideHelpCommand: true,
-}
-
-func handleCreditsQuickTopupBalance(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	params := xtwitterscraper.CreditQuickTopupBalanceParams{}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Credits.QuickTopupBalance(ctx, params, options...)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	explicitFormat := cmd.Root().IsSet("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(obj, ShowJSONOpts{
-		ExplicitFormat: explicitFormat,
-		Format:         format,
-		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "credits quick-topup-balance",
-		Transform:      transform,
-	})
 }
 
 func handleCreditsRedirectTopupCheckout(ctx context.Context, cmd *cli.Command) error {

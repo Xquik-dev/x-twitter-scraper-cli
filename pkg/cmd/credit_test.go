@@ -8,32 +8,6 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestCreditsQuickTopupBalance(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"--cookie-session", "string",
-			"credits", "quick-topup-balance",
-			"--dollars", "25",
-		)
-	})
-
-	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
-		pipeData := []byte("dollars: 25")
-		mocktest.TestRunMockTestWithPipeAndFlags(
-			t, pipeData,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"--cookie-session", "string",
-			"credits", "quick-topup-balance",
-		)
-	})
-}
-
 func TestCreditsRedirectTopupCheckout(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
@@ -41,7 +15,6 @@ func TestCreditsRedirectTopupCheckout(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"credits", "redirect-topup-checkout",
 			"--session-id", "session_id",
 		)
@@ -55,7 +28,6 @@ func TestCreditsRetrieveBalance(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"credits", "retrieve-balance",
 		)
 	})
@@ -68,7 +40,6 @@ func TestCreditsRetrieveTopupStatus(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"credits", "retrieve-topup-status",
 			"--session-id", "session_id",
 		)
@@ -82,7 +53,6 @@ func TestCreditsTopupBalance(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"credits", "topup-balance",
 			"--dollars", "10",
 			"--locale", "en",
@@ -98,7 +68,6 @@ func TestCreditsTopupBalance(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"credits", "topup-balance",
 		)
 	})

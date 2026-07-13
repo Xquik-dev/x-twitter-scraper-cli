@@ -52,9 +52,6 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 	if cmd.IsSet("bearer-token") {
 		opts = append(opts, option.WithBearerToken(cmd.String("bearer-token")))
 	}
-	if cmd.IsSet("cookie-session") {
-		opts = append(opts, option.WithCookieSession(cmd.String("cookie-session")))
-	}
 
 	// Override base URL if the --base-url flag is provided
 	if baseURL := cmd.String("base-url"); baseURL != "" {

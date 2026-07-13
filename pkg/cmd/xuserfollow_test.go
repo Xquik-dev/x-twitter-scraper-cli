@@ -15,7 +15,6 @@ func TestXUsersFollowCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:users:follow", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -29,7 +28,6 @@ func TestXUsersFollowCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:users:follow", "create",
 			"--id", "id",
 		)
@@ -43,7 +41,6 @@ func TestXUsersFollowDeleteAll(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:users:follow", "delete-all",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -57,7 +54,6 @@ func TestXUsersFollowDeleteAll(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:users:follow", "delete-all",
 			"--id", "id",
 		)

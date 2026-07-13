@@ -15,7 +15,6 @@ func TestRadarRetrieveTrendingTopics(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"radar", "retrieve-trending-topics",
 			"--after", "after",
 			"--category", "general",

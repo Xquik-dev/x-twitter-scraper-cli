@@ -15,7 +15,6 @@ func TestWebhooksCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "create",
 			"--event-type", "tweet.new",
 			"--event-type", "tweet.reply",
@@ -34,7 +33,6 @@ func TestWebhooksCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "create",
 		)
 	})
@@ -47,7 +45,6 @@ func TestWebhooksUpdate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
@@ -67,7 +64,6 @@ func TestWebhooksUpdate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "update",
 			"--id", "id",
 		)
@@ -81,7 +77,6 @@ func TestWebhooksList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "list",
 		)
 	})
@@ -94,7 +89,6 @@ func TestWebhooksDeactivate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "deactivate",
 			"--id", "id",
 		)
@@ -108,7 +102,6 @@ func TestWebhooksListDeliveries(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "list-deliveries",
 			"--id", "id",
 		)
@@ -122,7 +115,6 @@ func TestWebhooksResume(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "resume",
 			"--id", "id",
 		)
@@ -136,7 +128,6 @@ func TestWebhooksTest(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"webhooks", "test",
 			"--id", "id",
 		)

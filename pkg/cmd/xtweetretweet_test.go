@@ -15,7 +15,6 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:tweets:retweet", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -29,7 +28,6 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:tweets:retweet", "create",
 			"--id", "id",
 		)
@@ -43,7 +41,6 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:tweets:retweet", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -57,7 +54,6 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:tweets:retweet", "delete",
 			"--id", "id",
 		)

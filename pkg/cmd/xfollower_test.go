@@ -15,7 +15,6 @@ func TestXFollowersCheck(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:followers", "check",
 			"--source", "source",
 			"--target", "target",
