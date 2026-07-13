@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXProfileUpdate(t *testing.T) {

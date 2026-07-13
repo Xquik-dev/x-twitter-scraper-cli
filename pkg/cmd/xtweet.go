@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/Xquik-dev/x-twitter-scraper-go"
-	"github.com/Xquik-dev/x-twitter-scraper-go/option"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/stainless-sdks/x-twitter-scraper-go"
+	"github.com/stainless-sdks/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -39,13 +39,8 @@ var xTweetsCreate = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "media",
-			Usage:    "Array of media URLs to attach (mutually exclusive with media_ids)",
+			Usage:    "Array of public image URLs to attach (max 4). Each URL must be publicly reachable - the browser composer fetches them directly.",
 			BodyPath: "media",
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "media-id",
-			Usage:    "Array of media IDs to attach (mutually exclusive with media)",
-			BodyPath: "media_ids",
 		},
 		&requestflag.Flag[string]{
 			Name:     "reply-to-tweet-id",
@@ -67,8 +62,9 @@ var xTweetsRetrieve = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 	},
 	Action:          handleXTweetsRetrieve,
@@ -97,8 +93,9 @@ var xTweetsDelete = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
@@ -117,8 +114,9 @@ var xTweetsGetFavoriters = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -136,8 +134,9 @@ var xTweetsGetQuotes = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -170,8 +169,9 @@ var xTweetsGetReplies = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -199,8 +199,9 @@ var xTweetsGetRetweeters = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -218,8 +219,9 @@ var xTweetsGetThread = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -255,18 +257,18 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "query-type",
-			Usage:     "Sort order — Latest (chronological) or Top (engagement-ranked)",
+			Usage:     "Sort order - Latest (chronological) or Top (engagement-ranked)",
 			Default:   "Latest",
 			QueryPath: "queryType",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "ISO 8601 timestamp — only return tweets after this time",
+			Usage:     "ISO 8601 timestamp - only return tweets after this time",
 			QueryPath: "sinceTime",
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "ISO 8601 timestamp — only return tweets before this time",
+			Usage:     "ISO 8601 timestamp - only return tweets before this time",
 			QueryPath: "untilTime",
 		},
 	},
@@ -282,8 +284,6 @@ func handleXTweetsCreate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetNewParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -294,6 +294,8 @@ func handleXTweetsCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetNewParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -365,8 +367,6 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetListParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -377,6 +377,8 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetListParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -409,8 +411,6 @@ func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetDeleteParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -421,6 +421,8 @@ func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetDeleteParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -458,8 +460,6 @@ func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetGetFavoritersParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -470,6 +470,8 @@ func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetGetFavoritersParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -507,8 +509,6 @@ func handleXTweetsGetQuotes(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetGetQuotesParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -519,6 +519,8 @@ func handleXTweetsGetQuotes(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetGetQuotesParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -556,8 +558,6 @@ func handleXTweetsGetReplies(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetGetRepliesParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -568,6 +568,8 @@ func handleXTweetsGetReplies(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetGetRepliesParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -605,8 +607,6 @@ func handleXTweetsGetRetweeters(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetGetRetweetersParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -617,6 +617,8 @@ func handleXTweetsGetRetweeters(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetGetRetweetersParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -654,8 +656,6 @@ func handleXTweetsGetThread(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetGetThreadParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -666,6 +666,8 @@ func handleXTweetsGetThread(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetGetThreadParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -700,8 +702,6 @@ func handleXTweetsSearch(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XTweetSearchParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -712,6 +712,8 @@ func handleXTweetsSearch(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XTweetSearchParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

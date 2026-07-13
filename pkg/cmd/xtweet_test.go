@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXTweetsCreate(t *testing.T) {
@@ -20,7 +20,6 @@ func TestXTweetsCreate(t *testing.T) {
 			"--community-id", "1500000000000000000",
 			"--is-note-tweet=false",
 			"--media", "https://example.com/image.jpg",
-			"--media-id", "1234567890123456789",
 			"--reply-to-tweet-id", "1234567890",
 			"--text", "Just launched our new feature!",
 		)
@@ -35,8 +34,6 @@ func TestXTweetsCreate(t *testing.T) {
 			"is_note_tweet: false\n" +
 			"media:\n" +
 			"  - https://example.com/image.jpg\n" +
-			"media_ids:\n" +
-			"  - '1234567890123456789'\n" +
 			"reply_to_tweet_id: '1234567890'\n" +
 			"text: Just launched our new feature!\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(

@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXCommunitiesCreate(t *testing.T) {
@@ -83,6 +83,7 @@ func TestXCommunitiesRetrieveMembers(t *testing.T) {
 			"x:communities", "retrieve-members",
 			"--id", "id",
 			"--cursor", "cursor",
+			"--page-size", "0",
 		)
 	})
 }
