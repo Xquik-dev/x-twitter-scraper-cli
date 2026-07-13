@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestRadarRetrieveTrendingTopics(t *testing.T) {
@@ -14,6 +14,8 @@ func TestRadarRetrieveTrendingTopics(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"radar", "retrieve-trending-topics",
 			"--after", "after",
 			"--category", "general",

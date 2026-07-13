@@ -8,7 +8,7 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestEventsRetrieve(t *testing.T) {
+func TestXAccountConnectionChallengesSubmit(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
@@ -16,25 +16,22 @@ func TestEventsRetrieve(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"--cookie-session", "string",
-			"events", "retrieve",
+			"x:account-connection-challenges", "submit",
 			"--id", "id",
+			"--email-code", "123456",
 		)
 	})
-}
 
-func TestEventsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("email_code: '123456'")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"--cookie-session", "string",
-			"events", "list",
-			"--cursor", "cursor",
-			"--event-type", "tweet.new",
-			"--limit", "1",
-			"--monitor-id", "monitorId",
+			"x:account-connection-challenges", "submit",
+			"--id", "id",
 		)
 	})
 }

@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXTweetsRetweetCreate(t *testing.T) {
@@ -14,6 +14,8 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:tweets:retweet", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -26,6 +28,8 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:tweets:retweet", "create",
 			"--id", "id",
 		)
@@ -38,6 +42,8 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:tweets:retweet", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -50,6 +56,8 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:tweets:retweet", "delete",
 			"--id", "id",
 		)

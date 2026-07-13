@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -65,7 +65,7 @@ var draftsList = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Maximum number of items to return (1-100, default 50)",
+			Usage:     "Maximum number of items to return (1-100, default 50). For paid per-result endpoints, the returned count may be lower when remaining credits cannot cover the requested page. If zero paid results are affordable, the endpoint returns 402 insufficient_credits.\n",
 			Default:   50,
 			QueryPath: "limit",
 		},

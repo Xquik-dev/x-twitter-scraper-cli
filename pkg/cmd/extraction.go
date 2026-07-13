@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -26,9 +26,9 @@ var extractionsRetrieve = cli.Command{
 			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
-			Name:      "after",
-			Usage:     "Cursor for keyset pagination",
-			QueryPath: "after",
+			Name:      "cursor",
+			Usage:     "Cursor for keyset pagination from prior response next_cursor",
+			QueryPath: "cursor",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
@@ -47,13 +47,13 @@ var extractionsList = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:      "after",
-			Usage:     "Cursor for keyset pagination",
-			QueryPath: "after",
+			Name:      "cursor",
+			Usage:     "Cursor for keyset pagination from prior response next_cursor",
+			QueryPath: "cursor",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Maximum number of items to return (1-100, default 50)",
+			Usage:     "Maximum number of items to return (1-100, default 50). For paid per-result endpoints, the returned count may be lower when remaining credits cannot cover the requested page. If zero paid results are affordable, the endpoint returns 402 insufficient_credits.\n",
 			Default:   50,
 			QueryPath: "limit",
 		},
@@ -89,29 +89,158 @@ var extractionsEstimateCost = cli.Command{
 			BodyPath: "advancedQuery",
 		},
 		&requestflag.Flag[string]{
+			Name:     "any-words",
+			Usage:    "Alternative words or quoted phrases for estimated results. Separate with spaces, commas, or lines.",
+			BodyPath: "anyWords",
+		},
+		&requestflag.Flag[string]{
+			Name:     "bounding-box",
+			Usage:    "Geo bounding box used for estimation, e.g. -74.1 40.6 -73.9 40.8 (tweet_search_extractor)",
+			BodyPath: "boundingBox",
+		},
+		&requestflag.Flag[string]{
+			Name:     "cashtags",
+			Usage:    "Cashtags applied to the estimate, separated by spaces, commas, or lines.",
+			BodyPath: "cashtags",
+		},
+		&requestflag.Flag[string]{
+			Name:     "conversation-id",
+			Usage:    "Conversation ID filter used for estimation (tweet_search_extractor)",
+			BodyPath: "conversationId",
+		},
+		&requestflag.Flag[string]{
 			Name:     "exact-phrase",
 			Usage:    "Exact phrase filter for search estimation",
 			BodyPath: "exactPhrase",
 		},
 		&requestflag.Flag[string]{
 			Name:     "exclude-words",
-			Usage:    "Words excluded from estimated search results",
+			Usage:    "Words or quoted phrases excluded from estimated results. Separate with spaces, commas, or lines.",
 			BodyPath: "excludeWords",
 		},
 		&requestflag.Flag[string]{
+			Name:     "from-user",
+			Usage:    "Estimate only tweets from this author username (tweet_search_extractor)",
+			BodyPath: "fromUser",
+		},
+		&requestflag.Flag[string]{
+			Name:     "hashtags",
+			Usage:    "Hashtags applied to the estimate, separated by spaces, commas, or lines.",
+			BodyPath: "hashtags",
+		},
+		&requestflag.Flag[string]{
+			Name:     "in-reply-to-tweet-id",
+			Usage:    "Estimate only replies to this tweet ID (tweet_search_extractor)",
+			BodyPath: "inReplyToTweetId",
+		},
+		&requestflag.Flag[string]{
+			Name:     "language",
+			Usage:    "Language code used for estimate filtering (tweet_search_extractor)",
+			BodyPath: "language",
+		},
+		&requestflag.Flag[string]{
+			Name:     "list-id",
+			Usage:    "Estimate search results within this list ID (tweet_search_extractor)",
+			BodyPath: "listId",
+		},
+		&requestflag.Flag[string]{
+			Name:     "media-type",
+			Usage:    "Media type used for estimate filtering (tweet_search_extractor)",
+			BodyPath: "mediaType",
+		},
+		&requestflag.Flag[string]{
+			Name:     "mentioning",
+			Usage:    "Estimate tweets mentioning this username (tweet_search_extractor)",
+			BodyPath: "mentioning",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-faves",
+			Usage:    "Minimum likes threshold for estimated results (tweet_search_extractor)",
+			BodyPath: "minFaves",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-quotes",
+			Usage:    "Minimum quote count threshold for estimated results (tweet_search_extractor)",
+			BodyPath: "minQuotes",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-replies",
+			Usage:    "Minimum replies threshold for estimated results (tweet_search_extractor)",
+			BodyPath: "minReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-retweets",
+			Usage:    "Minimum retweets threshold for estimated results (tweet_search_extractor)",
+			BodyPath: "minRetweets",
+		},
+		&requestflag.Flag[string]{
+			Name:     "place",
+			Usage:    "Estimate search results within this place ID (tweet_search_extractor)",
+			BodyPath: "place",
+		},
+		&requestflag.Flag[string]{
+			Name:     "place-country",
+			Usage:    "Estimate search results within this country code (tweet_search_extractor)",
+			BodyPath: "placeCountry",
+		},
+		&requestflag.Flag[string]{
+			Name:     "point-radius",
+			Usage:    "Geo point radius used for estimation, e.g. -73.99 40.73 25mi (tweet_search_extractor)",
+			BodyPath: "pointRadius",
+		},
+		&requestflag.Flag[string]{
+			Name:     "quotes",
+			Usage:    "Quote mode used for estimation (tweet_search_extractor)",
+			BodyPath: "quotes",
+		},
+		&requestflag.Flag[string]{
+			Name:     "quotes-of-tweet-id",
+			Usage:    "Estimate only quotes of this tweet ID (tweet_search_extractor)",
+			BodyPath: "quotesOfTweetId",
+		},
+		&requestflag.Flag[string]{
+			Name:     "replies",
+			Usage:    "Reply mode used for estimation (tweet_search_extractor)",
+			BodyPath: "replies",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "results-limit",
+			Usage:    "Maximum number of results to estimate. When set, the estimate caps projected results to this value.",
+			BodyPath: "resultsLimit",
+		},
+		&requestflag.Flag[string]{
+			Name:     "retweets",
+			Usage:    "Retweet mode used for estimation (tweet_search_extractor)",
+			BodyPath: "retweets",
+		},
+		&requestflag.Flag[string]{
+			Name:     "retweets-of-tweet-id",
+			Usage:    "Estimate only retweets of this tweet ID (tweet_search_extractor)",
+			BodyPath: "retweetsOfTweetId",
+		},
+		&requestflag.Flag[string]{
 			Name:     "search-query",
+			Usage:    "Required for tweet_search_extractor & community_search.",
 			BodyPath: "searchQuery",
+		},
+		&requestflag.Flag[any]{
+			Name:     "since-date",
+			Usage:    "Estimate start date in YYYY-MM-DD format (tweet_search_extractor)",
+			BodyPath: "sinceDate",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-community-id",
+			Usage:    "Required for community_post_extractor & community_search.",
 			BodyPath: "targetCommunityId",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-list-id",
+			Usage:    "Required for list_follower_explorer, list_member_extractor & list_post_extractor.",
 			BodyPath: "targetListId",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-space-id",
+			Usage:    "Required for space_explorer.",
 			BodyPath: "targetSpaceId",
 		},
 		&requestflag.Flag[string]{
@@ -121,6 +250,26 @@ var extractionsEstimateCost = cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "target-username",
 			BodyPath: "targetUsername",
+		},
+		&requestflag.Flag[string]{
+			Name:     "to-user",
+			Usage:    "Estimate replies sent to this username (tweet_search_extractor)",
+			BodyPath: "toUser",
+		},
+		&requestflag.Flag[any]{
+			Name:     "until-date",
+			Usage:    "Estimate end date in YYYY-MM-DD format (tweet_search_extractor)",
+			BodyPath: "untilDate",
+		},
+		&requestflag.Flag[string]{
+			Name:     "url",
+			Usage:    "URL substring or domain filter used for estimation (tweet_search_extractor)",
+			BodyPath: "url",
+		},
+		&requestflag.Flag[bool]{
+			Name:     "verified-only",
+			Usage:    "Estimate only verified authors (tweet_search_extractor)",
+			BodyPath: "verifiedOnly",
 		},
 	},
 	Action:          handleExtractionsEstimateCost,
@@ -140,7 +289,7 @@ var extractionsExportResults = cli.Command{
 		&requestflag.Flag[string]{
 			Name:      "format",
 			Usage:     "Export file format",
-			Default:   "csv",
+			Required:  true,
 			QueryPath: "format",
 		},
 		&requestflag.Flag[string]{
@@ -170,29 +319,158 @@ var extractionsRun = cli.Command{
 			BodyPath: "advancedQuery",
 		},
 		&requestflag.Flag[string]{
+			Name:     "any-words",
+			Usage:    "Words or quoted phrases where any one can match. Separate with spaces, commas, or lines. (tweet_search_extractor)",
+			BodyPath: "anyWords",
+		},
+		&requestflag.Flag[string]{
+			Name:     "bounding-box",
+			Usage:    "Geo bounding box, e.g. -74.1 40.6 -73.9 40.8 (tweet_search_extractor)",
+			BodyPath: "boundingBox",
+		},
+		&requestflag.Flag[string]{
+			Name:     "cashtags",
+			Usage:    "Cashtags separated by spaces, commas, or lines. (tweet_search_extractor)",
+			BodyPath: "cashtags",
+		},
+		&requestflag.Flag[string]{
+			Name:     "conversation-id",
+			Usage:    "Conversation ID filter (tweet_search_extractor)",
+			BodyPath: "conversationId",
+		},
+		&requestflag.Flag[string]{
 			Name:     "exact-phrase",
 			Usage:    "Exact phrase to match (tweet_search_extractor)",
 			BodyPath: "exactPhrase",
 		},
 		&requestflag.Flag[string]{
 			Name:     "exclude-words",
-			Usage:    "Words to exclude from results (tweet_search_extractor)",
+			Usage:    "Words or quoted phrases to exclude. Separate with spaces, commas, or lines. (tweet_search_extractor)",
 			BodyPath: "excludeWords",
 		},
 		&requestflag.Flag[string]{
+			Name:     "from-user",
+			Usage:    "Filter by author username (tweet_search_extractor)",
+			BodyPath: "fromUser",
+		},
+		&requestflag.Flag[string]{
+			Name:     "hashtags",
+			Usage:    "Hashtags separated by spaces, commas, or lines. (tweet_search_extractor)",
+			BodyPath: "hashtags",
+		},
+		&requestflag.Flag[string]{
+			Name:     "in-reply-to-tweet-id",
+			Usage:    "Only replies to this tweet ID (tweet_search_extractor)",
+			BodyPath: "inReplyToTweetId",
+		},
+		&requestflag.Flag[string]{
+			Name:     "language",
+			Usage:    "Language code filter (tweet_search_extractor)",
+			BodyPath: "language",
+		},
+		&requestflag.Flag[string]{
+			Name:     "list-id",
+			Usage:    "Search within a list ID (tweet_search_extractor)",
+			BodyPath: "listId",
+		},
+		&requestflag.Flag[string]{
+			Name:     "media-type",
+			Usage:    "Media type filter (tweet_search_extractor)",
+			BodyPath: "mediaType",
+		},
+		&requestflag.Flag[string]{
+			Name:     "mentioning",
+			Usage:    "Filter tweets mentioning a username (tweet_search_extractor)",
+			BodyPath: "mentioning",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-faves",
+			Usage:    "Minimum likes threshold (tweet_search_extractor)",
+			BodyPath: "minFaves",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-quotes",
+			Usage:    "Minimum quote count threshold (tweet_search_extractor)",
+			BodyPath: "minQuotes",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-replies",
+			Usage:    "Minimum replies threshold (tweet_search_extractor)",
+			BodyPath: "minReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "min-retweets",
+			Usage:    "Minimum retweets threshold (tweet_search_extractor)",
+			BodyPath: "minRetweets",
+		},
+		&requestflag.Flag[string]{
+			Name:     "place",
+			Usage:    "Search within a place ID (tweet_search_extractor)",
+			BodyPath: "place",
+		},
+		&requestflag.Flag[string]{
+			Name:     "place-country",
+			Usage:    "Search within a country code (tweet_search_extractor)",
+			BodyPath: "placeCountry",
+		},
+		&requestflag.Flag[string]{
+			Name:     "point-radius",
+			Usage:    "Geo point radius, e.g. -73.99 40.73 25mi (tweet_search_extractor)",
+			BodyPath: "pointRadius",
+		},
+		&requestflag.Flag[string]{
+			Name:     "quotes",
+			Usage:    "Quote mode (tweet_search_extractor)",
+			BodyPath: "quotes",
+		},
+		&requestflag.Flag[string]{
+			Name:     "quotes-of-tweet-id",
+			Usage:    "Only quotes of this tweet ID (tweet_search_extractor)",
+			BodyPath: "quotesOfTweetId",
+		},
+		&requestflag.Flag[string]{
+			Name:     "replies",
+			Usage:    "Reply mode (tweet_search_extractor)",
+			BodyPath: "replies",
+		},
+		&requestflag.Flag[int64]{
+			Name:     "results-limit",
+			Usage:    "Maximum number of results to extract. When set, the extraction stops after reaching this limit.",
+			BodyPath: "resultsLimit",
+		},
+		&requestflag.Flag[string]{
+			Name:     "retweets",
+			Usage:    "Retweet mode (tweet_search_extractor)",
+			BodyPath: "retweets",
+		},
+		&requestflag.Flag[string]{
+			Name:     "retweets-of-tweet-id",
+			Usage:    "Only retweets of this tweet ID (tweet_search_extractor)",
+			BodyPath: "retweetsOfTweetId",
+		},
+		&requestflag.Flag[string]{
 			Name:     "search-query",
+			Usage:    "Required for tweet_search_extractor & community_search.",
 			BodyPath: "searchQuery",
+		},
+		&requestflag.Flag[any]{
+			Name:     "since-date",
+			Usage:    "Start date YYYY-MM-DD (tweet_search_extractor)",
+			BodyPath: "sinceDate",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-community-id",
+			Usage:    "Required for community_post_extractor & community_search.",
 			BodyPath: "targetCommunityId",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-list-id",
+			Usage:    "Required for list_follower_explorer, list_member_extractor & list_post_extractor.",
 			BodyPath: "targetListId",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-space-id",
+			Usage:    "Required for space_explorer.",
 			BodyPath: "targetSpaceId",
 		},
 		&requestflag.Flag[string]{
@@ -202,6 +480,26 @@ var extractionsRun = cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "target-username",
 			BodyPath: "targetUsername",
+		},
+		&requestflag.Flag[string]{
+			Name:     "to-user",
+			Usage:    "Filter replies sent to a username (tweet_search_extractor)",
+			BodyPath: "toUser",
+		},
+		&requestflag.Flag[any]{
+			Name:     "until-date",
+			Usage:    "End date YYYY-MM-DD (tweet_search_extractor)",
+			BodyPath: "untilDate",
+		},
+		&requestflag.Flag[string]{
+			Name:     "url",
+			Usage:    "URL substring or domain filter (tweet_search_extractor)",
+			BodyPath: "url",
+		},
+		&requestflag.Flag[bool]{
+			Name:     "verified-only",
+			Usage:    "Only verified authors (tweet_search_extractor)",
+			BodyPath: "verifiedOnly",
 		},
 	},
 	Action:          handleExtractionsRun,

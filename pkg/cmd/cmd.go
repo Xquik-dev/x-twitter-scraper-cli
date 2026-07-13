@@ -12,8 +12,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/autocomplete"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/autocomplete"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	docs "github.com/urfave/cli-docs/v3"
 	"github.com/urfave/cli/v3"
 )
@@ -86,6 +86,11 @@ func init() {
 				Name:    "bearer-token",
 				Usage:   "OAuth 2.1 access token",
 				Sources: cli.EnvVars("X_TWITTER_SCRAPER_BEARER_TOKEN"),
+			},
+			&requestflag.Flag[string]{
+				Name:    "cookie-session",
+				Usage:   "Secure Xquik browser session cookie",
+				Sources: cli.EnvVars("X_TWITTER_SCRAPER_SESSION"),
 			},
 		},
 		Commands: []*cli.Command{
@@ -171,6 +176,18 @@ func init() {
 				},
 			},
 			{
+				Name:     "monitors:keywords",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&monitorsKeywordsCreate,
+					&monitorsKeywordsRetrieve,
+					&monitorsKeywordsUpdate,
+					&monitorsKeywordsList,
+					&monitorsKeywordsDeactivate,
+				},
+			},
+			{
 				Name:     "events",
 				Category: "API RESOURCE",
 				Suggest:  true,
@@ -212,6 +229,7 @@ func init() {
 					&webhooksList,
 					&webhooksDeactivate,
 					&webhooksListDeliveries,
+					&webhooksResume,
 					&webhooksTest,
 				},
 			},
@@ -224,6 +242,14 @@ func init() {
 					&xGetHomeTimeline,
 					&xGetNotifications,
 					&xGetTrends,
+				},
+			},
+			{
+				Name:     "x:write-actions",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&xWriteActionsRetrieve,
 				},
 			},
 			{
@@ -267,6 +293,7 @@ func init() {
 				Suggest:  true,
 				Commands: []*cli.Command{
 					&xUsersRetrieve,
+					&xUsersRemoveFollower,
 					&xUsersRetrieveBatch,
 					&xUsersRetrieveFollowers,
 					&xUsersRetrieveFollowersYouKnow,
@@ -274,6 +301,7 @@ func init() {
 					&xUsersRetrieveLikes,
 					&xUsersRetrieveMedia,
 					&xUsersRetrieveMentions,
+					&xUsersRetrieveReplies,
 					&xUsersRetrieveSearch,
 					&xUsersRetrieveTweets,
 					&xUsersRetrieveVerifiedFollowers,
@@ -369,6 +397,14 @@ func init() {
 				},
 			},
 			{
+				Name:     "x:account-connection-challenges",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&xAccountConnectionChallengesSubmit,
+				},
+			},
+			{
 				Name:     "x:bookmarks",
 				Category: "API RESOURCE",
 				Suggest:  true,
@@ -412,8 +448,21 @@ func init() {
 				Category: "API RESOURCE",
 				Suggest:  true,
 				Commands: []*cli.Command{
+					&creditsQuickTopupBalance,
+					&creditsRedirectTopupCheckout,
 					&creditsRetrieveBalance,
+					&creditsRetrieveTopupStatus,
 					&creditsTopupBalance,
+				},
+			},
+			{
+				Name:     "guest-wallets",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&guestWalletsCreate,
+					&guestWalletsRetrieveStatus,
+					&guestWalletsTopup,
 				},
 			},
 			{

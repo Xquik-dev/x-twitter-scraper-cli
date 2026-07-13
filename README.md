@@ -4,6 +4,8 @@ The official CLI for the [X Twitter Scraper REST API](https://xquik.com).
 
 It is generated with [Stainless](https://www.stainless.com/).
 
+<!-- x-release-please-start-version -->
+
 ## Installation
 
 ### Installing with Go
@@ -11,7 +13,7 @@ It is generated with [Stainless](https://www.stainless.com/).
 To test or install the CLI locally, you need [Go](https://go.dev/doc/install) version 1.22 or later installed.
 
 ```sh
-go install 'github.com/stainless-sdks/x-twitter-scraper-cli/cmd/x-twitter-scraper@latest'
+go install 'github.com/Xquik-dev/x-twitter-scraper-cli/cmd/x-twitter-scraper@latest'
 ```
 
 Once you have run `go install`, the binary is placed in your Go bin directory:
@@ -25,6 +27,8 @@ If commands aren't found after installation, add the Go bin directory to your PA
 # Add to your shell profile (.zshrc, .bashrc, etc.)
 export PATH="$PATH:$(go env GOPATH)/bin"
 ```
+
+<!-- x-release-please-end -->
 
 ### Running Locally
 
@@ -54,15 +58,17 @@ For details about specific commands, use the `--help` flag.
 
 ### Environment variables
 
-| Environment variable             | Description            | Required | Default value |
-| -------------------------------- | ---------------------- | -------- | ------------- |
-| `X_TWITTER_SCRAPER_API_KEY`      |                        | no       | `null`        |
-| `X_TWITTER_SCRAPER_BEARER_TOKEN` | OAuth 2.1 access token | no       | `null`        |
+| Environment variable             | Description                         | Required | Default value |
+| -------------------------------- | ----------------------------------- | -------- | ------------- |
+| `X_TWITTER_SCRAPER_API_KEY`      |                                     | no       | `null`        |
+| `X_TWITTER_SCRAPER_BEARER_TOKEN` | OAuth 2.1 access token              | no       | `null`        |
+| `X_TWITTER_SCRAPER_SESSION`      | Secure Xquik browser session cookie | no       | `null`        |
 
 ### Global flags
 
 - `--api-key` (can also be set with `X_TWITTER_SCRAPER_API_KEY` env var)
 - `--bearer-token` - OAuth 2.1 access token (can also be set with `X_TWITTER_SCRAPER_BEARER_TOKEN` env var)
+- `--cookie-session` - Secure Xquik browser session cookie (can also be set with `X_TWITTER_SCRAPER_SESSION` env var)
 - `--help` - Show command line usage
 - `--debug` - Enable debug logging (includes HTTP request/response details)
 - `--version`, `-v` - Show the CLI version

@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -56,16 +56,15 @@ var xProfileUpdateAvatar = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or ID) for avatar update",
+			Usage:    "X account (@username or ID) receiving avatar from URL",
 			Required: true,
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:      "file",
-			Usage:     "Avatar image (max 716KB)",
-			Required:  true,
-			BodyPath:  "file",
-			FileInput: true,
+			Name:     "url",
+			Usage:    "HTTPS URL to the avatar image to download",
+			Required: true,
+			BodyPath: "url",
 		},
 	},
 	Action:          handleXProfileUpdateAvatar,
@@ -79,16 +78,15 @@ var xProfileUpdateBanner = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or ID) for banner update",
+			Usage:    "X account (@username or ID) receiving banner from URL",
 			Required: true,
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:      "file",
-			Usage:     "Banner image (max 2MB)",
-			Required:  true,
-			BodyPath:  "file",
-			FileInput: true,
+			Name:     "url",
+			Usage:    "HTTPS URL to the banner image to download",
+			Required: true,
+			BodyPath: "url",
 		},
 	},
 	Action:          handleXProfileUpdateBanner,
@@ -148,7 +146,7 @@ func handleXProfileUpdateAvatar(ctx context.Context, cmd *cli.Command) error {
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
-		MultipartFormEncoded,
+		ApplicationJSON,
 		false,
 	)
 	if err != nil {
@@ -189,7 +187,7 @@ func handleXProfileUpdateBanner(ctx context.Context, cmd *cli.Command) error {
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
-		MultipartFormEncoded,
+		ApplicationJSON,
 		false,
 	)
 	if err != nil {

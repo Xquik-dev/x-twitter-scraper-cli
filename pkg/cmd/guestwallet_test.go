@@ -8,7 +8,7 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestAPIKeysCreate(t *testing.T) {
+func TestGuestWalletsCreate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
@@ -16,25 +16,30 @@ func TestAPIKeysCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"--cookie-session", "string",
-			"api-keys", "create",
-			"--name", "My API Key",
+			"guest-wallets", "create",
+			"--amount-minor", "1000",
+			"--currency", "usd",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("name: My API Key")
+		pipeData := []byte("" +
+			"amount_minor: 1000\n" +
+			"currency: usd\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"--cookie-session", "string",
-			"api-keys", "create",
+			"guest-wallets", "create",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
 		)
 	})
 }
 
-func TestAPIKeysList(t *testing.T) {
+func TestGuestWalletsRetrieveStatus(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
@@ -42,12 +47,12 @@ func TestAPIKeysList(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"--cookie-session", "string",
-			"api-keys", "list",
+			"guest-wallets", "retrieve-status",
 		)
 	})
 }
 
-func TestAPIKeysRevoke(t *testing.T) {
+func TestGuestWalletsTopup(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
@@ -55,8 +60,25 @@ func TestAPIKeysRevoke(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"--cookie-session", "string",
-			"api-keys", "revoke",
-			"--id", "id",
+			"guest-wallets", "topup",
+			"--amount-minor", "1000",
+			"--currency", "usd",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
+		)
+	})
+
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("" +
+			"amount_minor: 1000\n" +
+			"currency: usd\n")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
+			"guest-wallets", "topup",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
 		)
 	})
 }

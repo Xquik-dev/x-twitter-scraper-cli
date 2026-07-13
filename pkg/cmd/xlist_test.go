@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXListsRetrieveFollowers(t *testing.T) {
@@ -14,9 +14,12 @@ func TestXListsRetrieveFollowers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:lists", "retrieve-followers",
 			"--id", "id",
 			"--cursor", "cursor",
+			"--page-size", "20",
 		)
 	})
 }
@@ -27,10 +30,12 @@ func TestXListsRetrieveMembers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:lists", "retrieve-members",
 			"--id", "id",
 			"--cursor", "cursor",
-			"--page-size", "0",
+			"--page-size", "20",
 		)
 	})
 }
@@ -41,10 +46,13 @@ func TestXListsRetrieveTweets(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:lists", "retrieve-tweets",
 			"--id", "id",
 			"--cursor", "cursor",
 			"--include-replies=true",
+			"--page-size", "1",
 			"--since-time", "sinceTime",
 			"--until-time", "untilTime",
 		)

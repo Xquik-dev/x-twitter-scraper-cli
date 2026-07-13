@@ -6,33 +6,46 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
 var xCommunitiesTweetsList = cli.Command{
 	Name:    "list",
-	Usage:   "List tweets across all communities",
+	Usage:   "Requires a Community ID and keyword query.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
+			Name:      "community-id",
+			Usage:     "Numeric ID of the community to search",
+			Required:  true,
+			QueryPath: "communityId",
+		},
+		&requestflag.Flag[string]{
 			Name:      "q",
-			Usage:     "Search query for cross-community tweets",
+			Usage:     "Keyword query within the selected community",
 			Required:  true,
 			QueryPath: "q",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor for cross-community results",
+			Usage:     "Pagination cursor for community results",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Default:   20,
+			QueryPath: "pageSize",
 		},
 		&requestflag.Flag[string]{
 			Name:      "query-type",
-			Usage:     "Sort order for cross-community results (Latest or Top)",
+			Usage:     "Sort order for community results (Latest or Top)",
+			Default:   "Latest",
 			QueryPath: "queryType",
 		},
 	},
@@ -54,6 +67,12 @@ var xCommunitiesTweetsListByCommunity = cli.Command{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for community tweets",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Default:   20,
+			QueryPath: "pageSize",
 		},
 	},
 	Action:          handleXCommunitiesTweetsListByCommunity,
