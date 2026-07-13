@@ -16,8 +16,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/jsonview"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/jsonview"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 
 	"github.com/charmbracelet/x/term"
 	"github.com/itchyny/json2yaml"
@@ -51,6 +51,9 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 	}
 	if cmd.IsSet("bearer-token") {
 		opts = append(opts, option.WithBearerToken(cmd.String("bearer-token")))
+	}
+	if cmd.IsSet("cookie-session") {
+		opts = append(opts, option.WithCookieSession(cmd.String("cookie-session")))
 	}
 
 	// Override base URL if the --base-url flag is provided

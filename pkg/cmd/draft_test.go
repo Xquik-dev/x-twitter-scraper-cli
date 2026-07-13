@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestDraftsCreate(t *testing.T) {
@@ -14,6 +14,8 @@ func TestDraftsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"drafts", "create",
 			"--text", "AI is the future of productivity",
 			"--goal", "engagement",
@@ -30,6 +32,8 @@ func TestDraftsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"drafts", "create",
 		)
 	})
@@ -41,6 +45,8 @@ func TestDraftsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"drafts", "retrieve",
 			"--id", "id",
 		)
@@ -53,6 +59,8 @@ func TestDraftsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"drafts", "list",
 			"--after-cursor", "afterCursor",
 			"--limit", "1",
@@ -66,6 +74,8 @@ func TestDraftsDelete(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"drafts", "delete",
 			"--id", "id",
 		)

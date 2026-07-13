@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -31,8 +31,8 @@ var radarRetrieveTrendingTopics = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "hours",
-			Usage:     "Lookback window in hours (1-168, default 24).",
-			Default:   24,
+			Usage:     "Lookback window in hours (1-72, default 6).",
+			Default:   6,
 			QueryPath: "hours",
 		},
 		&requestflag.Flag[int64]{
@@ -43,7 +43,8 @@ var radarRetrieveTrendingTopics = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "region",
-			Usage:     "Region filter (us, global, etc.)",
+			Usage:     "Region filter. Use `global` or a region code such as `US`, `GB`, `TR`, or `ES`.",
+			Default:   "global",
 			QueryPath: "region",
 		},
 		&requestflag.Flag[string]{

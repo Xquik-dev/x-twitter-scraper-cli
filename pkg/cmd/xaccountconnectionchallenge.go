@@ -14,32 +14,34 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var xFollowersCheck = cli.Command{
-	Name:    "check",
-	Usage:   "Check if one user follows another",
+var xAccountConnectionChallengesSubmit = cli.Command{
+	Name:    "submit",
+	Usage:   "Submit X account email verification code",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:      "source",
-			Usage:     "Source username, @username, or X or Twitter profile URL",
+			Name:      "id",
 			Required:  true,
-			QueryPath: "source",
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
-			Name:      "target",
-			Usage:     "Target username, @username, or X or Twitter profile URL",
-			Required:  true,
-			QueryPath: "target",
+			Name:     "email-code",
+			Usage:    "Code sent to the account email.",
+			Required: true,
+			BodyPath: "email_code",
 		},
 	},
-	Action:          handleXFollowersCheck,
+	Action:          handleXAccountConnectionChallengesSubmit,
 	HideHelpCommand: true,
 }
 
-func handleXFollowersCheck(ctx context.Context, cmd *cli.Command) error {
+func handleXAccountConnectionChallengesSubmit(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
-
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -48,18 +50,23 @@ func handleXFollowersCheck(ctx context.Context, cmd *cli.Command) error {
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
+		ApplicationJSON,
 		false,
 	)
 	if err != nil {
 		return err
 	}
 
-	params := xtwitterscraper.XFollowerCheckParams{}
+	params := xtwitterscraper.XAccountConnectionChallengeSubmitParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Followers.Check(ctx, params, options...)
+	_, err = client.X.AccountConnectionChallenges.Submit(
+		ctx,
+		cmd.Value("id").(string),
+		params,
+		options...,
+	)
 	if err != nil {
 		return err
 	}
@@ -72,7 +79,7 @@ func handleXFollowersCheck(ctx context.Context, cmd *cli.Command) error {
 		ExplicitFormat: explicitFormat,
 		Format:         format,
 		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "x:followers check",
+		Title:          "x:account-connection-challenges submit",
 		Transform:      transform,
 	})
 }

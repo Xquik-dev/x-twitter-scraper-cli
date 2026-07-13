@@ -3,10 +3,9 @@
 package cmd
 
 import (
-	"strings"
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXProfileUpdate(t *testing.T) {
@@ -15,6 +14,8 @@ func TestXProfileUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:profile", "update",
 			"--account", "@elonmusk",
 			"--description", "description_value",
@@ -35,6 +36,8 @@ func TestXProfileUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:profile", "update",
 		)
 	})
@@ -46,23 +49,24 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:profile", "update-avatar",
 			"--account", "@elonmusk",
-			"--file", mocktest.TestFile(t, "Example data"),
+			"--url", "https://example.com/avatar.png",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		testFile := mocktest.TestFile(t, "Example data")
 		// Test piping YAML data over stdin
-		pipeDataStr := "" +
+		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
-			"file: Example data\n"
-		pipeDataStr = strings.ReplaceAll(pipeDataStr, "Example data", testFile)
-		pipeData := []byte(pipeDataStr)
+			"url: https://example.com/avatar.png\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:profile", "update-avatar",
 		)
 	})
@@ -74,23 +78,24 @@ func TestXProfileUpdateBanner(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:profile", "update-banner",
 			"--account", "@elonmusk",
-			"--file", mocktest.TestFile(t, "Example data"),
+			"--url", "https://example.com/banner.png",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		testFile := mocktest.TestFile(t, "Example data")
 		// Test piping YAML data over stdin
-		pipeDataStr := "" +
+		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
-			"file: Example data\n"
-		pipeDataStr = strings.ReplaceAll(pipeDataStr, "Example data", testFile)
-		pipeData := []byte(pipeDataStr)
+			"url: https://example.com/banner.png\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:profile", "update-banner",
 		)
 	})

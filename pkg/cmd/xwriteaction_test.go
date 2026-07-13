@@ -8,7 +8,7 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestTrendsList(t *testing.T) {
+func TestXWriteActionsRetrieve(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
@@ -16,9 +16,8 @@ func TestTrendsList(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"--cookie-session", "string",
-			"trends", "list",
-			"--count", "1",
-			"--woeid", "0",
+			"x:write-actions", "retrieve",
+			"--id", "id",
 		)
 	})
 }

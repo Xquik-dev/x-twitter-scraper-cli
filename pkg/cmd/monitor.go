@@ -6,17 +6,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
 var monitorsCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Create monitor",
+	Usage:   "Creates an instant monitor. Monitors are unlimited. Active monitors check every\n1 second and cost 21 credits per hour. Events and webhook deliveries are\nincluded. Creation requires available credits for the first hourly charge and\nusername lookup.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{
@@ -86,7 +86,7 @@ var monitorsList = cli.Command{
 
 var monitorsDeactivate = cli.Command{
 	Name:    "deactivate",
-	Usage:   "Deactivate monitor",
+	Usage:   "Delete monitor",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

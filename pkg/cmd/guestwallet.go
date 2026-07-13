@@ -14,48 +14,113 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var accountRetrieve = cli.Command{
-	Name:            "retrieve",
-	Usage:           "Get account info",
+var guestWalletsCreate = cli.Command{
+	Name:    "create",
+	Usage:   "Create a one-use Stripe-hosted checkout after the user explicitly confirms a\n$10-$250 USD amount. This request creates no charge by itself. The user opens\ncheckout_url on Stripe. This endpoint returns the paid-read API key without\nrequiring an Xquik account, email, dashboard, or Xquik web page. An idempotent\nreplay returns the same key.",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[int64]{
+			Name:     "amount-minor",
+			Usage:    "Confirmed USD amount in cents.",
+			Required: true,
+			BodyPath: "amount_minor",
+		},
+		&requestflag.Flag[string]{
+			Name:     "currency",
+			Usage:    `Allowed values: "usd".`,
+			Default:  "usd",
+			Const:    true,
+			BodyPath: "currency",
+		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
+	},
+	Action:          handleGuestWalletsCreate,
+	HideHelpCommand: true,
+}
+
+var guestWalletsRetrieveStatus = cli.Command{
+	Name:            "retrieve-status",
+	Usage:           "Poll after Stripe payment. Use usable to decide whether paid reads can run. An\nactive wallet can remain usable while a top-up is pending. A new wallet becomes\nusable only after verified webhook fulfillment. Send the guest key as\nAuthorization: Bearer.",
 	Suggest:         true,
 	Flags:           []cli.Flag{},
-	Action:          handleAccountRetrieve,
+	Action:          handleGuestWalletsRetrieveStatus,
 	HideHelpCommand: true,
 }
 
-var accountSetXUsername = cli.Command{
-	Name:    "set-x-username",
-	Usage:   "Set linked X username",
+var guestWalletsTopup = cli.Command{
+	Name:    "topup",
+	Usage:   "Create a one-use Stripe-hosted checkout for an existing paid-read guest key\nafter the user explicitly confirms a $10-$250 USD amount. The key remains the\nsame. This request creates no charge by itself and never redirects through an\nXquik web page.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "username",
-			Usage:    "X username without @",
+		&requestflag.Flag[int64]{
+			Name:     "amount-minor",
+			Usage:    "Confirmed USD amount in cents.",
 			Required: true,
-			BodyPath: "username",
+			BodyPath: "amount_minor",
+		},
+		&requestflag.Flag[string]{
+			Name:     "currency",
+			Usage:    `Allowed values: "usd".`,
+			Default:  "usd",
+			Const:    true,
+			BodyPath: "currency",
+		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
 		},
 	},
-	Action:          handleAccountSetXUsername,
+	Action:          handleGuestWalletsTopup,
 	HideHelpCommand: true,
 }
 
-var accountUpdateLocale = cli.Command{
-	Name:    "update-locale",
-	Usage:   "Update account locale",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "locale",
-			Usage:    `Allowed values: "en", "tr", "es".`,
-			Required: true,
-			BodyPath: "locale",
-		},
-	},
-	Action:          handleAccountUpdateLocale,
-	HideHelpCommand: true,
+func handleGuestWalletsCreate(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	params := xtwitterscraper.GuestWalletNewParams{}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.GuestWallets.New(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "guest-wallets create",
+		Transform:      transform,
+	})
 }
 
-func handleAccountRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleGuestWalletsRetrieveStatus(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 
@@ -76,7 +141,7 @@ func handleAccountRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Account.Get(ctx, options...)
+	_, err = client.GuestWallets.GetStatus(ctx, options...)
 	if err != nil {
 		return err
 	}
@@ -89,12 +154,12 @@ func handleAccountRetrieve(ctx context.Context, cmd *cli.Command) error {
 		ExplicitFormat: explicitFormat,
 		Format:         format,
 		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "account retrieve",
+		Title:          "guest-wallets retrieve-status",
 		Transform:      transform,
 	})
 }
 
-func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
+func handleGuestWalletsTopup(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 
@@ -113,11 +178,11 @@ func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	params := xtwitterscraper.AccountSetXUsernameParams{}
+	params := xtwitterscraper.GuestWalletTopupParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Account.SetXUsername(ctx, params, options...)
+	_, err = client.GuestWallets.Topup(ctx, params, options...)
 	if err != nil {
 		return err
 	}
@@ -130,48 +195,7 @@ func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
 		ExplicitFormat: explicitFormat,
 		Format:         format,
 		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "account set-x-username",
-		Transform:      transform,
-	})
-}
-
-func handleAccountUpdateLocale(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	params := xtwitterscraper.AccountUpdateLocaleParams{}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Account.UpdateLocale(ctx, params, options...)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	explicitFormat := cmd.Root().IsSet("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(obj, ShowJSONOpts{
-		ExplicitFormat: explicitFormat,
-		Format:         format,
-		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "account update-locale",
+		Title:          "guest-wallets topup",
 		Transform:      transform,
 	})
 }

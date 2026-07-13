@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -100,7 +100,8 @@ var xCommunitiesRetrieveMembers = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Items per page (20-200, default 20)",
+			Usage:     "Items per page (20-200, default 20). This is an upper bound for paid authenticated calls: remaining credits can reduce the returned page size, and zero affordable results returns 402 insufficient_credits.\n",
+			Default:   20,
 			QueryPath: "pageSize",
 		},
 	},
@@ -130,9 +131,15 @@ var xCommunitiesRetrieveModerators = cli.Command{
 
 var xCommunitiesRetrieveSearch = cli.Command{
 	Name:    "retrieve-search",
-	Usage:   "Search for communities by keyword",
+	Usage:   "Returns tweets, not community records. Requires a Community ID.",
 	Suggest: true,
 	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:      "community-id",
+			Usage:     "Numeric ID of the community whose posts to search",
+			Required:  true,
+			QueryPath: "communityId",
+		},
 		&requestflag.Flag[string]{
 			Name:      "q",
 			Usage:     "Search query",
@@ -144,9 +151,16 @@ var xCommunitiesRetrieveSearch = cli.Command{
 			Usage:     "Pagination cursor for community search",
 			QueryPath: "cursor",
 		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Default:   20,
+			QueryPath: "pageSize",
+		},
 		&requestflag.Flag[string]{
 			Name:      "query-type",
 			Usage:     "Sort order (Latest or Top)",
+			Default:   "Latest",
 			QueryPath: "queryType",
 		},
 	},

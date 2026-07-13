@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -19,15 +19,25 @@ var xMediaDownload = cli.Command{
 	Usage:   "Download images and videos from tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "tweet-id",
+			Usage:    "Numeric tweet ID alias for tweetInput",
+			BodyPath: "tweetId",
+		},
 		&requestflag.Flag[[]string]{
 			Name:     "tweet-id",
-			Usage:    "Array of tweet URLs or IDs (bulk, max 50)",
+			Usage:    "Array of tweet URLs or IDs (bulk, max 50 string items)",
 			BodyPath: "tweetIds",
 		},
 		&requestflag.Flag[string]{
 			Name:     "tweet-input",
 			Usage:    "Tweet URL or ID (single tweet)",
 			BodyPath: "tweetInput",
+		},
+		&requestflag.Flag[string]{
+			Name:     "tweet-url",
+			Usage:    "Tweet URL alias for tweetInput",
+			BodyPath: "tweetUrl",
 		},
 	},
 	Action:          handleXMediaDownload,
@@ -41,20 +51,15 @@ var xMediaUpload = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or ID) uploading media",
+			Usage:    "X account (@username or ID) uploading media from URL",
 			Required: true,
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:      "file",
-			Usage:     "Media file to upload",
-			Required:  true,
-			BodyPath:  "file",
-			FileInput: true,
-		},
-		&requestflag.Flag[bool]{
-			Name:     "is-long-video",
-			BodyPath: "is_long_video",
+			Name:     "url",
+			Usage:    "HTTPS URL to download and upload as media",
+			Required: true,
+			BodyPath: "url",
 		},
 	},
 	Action:          handleXMediaUpload,
@@ -114,7 +119,7 @@ func handleXMediaUpload(ctx context.Context, cmd *cli.Command) error {
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
-		MultipartFormEncoded,
+		ApplicationJSON,
 		false,
 	)
 	if err != nil {

@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -36,13 +36,13 @@ var drawsList = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:      "after",
-			Usage:     "Cursor for keyset pagination",
-			QueryPath: "after",
+			Name:      "cursor",
+			Usage:     "Cursor for keyset pagination from prior response next_cursor",
+			QueryPath: "cursor",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Maximum number of items to return (1-100, default 50)",
+			Usage:     "Maximum number of items to return (1-100, default 50). For paid per-result endpoints, the returned count may be lower when remaining credits cannot cover the requested page. If zero paid results are affordable, the endpoint returns 402 insufficient_credits.\n",
 			Default:   50,
 			QueryPath: "limit",
 		},
@@ -64,7 +64,7 @@ var drawsExport = cli.Command{
 		&requestflag.Flag[string]{
 			Name:      "format",
 			Usage:     "Export output format",
-			Default:   "csv",
+			Required:  true,
 			QueryPath: "format",
 		},
 		&requestflag.Flag[string]{
@@ -85,7 +85,7 @@ var drawsExport = cli.Command{
 
 var drawsRun = cli.Command{
 	Name:    "run",
-	Usage:   "Run giveaway draw",
+	Usage:   "Runs a giveaway draw from a source tweet. The draw first checks the minimum\ncredits needed to inspect the source tweet and at least one candidate. Remaining\ncredits cap how many replies and retweeters can be inspected before filters and\nwinner selection run.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{

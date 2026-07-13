@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -36,11 +36,6 @@ var xAccountsCreate = cli.Command{
 			Usage:    "X username",
 			Required: true,
 			BodyPath: "username",
-		},
-		&requestflag.Flag[string]{
-			Name:     "proxy-country",
-			Usage:    "Proxy country code",
-			BodyPath: "proxy_country",
 		},
 		&requestflag.Flag[string]{
 			Name:     "totp-secret",
@@ -120,11 +115,6 @@ var xAccountsReauth = cli.Command{
 			Name:     "email",
 			Usage:    "Email for the X account (updates stored email)",
 			BodyPath: "email",
-		},
-		&requestflag.Flag[string]{
-			Name:     "proxy-country",
-			Usage:    "Two-letter country code for login proxy region",
-			BodyPath: "proxy_country",
 		},
 		&requestflag.Flag[string]{
 			Name:     "totp-secret",

@@ -6,17 +6,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
 var xGetArticle = cli.Command{
 	Name:    "get-article",
-	Usage:   "Retrieve the full content of an X Article (long-form post) by tweet ID.",
+	Usage:   "Retrieve the full content of an X Article (long-form post) by numeric tweet ID.\nReturns article_not_found when the tweet is valid but is not an X Article.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -41,7 +41,7 @@ var xGetHomeTimeline = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "seen-tweet-ids",
-			Usage:     "Comma-separated tweet IDs to exclude from results",
+			Usage:     "Comma-separated tweet IDs to exclude from results. Empty entries are ignored.",
 			QueryPath: "seenTweetIds",
 		},
 	},
@@ -61,7 +61,7 @@ var xGetNotifications = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "type",
-			Usage:     "Notification type filter",
+			Usage:     "Notification type filter. Unrecognized values fall back to All.",
 			Default:   "All",
 			QueryPath: "type",
 		},

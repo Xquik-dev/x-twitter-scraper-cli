@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXDmRetrieveHistory(t *testing.T) {
@@ -14,8 +14,11 @@ func TestXDmRetrieveHistory(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:dm", "retrieve-history",
 			"--user-id", "userId",
+			"--account", "account",
 			"--cursor", "cursor",
 			"--max-id", "maxId",
 		)
@@ -28,12 +31,13 @@ func TestXDmSend(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 			"--account", "@elonmusk",
 			"--text", "Example text content",
 			"--media-id", "1234567890123456789",
-			"--reply-to-message-id", "1234567890123456789",
 		)
 	})
 
@@ -43,11 +47,12 @@ func TestXDmSend(t *testing.T) {
 			"account: '@elonmusk'\n" +
 			"text: Example text content\n" +
 			"media_ids:\n" +
-			"  - '1234567890123456789'\n" +
-			"reply_to_message_id: '1234567890123456789'\n")
+			"  - '1234567890123456789'\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 		)

@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXCommunitiesTweetsList(t *testing.T) {
@@ -14,10 +14,14 @@ func TestXCommunitiesTweetsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:communities:tweets", "list",
+			"--community-id", "321669910225",
 			"--q", "q",
 			"--cursor", "cursor",
-			"--query-type", "queryType",
+			"--page-size", "1",
+			"--query-type", "Latest",
 		)
 	})
 }
@@ -28,9 +32,12 @@ func TestXCommunitiesTweetsListByCommunity(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:communities:tweets", "list-by-community",
 			"--id", "id",
 			"--cursor", "cursor",
+			"--page-size", "1",
 		)
 	})
 }

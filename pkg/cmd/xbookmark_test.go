@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXBookmarksList(t *testing.T) {
@@ -14,8 +14,10 @@ func TestXBookmarksList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:bookmarks", "list",
-			"--cursor", "folders_value",
+			"--cursor", "DAACCgACGRElMJcAAA",
 			"--folder-id", "folderId",
 		)
 	})
@@ -27,6 +29,8 @@ func TestXBookmarksRetrieveFolders(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x:bookmarks", "retrieve-folders",
 		)
 	})

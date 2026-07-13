@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/requestflag"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
@@ -23,6 +23,12 @@ var xDmRetrieveHistory = cli.Command{
 			Name:      "user-id",
 			Required:  true,
 			PathParam: "userId",
+		},
+		&requestflag.Flag[string]{
+			Name:      "account",
+			Usage:     "X handle (without the `@` prefix) of the connected X account used to read the conversation. The account must be a participant in the conversation.\n",
+			Required:  true,
+			QueryPath: "account",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -62,11 +68,8 @@ var xDmSend = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "media-id",
+			Usage:    "Optional array containing exactly 1 uploaded media ID.",
 			BodyPath: "media_ids",
-		},
-		&requestflag.Flag[string]{
-			Name:     "reply-to-message-id",
-			BodyPath: "reply_to_message_id",
 		},
 	},
 	Action:          handleXDmSend,

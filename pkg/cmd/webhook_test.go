@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestWebhooksCreate(t *testing.T) {
@@ -14,6 +14,8 @@ func TestWebhooksCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "create",
 			"--event-type", "tweet.new",
 			"--event-type", "tweet.reply",
@@ -31,6 +33,8 @@ func TestWebhooksCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "create",
 		)
 	})
@@ -42,6 +46,8 @@ func TestWebhooksUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
@@ -60,6 +66,8 @@ func TestWebhooksUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "update",
 			"--id", "id",
 		)
@@ -72,6 +80,8 @@ func TestWebhooksList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "list",
 		)
 	})
@@ -83,6 +93,8 @@ func TestWebhooksDeactivate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "deactivate",
 			"--id", "id",
 		)
@@ -95,7 +107,23 @@ func TestWebhooksListDeliveries(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "list-deliveries",
+			"--id", "id",
+		)
+	})
+}
+
+func TestWebhooksResume(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
+			"webhooks", "resume",
 			"--id", "id",
 		)
 	})
@@ -107,6 +135,8 @@ func TestWebhooksTest(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"webhooks", "test",
 			"--id", "id",
 		)

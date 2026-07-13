@@ -6,18 +6,25 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/stainless-sdks/x-twitter-scraper-go"
-	"github.com/stainless-sdks/x-twitter-scraper-go/option"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
+	"github.com/Xquik-dev/x-twitter-scraper-go"
+	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
 var subscribeCreate = cli.Command{
-	Name:            "create",
-	Usage:           "Get checkout or billing URL",
-	Suggest:         true,
-	Flags:           []cli.Flag{},
+	Name:    "create",
+	Usage:   "Create a subscription checkout or billing-management URL only after the user\nconfirms. The request never completes payment by itself.",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "tier",
+			Usage:    "Subscription tier to pre-select.",
+			BodyPath: "tier",
+		},
+	},
 	Action:          handleSubscribeCreate,
 	HideHelpCommand: true,
 }
@@ -34,16 +41,18 @@ func handleSubscribeCreate(ctx context.Context, cmd *cli.Command) error {
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
+		ApplicationJSON,
 		false,
 	)
 	if err != nil {
 		return err
 	}
 
+	params := xtwitterscraper.SubscribeNewParams{}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Subscribe.New(ctx, options...)
+	_, err = client.Subscribe.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/x-twitter-scraper-cli/internal/mocktest"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
 func TestXGetArticle(t *testing.T) {
@@ -14,6 +14,8 @@ func TestXGetArticle(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x", "get-article",
 			"--tweet-id", "tweetId",
 		)
@@ -26,6 +28,8 @@ func TestXGetHomeTimeline(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x", "get-home-timeline",
 			"--cursor", "cursor",
 			"--seen-tweet-ids", "seenTweetIds",
@@ -39,6 +43,8 @@ func TestXGetNotifications(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x", "get-notifications",
 			"--cursor", "cursor",
 			"--type", "All",
@@ -52,6 +58,8 @@ func TestXGetTrends(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
+			"--cookie-session", "string",
 			"x", "get-trends",
 			"--count", "1",
 			"--woeid", "0",
