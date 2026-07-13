@@ -15,7 +15,6 @@ func TestXBookmarksList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:bookmarks", "list",
 			"--cursor", "DAACCgACGRElMJcAAA",
 			"--folder-id", "folderId",
@@ -30,7 +29,6 @@ func TestXBookmarksRetrieveFolders(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:bookmarks", "retrieve-folders",
 		)
 	})

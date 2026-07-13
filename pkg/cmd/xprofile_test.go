@@ -15,7 +15,6 @@ func TestXProfileUpdate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:profile", "update",
 			"--account", "@elonmusk",
 			"--description", "description_value",
@@ -37,7 +36,6 @@ func TestXProfileUpdate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:profile", "update",
 		)
 	})
@@ -50,7 +48,6 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:profile", "update-avatar",
 			"--account", "@elonmusk",
 			"--url", "https://example.com/avatar.png",
@@ -66,7 +63,6 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:profile", "update-avatar",
 		)
 	})
@@ -79,7 +75,6 @@ func TestXProfileUpdateBanner(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:profile", "update-banner",
 			"--account", "@elonmusk",
 			"--url", "https://example.com/banner.png",
@@ -95,7 +90,6 @@ func TestXProfileUpdateBanner(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:profile", "update-banner",
 		)
 	})

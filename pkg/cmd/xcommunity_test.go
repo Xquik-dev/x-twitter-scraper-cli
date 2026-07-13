@@ -15,7 +15,6 @@ func TestXCommunitiesCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "create",
 			"--account", "@elonmusk",
 			"--name", "Example Name",
@@ -33,7 +32,6 @@ func TestXCommunitiesCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "create",
 		)
 	})
@@ -46,7 +44,6 @@ func TestXCommunitiesDelete(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -63,7 +60,6 @@ func TestXCommunitiesDelete(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "delete",
 			"--id", "id",
 		)
@@ -77,7 +73,6 @@ func TestXCommunitiesRetrieveInfo(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "retrieve-info",
 			"--id", "id",
 		)
@@ -91,7 +86,6 @@ func TestXCommunitiesRetrieveMembers(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "retrieve-members",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -107,7 +101,6 @@ func TestXCommunitiesRetrieveModerators(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "retrieve-moderators",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -122,7 +115,6 @@ func TestXCommunitiesRetrieveSearch(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:communities", "retrieve-search",
 			"--community-id", "321669910225",
 			"--q", "q",

@@ -15,7 +15,6 @@ func TestSubscribeCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"subscribe", "create",
 			"--tier", "pro",
 		)
@@ -28,7 +27,6 @@ func TestSubscribeCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"subscribe", "create",
 		)
 	})

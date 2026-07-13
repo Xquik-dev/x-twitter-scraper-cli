@@ -15,7 +15,6 @@ func TestMonitorsCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors", "create",
 			"--event-type", "tweet.new",
 			"--event-type", "tweet.reply",
@@ -34,7 +33,6 @@ func TestMonitorsCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors", "create",
 		)
 	})
@@ -47,7 +45,6 @@ func TestMonitorsRetrieve(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors", "retrieve",
 			"--id", "id",
 		)
@@ -61,7 +58,6 @@ func TestMonitorsUpdate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
@@ -79,7 +75,6 @@ func TestMonitorsUpdate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors", "update",
 			"--id", "id",
 		)
@@ -93,7 +88,6 @@ func TestMonitorsList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors", "list",
 		)
 	})
@@ -106,7 +100,6 @@ func TestMonitorsDeactivate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors", "deactivate",
 			"--id", "id",
 		)

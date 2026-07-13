@@ -15,7 +15,6 @@ func TestXDmRetrieveHistory(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:dm", "retrieve-history",
 			"--user-id", "userId",
 			"--account", "account",
@@ -32,7 +31,6 @@ func TestXDmSend(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 			"--account", "@elonmusk",
@@ -52,7 +50,6 @@ func TestXDmSend(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 		)

@@ -15,7 +15,6 @@ func TestXMediaDownload(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:media", "download",
 			"--tweet-id", "1234567890",
 			"--tweet-id", "1234567890",
@@ -38,7 +37,6 @@ func TestXMediaDownload(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:media", "download",
 		)
 	})
@@ -51,7 +49,6 @@ func TestXMediaUpload(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:media", "upload",
 			"--account", "@elonmusk",
 			"--url", "https://example.com/image.png",
@@ -67,7 +64,6 @@ func TestXMediaUpload(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"x:media", "upload",
 		)
 	})

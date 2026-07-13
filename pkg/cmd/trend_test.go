@@ -15,7 +15,6 @@ func TestTrendsList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"trends", "list",
 			"--count", "1",
 			"--woeid", "0",

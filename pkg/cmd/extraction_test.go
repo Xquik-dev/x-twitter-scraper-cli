@@ -15,7 +15,6 @@ func TestExtractionsRetrieve(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"extractions", "retrieve",
 			"--id", "id",
 			"--cursor", "cursor",
@@ -31,7 +30,6 @@ func TestExtractionsList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"extractions", "list",
 			"--cursor", "cursor",
 			"--limit", "1",
@@ -48,7 +46,6 @@ func TestExtractionsEstimateCost(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"extractions", "estimate-cost",
 			"--tool-type", "follower_explorer",
 			"--advanced-query", "min_faves:100",
@@ -138,7 +135,6 @@ func TestExtractionsEstimateCost(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"extractions", "estimate-cost",
 		)
 	})
@@ -151,7 +147,6 @@ func TestExtractionsExportResults(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"extractions", "export-results",
 			"--id", "id",
 			"--format", "csv",
@@ -167,7 +162,6 @@ func TestExtractionsRun(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"extractions", "run",
 			"--tool-type", "follower_explorer",
 			"--advanced-query", "min_faves:100",
@@ -257,7 +251,6 @@ func TestExtractionsRun(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"extractions", "run",
 		)
 	})

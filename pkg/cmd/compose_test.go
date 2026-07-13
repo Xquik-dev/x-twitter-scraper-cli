@@ -15,7 +15,6 @@ func TestComposeCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"compose", "create",
 			"--step", "compose",
 			"--additional-context", "https://x.com/elonmusk/status/1234567890",
@@ -49,7 +48,6 @@ func TestComposeCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"compose", "create",
 		)
 	})

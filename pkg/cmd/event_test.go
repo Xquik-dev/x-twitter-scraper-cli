@@ -15,7 +15,6 @@ func TestEventsRetrieve(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"events", "retrieve",
 			"--id", "id",
 		)
@@ -29,7 +28,6 @@ func TestEventsList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"events", "list",
 			"--cursor", "cursor",
 			"--event-type", "tweet.new",

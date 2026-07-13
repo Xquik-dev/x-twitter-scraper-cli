@@ -15,7 +15,6 @@ func TestMonitorsKeywordsCreate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors:keywords", "create",
 			"--event-type", "tweet.new",
 			"--query", `xquik OR "x api"`,
@@ -32,7 +31,6 @@ func TestMonitorsKeywordsCreate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors:keywords", "create",
 		)
 	})
@@ -45,7 +43,6 @@ func TestMonitorsKeywordsRetrieve(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors:keywords", "retrieve",
 			"--id", "id",
 		)
@@ -59,7 +56,6 @@ func TestMonitorsKeywordsUpdate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors:keywords", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
@@ -77,7 +73,6 @@ func TestMonitorsKeywordsUpdate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors:keywords", "update",
 			"--id", "id",
 		)
@@ -91,7 +86,6 @@ func TestMonitorsKeywordsList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors:keywords", "list",
 		)
 	})
@@ -104,7 +98,6 @@ func TestMonitorsKeywordsDeactivate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"monitors:keywords", "deactivate",
 			"--id", "id",
 		)

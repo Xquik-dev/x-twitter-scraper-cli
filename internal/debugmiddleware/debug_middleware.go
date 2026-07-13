@@ -26,7 +26,6 @@ var sensitiveHeaders = []string{
 	"x-api-key",
 	"cookie",
 	"set-cookie",
-	"__host-xquik_session",
 }
 
 // RequestLogger is a middleware that logs HTTP requests and responses.

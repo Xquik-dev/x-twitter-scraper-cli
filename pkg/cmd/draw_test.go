@@ -15,7 +15,6 @@ func TestDrawsRetrieve(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"draws", "retrieve",
 			"--id", "f4bd00a2-7b4e-4e59-8e1b-72e2c9f12345",
 		)
@@ -29,7 +28,6 @@ func TestDrawsList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"draws", "list",
 			"--cursor", "cursor",
 			"--limit", "1",
@@ -44,7 +42,6 @@ func TestDrawsExport(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"draws", "export",
 			"--id", "f4bd00a2-7b4e-4e59-8e1b-72e2c9f12345",
 			"--format", "csv",
@@ -61,7 +58,6 @@ func TestDrawsRun(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"draws", "run",
 			"--tweet-url", "https://x.com/elonmusk/status/1234567890",
 			"--backup-count", "2",
@@ -100,7 +96,6 @@ func TestDrawsRun(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"draws", "run",
 		)
 	})

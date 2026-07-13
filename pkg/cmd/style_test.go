@@ -16,7 +16,6 @@ func TestStylesRetrieve(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "retrieve",
 			"--id", "id",
 		)
@@ -30,7 +29,6 @@ func TestStylesUpdate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "update",
 			"--id", "id",
 			"--label", "Professional Voice",
@@ -47,7 +45,6 @@ func TestStylesUpdate(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "update",
 			"--id", "id",
 			"--label", "Professional Voice",
@@ -65,7 +62,6 @@ func TestStylesUpdate(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "update",
 			"--id", "id",
 		)
@@ -79,7 +75,6 @@ func TestStylesList(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "list",
 		)
 	})
@@ -92,7 +87,6 @@ func TestStylesDelete(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "delete",
 			"--id", "id",
 		)
@@ -106,7 +100,6 @@ func TestStylesAnalyze(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "analyze",
 			"--username", "elonmusk",
 		)
@@ -119,7 +112,6 @@ func TestStylesAnalyze(t *testing.T) {
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "analyze",
 		)
 	})
@@ -132,7 +124,6 @@ func TestStylesCompare(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "compare",
 			"--username1", "username1",
 			"--username2", "username2",
@@ -147,7 +138,6 @@ func TestStylesGetPerformance(t *testing.T) {
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"--cookie-session", "string",
 			"styles", "get-performance",
 			"--id", "id",
 		)
