@@ -1,32 +1,41 @@
 ---
 name: Publish Release
-permissions:
-  contents: write
+permissions: {}
 
 concurrency:
-  group: publish
+  group: cli-release-${{ github.ref }}
+  cancel-in-progress: false
 
 on:
   push:
     tags:
-      - "v*"
-  workflow_dispatch: {}
+      - "v*.*.*"
+
 jobs:
-  goreleaser:
-    runs-on: ubuntu-latest
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: github-release
+    permissions:
+      contents: write # Required to create the GitHub release and upload assets.
     steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-      with:
-        fetch-depth: 0
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: "go.mod"
-    - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@v6.1.0
-      with:
-        version: latest
-        args: release --clean
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check Out Release Tag
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set Up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          version: v2.17.0
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
