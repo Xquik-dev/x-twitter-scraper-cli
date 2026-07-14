@@ -56,16 +56,15 @@ var xProfileUpdateAvatar = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or ID) for avatar update",
+			Usage:    "X account (@username or ID) receiving avatar from URL",
 			Required: true,
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:      "file",
-			Usage:     "Avatar image (max 716KB)",
-			Required:  true,
-			BodyPath:  "file",
-			FileInput: true,
+			Name:     "url",
+			Usage:    "HTTPS URL to the avatar image to download",
+			Required: true,
+			BodyPath: "url",
 		},
 	},
 	Action:          handleXProfileUpdateAvatar,
@@ -79,16 +78,15 @@ var xProfileUpdateBanner = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "account",
-			Usage:    "X account (@username or ID) for banner update",
+			Usage:    "X account (@username or ID) receiving banner from URL",
 			Required: true,
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:      "file",
-			Usage:     "Banner image (max 2MB)",
-			Required:  true,
-			BodyPath:  "file",
-			FileInput: true,
+			Name:     "url",
+			Usage:    "HTTPS URL to the banner image to download",
+			Required: true,
+			BodyPath: "url",
 		},
 	},
 	Action:          handleXProfileUpdateBanner,
@@ -103,8 +101,6 @@ func handleXProfileUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XProfileUpdateParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -115,6 +111,8 @@ func handleXProfileUpdate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XProfileUpdateParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -144,18 +142,18 @@ func handleXProfileUpdateAvatar(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XProfileUpdateAvatarParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
-		MultipartFormEncoded,
+		ApplicationJSON,
 		false,
 	)
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XProfileUpdateAvatarParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -185,18 +183,18 @@ func handleXProfileUpdateBanner(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XProfileUpdateBannerParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
-		MultipartFormEncoded,
+		ApplicationJSON,
 		false,
 	)
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XProfileUpdateBannerParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

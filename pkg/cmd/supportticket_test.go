@@ -14,6 +14,7 @@ func TestSupportTicketsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "create",
 			"--body", "I am unable to connect my X account. Please help.",
 			"--subject", "Cannot connect X account",
@@ -28,6 +29,7 @@ func TestSupportTicketsCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "create",
 		)
 	})
@@ -39,8 +41,9 @@ func TestSupportTicketsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "retrieve",
-			"--id", "messages_value",
+			"--id", "tkt_a1b2c3d4e5f6a1b2c3d4e5f6",
 		)
 	})
 }
@@ -51,8 +54,9 @@ func TestSupportTicketsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "update",
-			"--id", "id",
+			"--id", "tkt_a1b2c3d4e5f6a1b2c3d4e5f6",
 			"--status", "resolved",
 		)
 	})
@@ -63,8 +67,9 @@ func TestSupportTicketsUpdate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "update",
-			"--id", "id",
+			"--id", "tkt_a1b2c3d4e5f6a1b2c3d4e5f6",
 		)
 	})
 }
@@ -75,6 +80,7 @@ func TestSupportTicketsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "list",
 		)
 	})
@@ -86,8 +92,9 @@ func TestSupportTicketsReply(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "reply",
-			"--id", "id",
+			"--id", "tkt_a1b2c3d4e5f6a1b2c3d4e5f6",
 			"--body", "Thank you for the update.",
 		)
 	})
@@ -98,8 +105,9 @@ func TestSupportTicketsReply(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"support:tickets", "reply",
-			"--id", "id",
+			"--id", "tkt_a1b2c3d4e5f6a1b2c3d4e5f6",
 		)
 	})
 }

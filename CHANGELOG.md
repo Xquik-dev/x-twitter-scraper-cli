@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.0 (2026-07-14)
+
+Full Changelog: [v0.4.1...v0.5.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.4.1...v0.5.0)
+
+### Features
+
+* add guest wallet checkout, status, and top-up commands
+* add credit top-up redirect and status commands
+* add keyword monitor and account connection challenge commands
+* expand read, write, extraction, event, and webhook command coverage
+* support structured request input through standard input
+
+### Chores
+
+* update the bundled Go SDK to v0.5.0
+
 ## 0.4.1 (2026-07-13)
 
 Full Changelog: [v0.4.0...v0.4.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.4.0...v0.4.1)

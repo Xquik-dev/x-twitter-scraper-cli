@@ -14,6 +14,7 @@ func TestXFollowersCheck(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:followers", "check",
 			"--source", "source",
 			"--target", "target",

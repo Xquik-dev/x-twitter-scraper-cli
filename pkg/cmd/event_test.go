@@ -14,6 +14,7 @@ func TestEventsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"events", "retrieve",
 			"--id", "id",
 		)
@@ -26,8 +27,9 @@ func TestEventsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"events", "list",
-			"--after", "after",
+			"--cursor", "cursor",
 			"--event-type", "tweet.new",
 			"--limit", "1",
 			"--monitor-id", "monitorId",

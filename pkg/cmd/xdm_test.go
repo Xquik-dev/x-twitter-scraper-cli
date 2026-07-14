@@ -14,8 +14,10 @@ func TestXDmRetrieveHistory(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:dm", "retrieve-history",
 			"--user-id", "userId",
+			"--account", "account",
 			"--cursor", "cursor",
 			"--max-id", "maxId",
 		)
@@ -28,12 +30,12 @@ func TestXDmSend(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 			"--account", "@elonmusk",
 			"--text", "Example text content",
 			"--media-id", "1234567890123456789",
-			"--reply-to-message-id", "1234567890123456789",
 		)
 	})
 
@@ -43,11 +45,11 @@ func TestXDmSend(t *testing.T) {
 			"account: '@elonmusk'\n" +
 			"text: Example text content\n" +
 			"media_ids:\n" +
-			"  - '1234567890123456789'\n" +
-			"reply_to_message_id: '1234567890123456789'\n")
+			"  - '1234567890123456789'\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
 		)

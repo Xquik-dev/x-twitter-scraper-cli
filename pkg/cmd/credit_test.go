@@ -8,13 +8,40 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
+func TestCreditsRedirectTopupCheckout(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"credits", "redirect-topup-checkout",
+			"--session-id", "session_id",
+		)
+	})
+}
+
 func TestCreditsRetrieveBalance(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"credits", "retrieve-balance",
+		)
+	})
+}
+
+func TestCreditsRetrieveTopupStatus(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"credits", "retrieve-topup-status",
+			"--session-id", "session_id",
 		)
 	})
 }
@@ -25,17 +52,22 @@ func TestCreditsTopupBalance(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"credits", "topup-balance",
-			"--amount", "10000",
+			"--dollars", "10",
+			"--locale", "en",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("amount: 10000")
+		pipeData := []byte("" +
+			"dollars: 10\n" +
+			"locale: en\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"credits", "topup-balance",
 		)
 	})

@@ -14,9 +14,11 @@ func TestXListsRetrieveFollowers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:lists", "retrieve-followers",
 			"--id", "id",
 			"--cursor", "cursor",
+			"--page-size", "20",
 		)
 	})
 }
@@ -27,9 +29,11 @@ func TestXListsRetrieveMembers(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:lists", "retrieve-members",
 			"--id", "id",
 			"--cursor", "cursor",
+			"--page-size", "20",
 		)
 	})
 }
@@ -40,10 +44,12 @@ func TestXListsRetrieveTweets(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:lists", "retrieve-tweets",
 			"--id", "id",
 			"--cursor", "cursor",
 			"--include-replies=true",
+			"--page-size", "1",
 			"--since-time", "sinceTime",
 			"--until-time", "untilTime",
 		)

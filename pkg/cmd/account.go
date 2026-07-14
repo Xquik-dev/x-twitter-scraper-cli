@@ -102,8 +102,6 @@ func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.AccountSetXUsernameParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -114,6 +112,8 @@ func handleAccountSetXUsername(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.AccountSetXUsernameParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -143,8 +143,6 @@ func handleAccountUpdateLocale(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.AccountUpdateLocaleParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -155,6 +153,8 @@ func handleAccountUpdateLocale(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.AccountUpdateLocaleParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

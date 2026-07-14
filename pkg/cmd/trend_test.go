@@ -14,6 +14,7 @@ func TestTrendsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"trends", "list",
 			"--count", "1",
 			"--woeid", "0",

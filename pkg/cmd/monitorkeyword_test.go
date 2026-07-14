@@ -8,17 +8,16 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestWebhooksCreate(t *testing.T) {
+func TestMonitorsKeywordsCreate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"webhooks", "create",
+			"monitors:keywords", "create",
 			"--event-type", "tweet.new",
-			"--event-type", "tweet.reply",
-			"--url", "https://example.com/webhook",
+			"--query", `xquik OR "x api"`,
 		)
 	})
 
@@ -27,29 +26,40 @@ func TestWebhooksCreate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"  - tweet.reply\n" +
-			"url: https://example.com/webhook\n")
+			"query: xquik OR \"x api\"\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"webhooks", "create",
+			"monitors:keywords", "create",
 		)
 	})
 }
 
-func TestWebhooksUpdate(t *testing.T) {
+func TestMonitorsKeywordsRetrieve(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"webhooks", "update",
+			"monitors:keywords", "retrieve",
+			"--id", "id",
+		)
+	})
+}
+
+func TestMonitorsKeywordsUpdate(t *testing.T) {
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"--bearer-token", "string",
+			"monitors:keywords", "update",
 			"--id", "id",
 			"--event-type", "tweet.new",
 			"--is-active=true",
-			"--url", "https://example.com/webhook",
 		)
 	})
 
@@ -58,77 +68,37 @@ func TestWebhooksUpdate(t *testing.T) {
 		pipeData := []byte("" +
 			"eventTypes:\n" +
 			"  - tweet.new\n" +
-			"isActive: true\n" +
-			"url: https://example.com/webhook\n")
+			"isActive: true\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"webhooks", "update",
+			"monitors:keywords", "update",
 			"--id", "id",
 		)
 	})
 }
 
-func TestWebhooksList(t *testing.T) {
+func TestMonitorsKeywordsList(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"webhooks", "list",
+			"monitors:keywords", "list",
 		)
 	})
 }
 
-func TestWebhooksDeactivate(t *testing.T) {
+func TestMonitorsKeywordsDeactivate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"webhooks", "deactivate",
-			"--id", "id",
-		)
-	})
-}
-
-func TestWebhooksListDeliveries(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"webhooks", "list-deliveries",
-			"--id", "id",
-		)
-	})
-}
-
-func TestWebhooksResume(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"webhooks", "resume",
-			"--id", "id",
-		)
-	})
-}
-
-func TestWebhooksTest(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
-			"--api-key", "string",
-			"--bearer-token", "string",
-			"webhooks", "test",
+			"monitors:keywords", "deactivate",
 			"--id", "id",
 		)
 	})

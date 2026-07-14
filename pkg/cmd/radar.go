@@ -31,8 +31,8 @@ var radarRetrieveTrendingTopics = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "hours",
-			Usage:     "Lookback window in hours (1-168, default 24).",
-			Default:   24,
+			Usage:     "Lookback window in hours (1-72, default 6).",
+			Default:   6,
 			QueryPath: "hours",
 		},
 		&requestflag.Flag[int64]{
@@ -43,7 +43,8 @@ var radarRetrieveTrendingTopics = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "region",
-			Usage:     "Region filter (us, global, etc.)",
+			Usage:     "Region filter. Use `global` or a region code such as `US`, `GB`, `TR`, or `ES`.",
+			Default:   "global",
 			QueryPath: "region",
 		},
 		&requestflag.Flag[string]{
@@ -64,8 +65,6 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.RadarGetTrendingTopicsParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -76,6 +75,8 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.RadarGetTrendingTopicsParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

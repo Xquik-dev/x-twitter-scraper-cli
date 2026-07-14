@@ -8,71 +8,72 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestDraftsCreate(t *testing.T) {
+func TestGuestWalletsCreate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"drafts", "create",
-			"--text", "AI is the future of productivity",
-			"--goal", "engagement",
-			"--topic", "AI trends",
+			"guest-wallets", "create",
+			"--amount-minor", "1000",
+			"--currency", "usd",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
-			"text: AI is the future of productivity\n" +
-			"goal: engagement\n" +
-			"topic: AI trends\n")
+			"amount_minor: 1000\n" +
+			"currency: usd\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"drafts", "create",
+			"guest-wallets", "create",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
 		)
 	})
 }
 
-func TestDraftsRetrieve(t *testing.T) {
+func TestGuestWalletsRetrieveStatus(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"drafts", "retrieve",
-			"--id", "id",
+			"guest-wallets", "retrieve-status",
 		)
 	})
 }
 
-func TestDraftsList(t *testing.T) {
+func TestGuestWalletsTopup(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"drafts", "list",
-			"--after-cursor", "afterCursor",
-			"--limit", "1",
+			"guest-wallets", "topup",
+			"--amount-minor", "1000",
+			"--currency", "usd",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
 		)
 	})
-}
 
-func TestDraftsDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
-	t.Run("regular flags", func(t *testing.T) {
-		mocktest.TestRunMockTestWithFlags(
-			t,
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("" +
+			"amount_minor: 1000\n" +
+			"currency: usd\n")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"drafts", "delete",
-			"--id", "id",
+			"guest-wallets", "topup",
+			"--idempotency-key", "e1cb97D8-dDF3-4AaA-ad0a-49E4A0d1CfAa",
 		)
 	})
 }

@@ -14,6 +14,7 @@ func TestXUsersFollowCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:users:follow", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -26,6 +27,7 @@ func TestXUsersFollowCreate(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:users:follow", "create",
 			"--id", "id",
 		)
@@ -38,6 +40,7 @@ func TestXUsersFollowDeleteAll(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:users:follow", "delete-all",
 			"--id", "id",
 			"--account", "@elonmusk",
@@ -50,6 +53,7 @@ func TestXUsersFollowDeleteAll(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"x:users:follow", "delete-all",
 			"--id", "id",
 		)

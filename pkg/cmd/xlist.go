@@ -20,13 +20,20 @@ var xListsRetrieveFollowers = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for list followers",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum user profiles requested from this page (20-200, default 200). The response can contain fewer profiles because the source returned fewer or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true. The deprecated limit and count aliases remain accepted.\n",
+			Default:   200,
+			QueryPath: "pageSize",
 		},
 	},
 	Action:          handleXListsRetrieveFollowers,
@@ -39,13 +46,20 @@ var xListsRetrieveMembers = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for list members",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Members per page (20-200, default 20)",
+			Default:   20,
+			QueryPath: "pageSize",
 		},
 	},
 	Action:          handleXListsRetrieveMembers,
@@ -58,8 +72,9 @@ var xListsRetrieveTweets = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -70,6 +85,12 @@ var xListsRetrieveTweets = cli.Command{
 			Name:      "include-replies",
 			Usage:     "Include replies (default false)",
 			QueryPath: "includeReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Default:   20,
+			QueryPath: "pageSize",
 		},
 		&requestflag.Flag[string]{
 			Name:      "since-time",
@@ -97,8 +118,6 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XListGetFollowersParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -109,6 +128,8 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XListGetFollowersParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -146,8 +167,6 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XListGetMembersParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -158,6 +177,8 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XListGetMembersParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -195,8 +216,6 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XListGetTweetsParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -207,6 +226,8 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XListGetTweetsParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

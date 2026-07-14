@@ -8,26 +8,28 @@ import (
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/mocktest"
 )
 
-func TestSubscribeCreate(t *testing.T) {
+func TestXAccountConnectionChallengesSubmit(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"subscribe", "create",
-			"--tier", "pro",
+			"x:account-connection-challenges", "submit",
+			"--id", "id",
+			"--email-code", "123456",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("tier: pro")
+		pipeData := []byte("email_code: '123456'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
 			"--bearer-token", "string",
-			"subscribe", "create",
+			"x:account-connection-challenges", "submit",
+			"--id", "id",
 		)
 	})
 }

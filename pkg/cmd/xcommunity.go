@@ -47,8 +47,9 @@ var xCommunitiesDelete = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
@@ -73,8 +74,9 @@ var xCommunitiesRetrieveInfo = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 	},
 	Action:          handleXCommunitiesRetrieveInfo,
@@ -87,13 +89,20 @@ var xCommunitiesRetrieveMembers = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Items per page (20-200, default 20). This is an upper bound for paid authenticated calls: remaining credits can reduce the returned page size, and zero affordable results returns 402 insufficient_credits.\n",
+			Default:   20,
+			QueryPath: "pageSize",
 		},
 	},
 	Action:          handleXCommunitiesRetrieveMembers,
@@ -106,8 +115,9 @@ var xCommunitiesRetrieveModerators = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -121,9 +131,15 @@ var xCommunitiesRetrieveModerators = cli.Command{
 
 var xCommunitiesRetrieveSearch = cli.Command{
 	Name:    "retrieve-search",
-	Usage:   "Search for communities by keyword",
+	Usage:   "Returns tweets, not community records. Requires a Community ID.",
 	Suggest: true,
 	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:      "community-id",
+			Usage:     "Numeric ID of the community whose posts to search",
+			Required:  true,
+			QueryPath: "communityId",
+		},
 		&requestflag.Flag[string]{
 			Name:      "q",
 			Usage:     "Search query",
@@ -135,9 +151,16 @@ var xCommunitiesRetrieveSearch = cli.Command{
 			Usage:     "Pagination cursor for community search",
 			QueryPath: "cursor",
 		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Default:   20,
+			QueryPath: "pageSize",
+		},
 		&requestflag.Flag[string]{
 			Name:      "query-type",
 			Usage:     "Sort order (Latest or Top)",
+			Default:   "Latest",
 			QueryPath: "queryType",
 		},
 	},
@@ -153,8 +176,6 @@ func handleXCommunitiesCreate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XCommunityNewParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -165,6 +186,8 @@ func handleXCommunitiesCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XCommunityNewParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -197,8 +220,6 @@ func handleXCommunitiesDelete(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XCommunityDeleteParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -209,6 +230,8 @@ func handleXCommunitiesDelete(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XCommunityDeleteParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -288,8 +311,6 @@ func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) er
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XCommunityGetMembersParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -300,6 +321,8 @@ func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) er
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XCommunityGetMembersParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -337,8 +360,6 @@ func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XCommunityGetModeratorsParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -349,6 +370,8 @@ func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command)
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XCommunityGetModeratorsParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -383,8 +406,6 @@ func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) err
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XCommunityGetSearchParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -395,6 +416,8 @@ func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) err
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XCommunityGetSearchParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

@@ -20,8 +20,9 @@ var eventsRetrieve = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 	},
 	Action:          handleEventsRetrieve,
@@ -34,9 +35,9 @@ var eventsList = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:      "after",
-			Usage:     "Cursor for keyset pagination",
-			QueryPath: "after",
+			Name:      "cursor",
+			Usage:     "Cursor for keyset pagination from prior response next_cursor",
+			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
 			Name:      "event-type",
@@ -45,7 +46,7 @@ var eventsList = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Maximum number of items to return (1-100, default 50)",
+			Usage:     "Maximum number of items to return (1-100, default 50). For paid per-result endpoints, the returned count may be lower when remaining credits cannot cover the requested page. If zero paid results are affordable, the endpoint returns 402 insufficient_credits.\n",
 			Default:   50,
 			QueryPath: "limit",
 		},
@@ -109,8 +110,6 @@ func handleEventsList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.EventListParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -121,6 +120,8 @@ func handleEventsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.EventListParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

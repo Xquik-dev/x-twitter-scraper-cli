@@ -16,12 +16,13 @@ import (
 
 var xGetArticle = cli.Command{
 	Name:    "get-article",
-	Usage:   "Retrieve the full content of an X Article (long-form post) by tweet ID.",
+	Usage:   "Retrieve the full content of an X Article (long-form post) by numeric tweet ID.\nReturns article_not_found when the tweet is valid but is not an X Article.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "tweet-id",
-			Required: true,
+			Name:      "tweet-id",
+			Required:  true,
+			PathParam: "tweetId",
 		},
 	},
 	Action:          handleXGetArticle,
@@ -40,7 +41,7 @@ var xGetHomeTimeline = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "seen-tweet-ids",
-			Usage:     "Comma-separated tweet IDs to exclude from results",
+			Usage:     "Comma-separated tweet IDs to exclude from results. Empty entries are ignored.",
 			QueryPath: "seenTweetIds",
 		},
 	},
@@ -60,7 +61,7 @@ var xGetNotifications = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "type",
-			Usage:     "Notification type filter",
+			Usage:     "Notification type filter. Unrecognized values fall back to All.",
 			Default:   "All",
 			QueryPath: "type",
 		},
@@ -141,8 +142,6 @@ func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XGetHomeTimelineParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -153,6 +152,8 @@ func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XGetHomeTimelineParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -182,8 +183,6 @@ func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XGetNotificationsParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -194,6 +193,8 @@ func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XGetNotificationsParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -223,8 +224,6 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XGetTrendsParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -235,6 +234,8 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XGetTrendsParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

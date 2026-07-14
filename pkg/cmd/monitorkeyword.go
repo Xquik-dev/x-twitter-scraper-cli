@@ -14,9 +14,9 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var webhooksCreate = cli.Command{
+var monitorsKeywordsCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Create webhook",
+	Usage:   "Creates an instant keyword monitor. Keyword monitors are unlimited. Active\nmonitors check every 1 second and cost 21 credits per hour. Events and webhook\ndeliveries are included. Creation requires available credits for the first\nhourly charge.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{
@@ -26,19 +26,34 @@ var webhooksCreate = cli.Command{
 			BodyPath: "eventTypes",
 		},
 		&requestflag.Flag[string]{
-			Name:     "url",
-			Usage:    "HTTPS URL",
+			Name:     "query",
+			Usage:    "X search query to monitor. Whitespace is normalized.",
 			Required: true,
-			BodyPath: "url",
+			BodyPath: "query",
 		},
 	},
-	Action:          handleWebhooksCreate,
+	Action:          handleMonitorsKeywordsCreate,
 	HideHelpCommand: true,
 }
 
-var webhooksUpdate = cli.Command{
+var monitorsKeywordsRetrieve = cli.Command{
+	Name:    "retrieve",
+	Usage:   "Get keyword monitor",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
+		},
+	},
+	Action:          handleMonitorsKeywordsRetrieve,
+	HideHelpCommand: true,
+}
+
+var monitorsKeywordsUpdate = cli.Command{
 	Name:    "update",
-	Usage:   "Update webhook",
+	Usage:   "Update keyword monitor",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -55,27 +70,23 @@ var webhooksUpdate = cli.Command{
 			Name:     "is-active",
 			BodyPath: "isActive",
 		},
-		&requestflag.Flag[string]{
-			Name:     "url",
-			BodyPath: "url",
-		},
 	},
-	Action:          handleWebhooksUpdate,
+	Action:          handleMonitorsKeywordsUpdate,
 	HideHelpCommand: true,
 }
 
-var webhooksList = cli.Command{
+var monitorsKeywordsList = cli.Command{
 	Name:            "list",
-	Usage:           "List webhooks",
+	Usage:           "List keyword monitors",
 	Suggest:         true,
 	Flags:           []cli.Flag{},
-	Action:          handleWebhooksList,
+	Action:          handleMonitorsKeywordsList,
 	HideHelpCommand: true,
 }
 
-var webhooksDeactivate = cli.Command{
+var monitorsKeywordsDeactivate = cli.Command{
 	Name:    "deactivate",
-	Usage:   "Deactivate webhook",
+	Usage:   "Delete keyword monitor",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -84,56 +95,11 @@ var webhooksDeactivate = cli.Command{
 			PathParam: "id",
 		},
 	},
-	Action:          handleWebhooksDeactivate,
+	Action:          handleMonitorsKeywordsDeactivate,
 	HideHelpCommand: true,
 }
 
-var webhooksListDeliveries = cli.Command{
-	Name:    "list-deliveries",
-	Usage:   "List webhook deliveries",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:      "id",
-			Required:  true,
-			PathParam: "id",
-		},
-	},
-	Action:          handleWebhooksListDeliveries,
-	HideHelpCommand: true,
-}
-
-var webhooksResume = cli.Command{
-	Name:    "resume",
-	Usage:   "Test and resume webhook endpoint",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:      "id",
-			Required:  true,
-			PathParam: "id",
-		},
-	},
-	Action:          handleWebhooksResume,
-	HideHelpCommand: true,
-}
-
-var webhooksTest = cli.Command{
-	Name:    "test",
-	Usage:   "Test webhook endpoint",
-	Suggest: true,
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:      "id",
-			Required:  true,
-			PathParam: "id",
-		},
-	},
-	Action:          handleWebhooksTest,
-	HideHelpCommand: true,
-}
-
-func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
+func handleMonitorsKeywordsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 
@@ -152,11 +118,11 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	params := xtwitterscraper.WebhookNewParams{}
+	params := xtwitterscraper.MonitorKeywordNewParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.New(ctx, params, options...)
+	_, err = client.Monitors.Keywords.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}
@@ -169,12 +135,54 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 		ExplicitFormat: explicitFormat,
 		Format:         format,
 		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "webhooks create",
+		Title:          "monitors:keywords create",
 		Transform:      transform,
 	})
 }
 
-func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleMonitorsKeywordsRetrieve(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Monitors.Keywords.Get(ctx, cmd.Value("id").(string), options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "monitors:keywords retrieve",
+		Transform:      transform,
+	})
+}
+
+func handleMonitorsKeywordsUpdate(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -196,11 +204,11 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	params := xtwitterscraper.WebhookUpdateParams{}
+	params := xtwitterscraper.MonitorKeywordUpdateParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Update(
+	_, err = client.Monitors.Keywords.Update(
 		ctx,
 		cmd.Value("id").(string),
 		params,
@@ -218,12 +226,12 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 		ExplicitFormat: explicitFormat,
 		Format:         format,
 		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "webhooks update",
+		Title:          "monitors:keywords update",
 		Transform:      transform,
 	})
 }
 
-func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
+func handleMonitorsKeywordsList(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 
@@ -244,7 +252,7 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.List(ctx, options...)
+	_, err = client.Monitors.Keywords.List(ctx, options...)
 	if err != nil {
 		return err
 	}
@@ -257,54 +265,12 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 		ExplicitFormat: explicitFormat,
 		Format:         format,
 		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "webhooks list",
+		Title:          "monitors:keywords list",
 		Transform:      transform,
 	})
 }
 
-func handleWebhooksDeactivate(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Deactivate(ctx, cmd.Value("id").(string), options...)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	explicitFormat := cmd.Root().IsSet("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(obj, ShowJSONOpts{
-		ExplicitFormat: explicitFormat,
-		Format:         format,
-		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "webhooks deactivate",
-		Transform:      transform,
-	})
-}
-
-func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
+func handleMonitorsKeywordsDeactivate(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -328,7 +294,7 @@ func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.ListDeliveries(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Monitors.Keywords.Deactivate(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -341,91 +307,7 @@ func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
 		ExplicitFormat: explicitFormat,
 		Format:         format,
 		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "webhooks list-deliveries",
-		Transform:      transform,
-	})
-}
-
-func handleWebhooksResume(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Resume(ctx, cmd.Value("id").(string), options...)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	explicitFormat := cmd.Root().IsSet("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(obj, ShowJSONOpts{
-		ExplicitFormat: explicitFormat,
-		Format:         format,
-		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "webhooks resume",
-		Transform:      transform,
-	})
-}
-
-func handleWebhooksTest(ctx context.Context, cmd *cli.Command) error {
-	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Test(ctx, cmd.Value("id").(string), options...)
-	if err != nil {
-		return err
-	}
-
-	obj := gjson.ParseBytes(res)
-	format := cmd.Root().String("format")
-	explicitFormat := cmd.Root().IsSet("format")
-	transform := cmd.Root().String("transform")
-	return ShowJSON(obj, ShowJSONOpts{
-		ExplicitFormat: explicitFormat,
-		Format:         format,
-		RawOutput:      cmd.Root().Bool("raw-output"),
-		Title:          "webhooks test",
+		Title:          "monitors:keywords deactivate",
 		Transform:      transform,
 	})
 }

@@ -14,6 +14,22 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+var creditsRedirectTopupCheckout = cli.Command{
+	Name:    "redirect-topup-checkout",
+	Usage:   "Redirect to an active top-up payment page",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:      "session-id",
+			Usage:     "Billing session ID returned by the top-up billing flow.",
+			Required:  true,
+			QueryPath: "session_id",
+		},
+	},
+	Action:          handleCreditsRedirectTopupCheckout,
+	HideHelpCommand: true,
+}
+
 var creditsRetrieveBalance = cli.Command{
 	Name:            "retrieve-balance",
 	Usage:           "Get credits balance",
@@ -23,20 +39,65 @@ var creditsRetrieveBalance = cli.Command{
 	HideHelpCommand: true,
 }
 
+var creditsRetrieveTopupStatus = cli.Command{
+	Name:    "retrieve-topup-status",
+	Usage:   "Get top-up billing status",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:      "session-id",
+			Usage:     "Billing session ID returned by the top-up billing flow.",
+			Required:  true,
+			QueryPath: "session_id",
+		},
+	},
+	Action:          handleCreditsRetrieveTopupStatus,
+	HideHelpCommand: true,
+}
+
 var creditsTopupBalance = cli.Command{
 	Name:    "topup-balance",
-	Usage:   "Top up credits balance",
+	Usage:   "Create a Stripe Checkout session only after the user confirms. The request never\ncompletes payment or adds credits by itself.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
-			Name:     "amount",
-			Usage:    "Amount to top up in credits",
+			Name:     "dollars",
+			Usage:    "Amount to top up in US dollars. Minimum 10.",
 			Required: true,
-			BodyPath: "amount",
+			BodyPath: "dollars",
+		},
+		&requestflag.Flag[string]{
+			Name:     "locale",
+			Usage:    "Optional checkout locale. Defaults to en.",
+			BodyPath: "locale",
 		},
 	},
 	Action:          handleCreditsTopupBalance,
 	HideHelpCommand: true,
+}
+
+func handleCreditsRedirectTopupCheckout(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	params := xtwitterscraper.CreditRedirectTopupCheckoutParams{}
+
+	return client.Credits.RedirectTopupCheckout(ctx, params, options...)
 }
 
 func handleCreditsRetrieveBalance(ctx context.Context, cmd *cli.Command) error {
@@ -78,7 +139,7 @@ func handleCreditsRetrieveBalance(ctx context.Context, cmd *cli.Command) error {
 	})
 }
 
-func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
+func handleCreditsRetrieveTopupStatus(ctx context.Context, cmd *cli.Command) error {
 	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 
@@ -86,7 +147,46 @@ func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.CreditTopupBalanceParams{}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	params := xtwitterscraper.CreditGetTopupStatusParams{}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Credits.GetTopupStatus(ctx, params, options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		RawOutput:      cmd.Root().Bool("raw-output"),
+		Title:          "credits retrieve-topup-status",
+		Transform:      transform,
+	})
+}
+
+func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
+	client := xtwitterscraper.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 
 	options, err := flagOptions(
 		cmd,
@@ -98,6 +198,8 @@ func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.CreditTopupBalanceParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

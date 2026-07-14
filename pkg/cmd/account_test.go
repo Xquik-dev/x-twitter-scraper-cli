@@ -14,6 +14,7 @@ func TestAccountRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"account", "retrieve",
 		)
 	})
@@ -25,6 +26,7 @@ func TestAccountSetXUsername(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"account", "set-x-username",
 			"--username", "elonmusk",
 		)
@@ -36,6 +38,7 @@ func TestAccountSetXUsername(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"account", "set-x-username",
 		)
 	})
@@ -47,6 +50,7 @@ func TestAccountUpdateLocale(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"account", "update-locale",
 			"--locale", "en",
 		)
@@ -58,6 +62,7 @@ func TestAccountUpdateLocale(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"account", "update-locale",
 		)
 	})

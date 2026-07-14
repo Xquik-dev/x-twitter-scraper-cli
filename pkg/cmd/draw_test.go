@@ -14,8 +14,9 @@ func TestDrawsRetrieve(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"draws", "retrieve",
-			"--id", "id",
+			"--id", "f4bd00a2-7b4e-4e59-8e1b-72e2c9f12345",
 		)
 	})
 }
@@ -26,8 +27,9 @@ func TestDrawsList(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"draws", "list",
-			"--after", "after",
+			"--cursor", "cursor",
 			"--limit", "1",
 		)
 	})
@@ -39,8 +41,9 @@ func TestDrawsExport(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"draws", "export",
-			"--id", "id",
+			"--id", "f4bd00a2-7b4e-4e59-8e1b-72e2c9f12345",
 			"--format", "csv",
 			"--type", "winners",
 			"--output", "/dev/null",
@@ -54,6 +57,7 @@ func TestDrawsRun(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"draws", "run",
 			"--tweet-url", "https://x.com/elonmusk/status/1234567890",
 			"--backup-count", "2",
@@ -91,6 +95,7 @@ func TestDrawsRun(t *testing.T) {
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
+			"--bearer-token", "string",
 			"draws", "run",
 		)
 	})

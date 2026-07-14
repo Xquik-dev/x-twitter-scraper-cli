@@ -16,7 +16,7 @@ import (
 
 var monitorsCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Create monitor",
+	Usage:   "Creates an instant monitor. Monitors are unlimited. Active monitors check every\n1 second and cost 21 credits per hour. Events and webhook deliveries are\nincluded. Creation requires available credits for the first hourly charge and\nusername lookup.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{
@@ -42,8 +42,9 @@ var monitorsRetrieve = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 	},
 	Action:          handleMonitorsRetrieve,
@@ -56,8 +57,9 @@ var monitorsUpdate = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "event-type",
@@ -84,12 +86,13 @@ var monitorsList = cli.Command{
 
 var monitorsDeactivate = cli.Command{
 	Name:    "deactivate",
-	Usage:   "Deactivate monitor",
+	Usage:   "Delete monitor",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 	},
 	Action:          handleMonitorsDeactivate,
@@ -104,8 +107,6 @@ func handleMonitorsCreate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.MonitorNewParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -116,6 +117,8 @@ func handleMonitorsCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.MonitorNewParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -190,8 +193,6 @@ func handleMonitorsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.MonitorUpdateParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -202,6 +203,8 @@ func handleMonitorsUpdate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.MonitorUpdateParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

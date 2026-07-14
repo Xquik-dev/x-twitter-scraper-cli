@@ -20,8 +20,15 @@ var xDmRetrieveHistory = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "user-id",
-			Required: true,
+			Name:      "user-id",
+			Required:  true,
+			PathParam: "userId",
+		},
+		&requestflag.Flag[string]{
+			Name:      "account",
+			Usage:     "X handle (without the `@` prefix) of the connected X account used to read the conversation. The account must be a participant in the conversation.\n",
+			Required:  true,
+			QueryPath: "account",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
@@ -44,8 +51,9 @@ var xDmSend = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "user-id",
-			Required: true,
+			Name:      "user-id",
+			Required:  true,
+			PathParam: "userId",
 		},
 		&requestflag.Flag[string]{
 			Name:     "account",
@@ -60,11 +68,8 @@ var xDmSend = cli.Command{
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "media-id",
+			Usage:    "Optional array containing exactly 1 uploaded media ID.",
 			BodyPath: "media_ids",
-		},
-		&requestflag.Flag[string]{
-			Name:     "reply-to-message-id",
-			BodyPath: "reply_to_message_id",
 		},
 	},
 	Action:          handleXDmSend,
@@ -82,8 +87,6 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XDmGetHistoryParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -94,6 +97,8 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XDmGetHistoryParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -131,8 +136,6 @@ func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XDmSendParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -143,6 +146,8 @@ func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XDmSendParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

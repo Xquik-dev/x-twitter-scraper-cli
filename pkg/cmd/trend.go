@@ -21,13 +21,13 @@ var trendsList = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:      "count",
-			Usage:     "Number of trending topics to return (1-50, default 30)",
+			Usage:     "Number of trending topics returned (1-50, default 30)",
 			Default:   30,
 			QueryPath: "count",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "woeid",
-			Usage:     "Region WOEID (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
+			Usage:     "Region Yahoo WOEID code (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
 			Default:   1,
 			QueryPath: "woeid",
 		},
@@ -44,8 +44,6 @@ func handleTrendsList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.TrendListParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -56,6 +54,8 @@ func handleTrendsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.TrendListParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

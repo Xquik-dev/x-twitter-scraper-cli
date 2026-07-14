@@ -21,8 +21,9 @@ var drawsRetrieve = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 	},
 	Action:          handleDrawsRetrieve,
@@ -35,13 +36,13 @@ var drawsList = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:      "after",
-			Usage:     "Cursor for keyset pagination",
-			QueryPath: "after",
+			Name:      "cursor",
+			Usage:     "Cursor for keyset pagination from prior response next_cursor",
+			QueryPath: "cursor",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Maximum number of items to return (1-100, default 50)",
+			Usage:     "Maximum number of items to return (1-100, default 50). For paid per-result endpoints, the returned count may be lower when remaining credits cannot cover the requested page. If zero paid results are affordable, the endpoint returns 402 insufficient_credits.\n",
 			Default:   50,
 			QueryPath: "limit",
 		},
@@ -56,13 +57,14 @@ var drawsExport = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "format",
 			Usage:     "Export output format",
-			Default:   "csv",
+			Required:  true,
 			QueryPath: "format",
 		},
 		&requestflag.Flag[string]{
@@ -83,7 +85,7 @@ var drawsExport = cli.Command{
 
 var drawsRun = cli.Command{
 	Name:    "run",
-	Usage:   "Run giveaway draw",
+	Usage:   "Runs a giveaway draw from a source tweet. The draw first checks the minimum\ncredits needed to inspect the source tweet and at least one candidate. Remaining\ncredits cap how many replies and retweeters can be inspected before filters and\nwinner selection run.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -191,8 +193,6 @@ func handleDrawsList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.DrawListParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -203,6 +203,8 @@ func handleDrawsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.DrawListParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -235,8 +237,6 @@ func handleDrawsExport(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.DrawExportParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -247,6 +247,8 @@ func handleDrawsExport(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.DrawExportParams{}
 
 	response, err := client.Draws.Export(
 		ctx,
@@ -272,8 +274,6 @@ func handleDrawsRun(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.DrawRunParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -284,6 +284,8 @@ func handleDrawsRun(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.DrawRunParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))

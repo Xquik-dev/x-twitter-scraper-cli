@@ -16,23 +16,36 @@ import (
 
 var xCommunitiesTweetsList = cli.Command{
 	Name:    "list",
-	Usage:   "List tweets across all communities",
+	Usage:   "Requires a Community ID and keyword query.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
+			Name:      "community-id",
+			Usage:     "Numeric ID of the community to search",
+			Required:  true,
+			QueryPath: "communityId",
+		},
+		&requestflag.Flag[string]{
 			Name:      "q",
-			Usage:     "Search query for cross-community tweets",
+			Usage:     "Keyword query within the selected community",
 			Required:  true,
 			QueryPath: "q",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor for cross-community results",
+			Usage:     "Pagination cursor for community results",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Default:   20,
+			QueryPath: "pageSize",
 		},
 		&requestflag.Flag[string]{
 			Name:      "query-type",
-			Usage:     "Sort order for cross-community results (Latest or Top)",
+			Usage:     "Sort order for community results (Latest or Top)",
+			Default:   "Latest",
 			QueryPath: "queryType",
 		},
 	},
@@ -46,13 +59,20 @@ var xCommunitiesTweetsListByCommunity = cli.Command{
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
+			Name:      "id",
+			Required:  true,
+			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for community tweets",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Default:   20,
+			QueryPath: "pageSize",
 		},
 	},
 	Action:          handleXCommunitiesTweetsListByCommunity,
@@ -67,8 +87,6 @@ func handleXCommunitiesTweetsList(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XCommunityTweetListParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -79,6 +97,8 @@ func handleXCommunitiesTweetsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XCommunityTweetListParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
@@ -111,8 +131,6 @@ func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Comma
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 
-	params := xtwitterscraper.XCommunityTweetListByCommunityParams{}
-
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
@@ -123,6 +141,8 @@ func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Comma
 	if err != nil {
 		return err
 	}
+
+	params := xtwitterscraper.XCommunityTweetListByCommunityParams{}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
