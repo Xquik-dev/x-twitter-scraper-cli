@@ -111,3 +111,37 @@ func TestEncode(t *testing.T) {
 		})
 	}
 }
+
+func FuzzMarshalRoundTrip(f *testing.F) {
+	f.Add("")
+	f.Add("plain text")
+	f.Add("quotes \" and slashes \\")
+	f.Add("line one\r\nline two\x00")
+
+	f.Fuzz(func(t *testing.T, value string) {
+		if len(value) > 64*1024 {
+			t.Skip()
+		}
+
+		buf := bytes.NewBuffer(nil)
+		writer := multipart.NewWriter(buf)
+		boundary := writer.Boundary()
+		if err := MarshalWithSettings(map[string]string{"value": value}, writer, FormatIndicesDots); err != nil {
+			t.Fatalf("marshal value: %v", err)
+		}
+		if err := writer.Close(); err != nil {
+			t.Fatalf("close multipart writer: %v", err)
+		}
+
+		form, err := multipart.NewReader(buf, boundary).ReadForm(128 * 1024)
+		if err != nil {
+			t.Fatalf("read multipart form: %v", err)
+		}
+		defer form.RemoveAll()
+
+		values := form.Value["value"]
+		if len(values) != 1 || values[0] != value {
+			t.Fatalf("round trip changed value: got %q, want %q", values, value)
+		}
+	})
+}
