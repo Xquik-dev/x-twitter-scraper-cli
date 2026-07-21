@@ -65,6 +65,9 @@ archives:
 snapshot:
   version_template: '{{ .Tag }}-next'
 
+release:
+  draft: true
+
 nfpms:
   - license: Apache-2.0
     maintainer: support@xquik.com
