@@ -17,6 +17,7 @@ func TestXProfileUpdate(t *testing.T) {
 			"--bearer-token", "string",
 			"x:profile", "update",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 			"--description", "description_value",
 			"--location", "location_value",
 			"--name", "Example Name",
@@ -37,6 +38,7 @@ func TestXProfileUpdate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:profile", "update",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -51,6 +53,7 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 			"x:profile", "update-avatar",
 			"--account", "@elonmusk",
 			"--url", "https://example.com/avatar.png",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -64,6 +67,7 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:profile", "update-avatar",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -78,6 +82,7 @@ func TestXProfileUpdateBanner(t *testing.T) {
 			"x:profile", "update-banner",
 			"--account", "@elonmusk",
 			"--url", "https://example.com/banner.png",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -91,6 +96,7 @@ func TestXProfileUpdateBanner(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:profile", "update-banner",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

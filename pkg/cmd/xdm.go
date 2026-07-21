@@ -66,6 +66,11 @@ var xDmSend = cli.Command{
 			Required: true,
 			BodyPath: "text",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
 		&requestflag.Flag[[]string]{
 			Name:     "media-id",
 			Usage:    "Optional array containing exactly 1 uploaded media ID.",

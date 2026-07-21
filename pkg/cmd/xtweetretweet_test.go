@@ -18,6 +18,7 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 			"x:tweets:retweet", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -30,6 +31,7 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets:retweet", "create",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -44,6 +46,7 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 			"x:tweets:retweet", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -56,6 +59,7 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets:retweet", "delete",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

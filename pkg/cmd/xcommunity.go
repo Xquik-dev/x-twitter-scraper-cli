@@ -32,6 +32,11 @@ var xCommunitiesCreate = cli.Command{
 			BodyPath: "name",
 		},
 		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
+		&requestflag.Flag[string]{
 			Name:     "description",
 			Usage:    "Community description",
 			BodyPath: "description",
@@ -62,6 +67,11 @@ var xCommunitiesDelete = cli.Command{
 			Usage:    "Community name for confirmation",
 			Required: true,
 			BodyPath: "community_name",
+		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
 		},
 	},
 	Action:          handleXCommunitiesDelete,

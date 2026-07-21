@@ -18,6 +18,7 @@ func TestXUsersFollowCreate(t *testing.T) {
 			"x:users:follow", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -30,6 +31,7 @@ func TestXUsersFollowCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"x:users:follow", "create",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -44,6 +46,7 @@ func TestXUsersFollowDeleteAll(t *testing.T) {
 			"x:users:follow", "delete-all",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -56,6 +59,7 @@ func TestXUsersFollowDeleteAll(t *testing.T) {
 			"--bearer-token", "string",
 			"x:users:follow", "delete-all",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

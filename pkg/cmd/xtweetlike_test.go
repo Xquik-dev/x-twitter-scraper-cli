@@ -18,6 +18,7 @@ func TestXTweetsLikeCreate(t *testing.T) {
 			"x:tweets:like", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -30,6 +31,7 @@ func TestXTweetsLikeCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets:like", "create",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -44,6 +46,7 @@ func TestXTweetsLikeDelete(t *testing.T) {
 			"x:tweets:like", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -56,6 +59,7 @@ func TestXTweetsLikeDelete(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets:like", "delete",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

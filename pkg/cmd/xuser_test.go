@@ -31,6 +31,7 @@ func TestXUsersRemoveFollower(t *testing.T) {
 			"x:users", "remove-follower",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -43,6 +44,7 @@ func TestXUsersRemoveFollower(t *testing.T) {
 			"--bearer-token", "string",
 			"x:users", "remove-follower",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
