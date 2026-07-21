@@ -61,6 +61,11 @@ var xMediaUpload = cli.Command{
 			Required: true,
 			BodyPath: "url",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
 	},
 	Action:          handleXMediaUpload,
 	HideHelpCommand: true,

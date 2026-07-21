@@ -52,6 +52,7 @@ func TestXMediaUpload(t *testing.T) {
 			"x:media", "upload",
 			"--account", "@elonmusk",
 			"--url", "https://example.com/image.png",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -65,6 +66,7 @@ func TestXMediaUpload(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:media", "upload",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

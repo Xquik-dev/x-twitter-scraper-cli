@@ -30,6 +30,11 @@ var xTweetsLikeCreate = cli.Command{
 			Required: true,
 			BodyPath: "account",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
 	},
 	Action:          handleXTweetsLikeCreate,
 	HideHelpCommand: true,
@@ -50,6 +55,11 @@ var xTweetsLikeDelete = cli.Command{
 			Usage:    "X account identifier (@username or account ID)",
 			Required: true,
 			BodyPath: "account",
+		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
 		},
 	},
 	Action:          handleXTweetsLikeDelete,

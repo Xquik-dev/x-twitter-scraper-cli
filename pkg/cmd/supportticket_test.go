@@ -18,6 +18,7 @@ func TestSupportTicketsCreate(t *testing.T) {
 			"support:tickets", "create",
 			"--body", "I am unable to connect my X account. Please help.",
 			"--subject", "Cannot connect X account",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -31,6 +32,7 @@ func TestSupportTicketsCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"support:tickets", "create",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -96,6 +98,7 @@ func TestSupportTicketsReply(t *testing.T) {
 			"support:tickets", "reply",
 			"--id", "tkt_a1b2c3d4e5f6a1b2c3d4e5f6",
 			"--body", "Thank you for the update.",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -108,6 +111,7 @@ func TestSupportTicketsReply(t *testing.T) {
 			"--bearer-token", "string",
 			"support:tickets", "reply",
 			"--id", "tkt_a1b2c3d4e5f6a1b2c3d4e5f6",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

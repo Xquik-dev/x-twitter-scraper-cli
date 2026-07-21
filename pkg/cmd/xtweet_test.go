@@ -17,7 +17,7 @@ func TestXTweetsCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets", "create",
 			"--account", "@elonmusk",
-			"--attachment-url", "https://x.com/elonmusk/status/1234567890",
+			"--idempotency-key", "Idempotency-Key",
 			"--community-id", "1500000000000000000",
 			"--is-note-tweet=false",
 			"--media", "https://example.com/video.mp4",
@@ -30,7 +30,6 @@ func TestXTweetsCreate(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
-			"attachment_url: https://x.com/elonmusk/status/1234567890\n" +
 			"community_id: '1500000000000000000'\n" +
 			"is_note_tweet: false\n" +
 			"media:\n" +
@@ -42,6 +41,7 @@ func TestXTweetsCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:tweets", "create",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -82,6 +82,7 @@ func TestXTweetsDelete(t *testing.T) {
 			"x:tweets", "delete",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -94,6 +95,7 @@ func TestXTweetsDelete(t *testing.T) {
 			"--bearer-token", "string",
 			"x:tweets", "delete",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

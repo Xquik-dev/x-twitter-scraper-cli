@@ -18,6 +18,7 @@ func TestXCommunitiesCreate(t *testing.T) {
 			"x:communities", "create",
 			"--account", "@elonmusk",
 			"--name", "Example Name",
+			"--idempotency-key", "Idempotency-Key",
 			"--description", "A community for Tesla enthusiasts",
 		)
 	})
@@ -33,6 +34,7 @@ func TestXCommunitiesCreate(t *testing.T) {
 			"--api-key", "string",
 			"--bearer-token", "string",
 			"x:communities", "create",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -48,6 +50,7 @@ func TestXCommunitiesDelete(t *testing.T) {
 			"--id", "id",
 			"--account", "@elonmusk",
 			"--community-name", "Tesla Fans",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -62,6 +65,7 @@ func TestXCommunitiesDelete(t *testing.T) {
 			"--bearer-token", "string",
 			"x:communities", "delete",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

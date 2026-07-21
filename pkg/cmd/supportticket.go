@@ -29,6 +29,10 @@ var supportTicketsCreate = cli.Command{
 			Required: true,
 			BodyPath: "subject",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			HeaderPath: "Idempotency-Key",
+		},
 	},
 	Action:          handleSupportTicketsCreate,
 	HideHelpCommand: true,
@@ -93,6 +97,10 @@ var supportTicketsReply = cli.Command{
 			Name:     "body",
 			Required: true,
 			BodyPath: "body",
+		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			HeaderPath: "Idempotency-Key",
 		},
 	},
 	Action:          handleSupportTicketsReply,

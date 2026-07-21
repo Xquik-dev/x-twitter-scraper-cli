@@ -45,6 +45,11 @@ var xUsersRemoveFollower = cli.Command{
 			Required: true,
 			BodyPath: "account",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
 	},
 	Action:          handleXUsersRemoveFollower,
 	HideHelpCommand: true,
