@@ -16,7 +16,7 @@ import (
 
 var monitorsKeywordsCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Creates an instant keyword monitor. Keyword monitors are unlimited. Active\nmonitors check every 1 second and cost 21 credits per hour. Events and webhook\ndeliveries are included. Creation requires available credits for the first\nhourly charge.",
+	Usage:   "Creates a keyword monitor. Keyword monitors are unlimited. Active monitors check\nevery 1 second and cost 21 credits per hour. Events and webhook deliveries are\nincluded. Creation requires available credits for the first hourly charge.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{

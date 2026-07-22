@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 (2026-07-22)
+
+Full Changelog: [v0.6.0...v0.6.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.0...v0.6.1)
+
+### Chores
+
+* sync generated SDK contracts ([c008a4c](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c008a4c645f951f0e07bca3b4bfc145bd7d335a8))
+
 ## 0.6.0 (2026-07-22)
 
 Full Changelog: [v0.5.2...v0.6.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.5.2...v0.6.0)

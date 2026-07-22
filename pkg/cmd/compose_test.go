@@ -17,16 +17,9 @@ func TestComposeCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"compose", "create",
 			"--step", "compose",
-			"--additional-context", "https://x.com/elonmusk/status/1234567890",
-			"--call-to-action", "Follow for more",
-			"--draft", "AI is changing everything. Here's why.",
+			"--topic", "PostgreSQL query planning",
 			"--goal", "engagement",
-			"--has-link=false",
-			"--has-media=false",
-			"--media-type", "none",
-			"--style-username", "elonmusk",
-			"--tone", "professional",
-			"--topic", "AI trends in 2025",
+			"--style-username", "x",
 		)
 	})
 
@@ -34,16 +27,9 @@ func TestComposeCreate(t *testing.T) {
 		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"step: compose\n" +
-			"additionalContext: https://x.com/elonmusk/status/1234567890\n" +
-			"callToAction: Follow for more\n" +
-			"draft: AI is changing everything. Here's why.\n" +
+			"topic: PostgreSQL query planning\n" +
 			"goal: engagement\n" +
-			"hasLink: false\n" +
-			"hasMedia: false\n" +
-			"mediaType: none\n" +
-			"styleUsername: elonmusk\n" +
-			"tone: professional\n" +
-			"topic: AI trends in 2025\n")
+			"styleUsername: x\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
