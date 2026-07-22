@@ -46,7 +46,7 @@ var creditsRetrieveTopupStatus = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "session-id",
-			Usage:     "Billing session ID returned by the top-up billing flow.",
+			Usage:     "Top-up session ID to inspect.",
 			Required:  true,
 			QueryPath: "session_id",
 		},

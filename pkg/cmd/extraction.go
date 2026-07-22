@@ -220,7 +220,7 @@ var extractionsEstimateCost = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "search-query",
-			Usage:    "Required for tweet_search_extractor & community_search.",
+			Usage:    "Query used to price tweet_search_extractor or community_search.",
 			BodyPath: "searchQuery",
 		},
 		&requestflag.Flag[any]{
@@ -230,17 +230,17 @@ var extractionsEstimateCost = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-community-id",
-			Usage:    "Required for community_post_extractor & community_search.",
+			Usage:    "Community ID used to price community_post_extractor or community_search.",
 			BodyPath: "targetCommunityId",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-list-id",
-			Usage:    "Required for list_follower_explorer, list_member_extractor & list_post_extractor.",
+			Usage:    "List ID used to price list_follower_explorer, list_member_extractor, or list_post_extractor.",
 			BodyPath: "targetListId",
 		},
 		&requestflag.Flag[string]{
 			Name:     "target-space-id",
-			Usage:    "Required for space_explorer.",
+			Usage:    "Space ID used to price space_explorer.",
 			BodyPath: "targetSpaceId",
 		},
 		&requestflag.Flag[string]{

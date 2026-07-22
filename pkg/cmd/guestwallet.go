@@ -21,7 +21,7 @@ var guestWalletsCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:     "amount-minor",
-			Usage:    "Confirmed USD amount in cents.",
+			Usage:    "USD cents accepted for this checkout.",
 			Required: true,
 			BodyPath: "amount_minor",
 		},
@@ -58,7 +58,7 @@ var guestWalletsTopup = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:     "amount-minor",
-			Usage:    "Confirmed USD amount in cents.",
+			Usage:    "USD cents accepted for this checkout.",
 			Required: true,
 			BodyPath: "amount_minor",
 		},
