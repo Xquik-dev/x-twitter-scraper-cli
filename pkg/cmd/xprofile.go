@@ -26,6 +26,11 @@ var xProfileUpdate = cli.Command{
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
+		&requestflag.Flag[string]{
 			Name:     "description",
 			Usage:    "Bio description",
 			BodyPath: "description",
@@ -66,6 +71,11 @@ var xProfileUpdateAvatar = cli.Command{
 			Required: true,
 			BodyPath: "url",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
 	},
 	Action:          handleXProfileUpdateAvatar,
 	HideHelpCommand: true,
@@ -87,6 +97,11 @@ var xProfileUpdateBanner = cli.Command{
 			Usage:    "HTTPS URL to the banner image to download",
 			Required: true,
 			BodyPath: "url",
+		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
 		},
 	},
 	Action:          handleXProfileUpdateBanner,

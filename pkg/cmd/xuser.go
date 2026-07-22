@@ -45,6 +45,11 @@ var xUsersRemoveFollower = cli.Command{
 			Required: true,
 			BodyPath: "account",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
 	},
 	Action:          handleXUsersRemoveFollower,
 	HideHelpCommand: true,
@@ -140,7 +145,7 @@ var xUsersRetrieveFollowing = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "after",
-			Usage:     "Legacy cursor alias. Prefer cursor.",
+			Usage:     "Deprecated following cursor alias. Prefer cursor.",
 			QueryPath: "after",
 		},
 		&requestflag.Flag[string]{
@@ -679,7 +684,7 @@ var xUsersRetrieveReplies = cli.Command{
 		},
 		&requestflag.Flag[bool]{
 			Name:      "include-parent-tweet",
-			Usage:     "Include parent tweet for replies",
+			Usage:     "Include each reply's parent tweet.",
 			Default:   false,
 			QueryPath: "includeParentTweet",
 		},

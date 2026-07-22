@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0 (2026-07-22)
+
+Full Changelog: [v0.5.2...v0.6.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.5.2...v0.6.0)
+
+### Features
+
+* **api:** propagate durable write actions ([9698548](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/9698548f8e5ff8bc83edb5937bc49afcb58e9090))
+* **api:** propagate production write-action contract ([3365162](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/3365162b16680e10fd8a6ddf8bba67193ba6de70))
+* **stlc:** configurable CI runner and private-production-repo support in workflow templates ([fdb0dc6](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/fdb0dc616a543d79d537d673118f941e6b99c5d5))
+* **stlc:** configurable CI runner and private-production-repo support in workflow templates ([3c59103](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/3c59103a780c5385e6739774b27ff0856a02b238))
+
+
+### Chores
+
+* **internal:** codegen related update ([ff796c8](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/ff796c8770a4b0f9ded3a25a1aecd4f6ad7097da))
+* **internal:** codegen related update ([1d30539](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/1d305394e230fc3eb390366584f3c428d0886742))
+
 ## 0.5.0 (2026-07-14)
 
 Full Changelog: [v0.4.1...v0.5.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.4.1...v0.5.0)

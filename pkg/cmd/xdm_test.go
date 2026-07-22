@@ -35,6 +35,7 @@ func TestXDmSend(t *testing.T) {
 			"--user-id", "userId",
 			"--account", "@elonmusk",
 			"--text", "Example text content",
+			"--idempotency-key", "Idempotency-Key",
 			"--media-id", "1234567890123456789",
 		)
 	})
@@ -52,6 +53,7 @@ func TestXDmSend(t *testing.T) {
 			"--bearer-token", "string",
 			"x:dm", "send",
 			"--user-id", "userId",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

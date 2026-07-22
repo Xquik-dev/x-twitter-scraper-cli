@@ -18,6 +18,7 @@ func TestXCommunitiesJoinCreate(t *testing.T) {
 			"x:communities:join", "create",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -30,6 +31,7 @@ func TestXCommunitiesJoinCreate(t *testing.T) {
 			"--bearer-token", "string",
 			"x:communities:join", "create",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }
@@ -44,6 +46,7 @@ func TestXCommunitiesJoinDeleteAll(t *testing.T) {
 			"x:communities:join", "delete-all",
 			"--id", "id",
 			"--account", "@elonmusk",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 
@@ -56,6 +59,7 @@ func TestXCommunitiesJoinDeleteAll(t *testing.T) {
 			"--bearer-token", "string",
 			"x:communities:join", "delete-all",
 			"--id", "id",
+			"--idempotency-key", "Idempotency-Key",
 		)
 	})
 }

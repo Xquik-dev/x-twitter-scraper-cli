@@ -26,8 +26,9 @@ var xTweetsCreate = cli.Command{
 			BodyPath: "account",
 		},
 		&requestflag.Flag[string]{
-			Name:     "attachment-url",
-			BodyPath: "attachment_url",
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
 		},
 		&requestflag.Flag[string]{
 			Name:     "community-id",
@@ -103,6 +104,11 @@ var xTweetsDelete = cli.Command{
 			Required: true,
 			BodyPath: "account",
 		},
+		&requestflag.Flag[string]{
+			Name:       "idempotency-key",
+			Required:   true,
+			HeaderPath: "Idempotency-Key",
+		},
 	},
 	Action:          handleXTweetsDelete,
 	HideHelpCommand: true,
@@ -110,7 +116,7 @@ var xTweetsDelete = cli.Command{
 
 var xTweetsGetFavoriters = cli.Command{
 	Name:    "get-favoriters",
-	Usage:   "List users who liked a tweet",
+	Usage:   "Returns liker profiles that X makes visible for the post. X can withhold liker\nidentities even when the post reports likes. In that case this endpoint returns\n424 `favoriters_unavailable` instead of a misleading empty success.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -302,7 +308,7 @@ var xTweetsGetQuotes = cli.Command{
 
 var xTweetsGetReplies = cli.Command{
 	Name:    "get-replies",
-	Usage:   "List replies to a tweet",
+	Usage:   "Returns visible replies. For an unfiltered first page, Xquik compares a terminal\npage with the post's reported reply count. If the page is visibly incomplete,\nthe endpoint returns 424 `replies_incomplete` instead of presenting partial\ncoverage as complete. Use tweet search with a `conversation_id:{id}` query as\nthe broader fallback.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
