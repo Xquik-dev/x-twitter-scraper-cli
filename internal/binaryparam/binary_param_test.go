@@ -57,3 +57,16 @@ func TestFileOrStdin(t *testing.T) {
 		})
 	}
 }
+
+func TestFileOrStdinRejectsMissingFile(t *testing.T) {
+	t.Parallel()
+
+	readCloser, stdinInUse, err := FileOrStdin(
+		os.Stdin,
+		t.TempDir()+"/missing.txt",
+	)
+
+	require.Error(t, err)
+	require.Nil(t, readCloser)
+	require.False(t, stdinInUse)
+}

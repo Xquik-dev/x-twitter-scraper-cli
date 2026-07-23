@@ -13,6 +13,7 @@ go test -race ./... "$@"
 if [[ "$#" -eq 0 ]]; then
   echo "==> Enforcing statement coverage"
   ./scripts/coverage
+  ./scripts/branch-coverage
 fi
 
 echo "==> Checking tests on Windows"

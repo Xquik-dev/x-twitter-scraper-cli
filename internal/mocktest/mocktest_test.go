@@ -45,3 +45,20 @@ func TestFileCreatesFixture(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "contents", string(contents))
 }
+
+func TestNetworkGuardRejectsOtherServers(t *testing.T) {
+	restore := restrictNetworkToMockServer()
+	t.Cleanup(restore)
+
+	request, err := http.NewRequestWithContext(
+		context.Background(),
+		http.MethodGet,
+		"https://example.invalid",
+		nil,
+	)
+	require.NoError(t, err)
+
+	response, err := http.DefaultClient.Do(request)
+	require.ErrorContains(t, err, "blocked test network connection")
+	require.Nil(t, response)
+}
