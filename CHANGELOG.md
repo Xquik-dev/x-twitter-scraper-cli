@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.3 (2026-07-23)
+
+Full Changelog: [v0.6.2...v0.6.3](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.2...v0.6.3)
+
+### Documentation
+
+* map common CLI tasks ([#11](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/11)) ([1b4522c](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/1b4522c76a0379bbecbc54d6fbb7d8c891cc7389))
+
 ## 0.6.2 (2026-07-23)
 
 Full Changelog: [v0.6.1...v0.6.2](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.1...v0.6.2)
