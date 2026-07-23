@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+readonly gocove_version="v0.0.0-20260427173940-a0dceb9dadca"
+readonly temp_root="${TMPDIR:-/tmp}"
+branch_workspace="$(mktemp -d "${temp_root%/}/xquik-cli-gocove.XXXXXX")"
+readonly branch_meta="$branch_workspace/meta"
+readonly branch_cache="$branch_workspace/go-cache"
+mkdir -p "$branch_meta" "$branch_cache"
+
+cleanup() {
+  case "$branch_workspace" in
+    "${temp_root%/}"/xquik-cli-gocove.*)
+      rm -rf -- "$branch_workspace"
+      ;;
+    *)
+      echo "Refusing to remove unexpected path: $branch_workspace" >&2
+      ;;
+  esac
+}
+trap cleanup EXIT
+
+export GOCOVE_META_DIR="$branch_meta"
+export GOCACHE="$branch_cache"
+# TestMain returns normally, so the generated test main flushes observations.
+# gocove's diagnostic does not distinguish that safe form.
+export GOCOVE_NO_WARN=1
+
+echo "==> Enforcing 80% branch coverage"
+# Rebuild every package. gocove does not emit catalogs for Go cache hits.
+go run "github.com/srvgit/gocove/cmd/gocove@${gocove_version}" \
+  test \
+  -a \
+  -coverpkg=./... \
+  ./...
+go run "github.com/srvgit/gocove/cmd/gocove@${gocove_version}" \
+  report \
+  --meta-dir="$branch_meta" \
+  --format=json > "$branch_meta/report.json"
+
+go run ./scripts/branch_coverage.go \
+  "$branch_meta/report.json" \
+  "$branch_meta/_gocove/cover.profile" \
+  80

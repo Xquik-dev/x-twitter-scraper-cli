@@ -2,6 +2,7 @@ package debugmiddleware
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -11,6 +12,23 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
+
+type controlledReadCloser struct {
+	reader   io.Reader
+	readErr  error
+	closeErr error
+}
+
+func (r *controlledReadCloser) Read(buffer []byte) (int, error) {
+	if r.readErr != nil {
+		return 0, r.readErr
+	}
+	return r.reader.Read(buffer)
+}
+
+func (r *controlledReadCloser) Close() error {
+	return r.closeErr
+}
 
 func TestDebugMiddleware(t *testing.T) {
 	t.Parallel()
@@ -198,4 +216,40 @@ func TestDebugMiddleware(t *testing.T) {
 		require.True(t, nextMiddlewareRan)
 		require.Contains(t, logBuf.String(), "Authorization: "+redactedPlaceholder)
 	})
+}
+
+func TestCloneBodyHandlesEmptyAndFailedBodies(t *testing.T) {
+	t.Parallel()
+
+	for name, body := range map[string]io.ReadCloser{
+		"nil":     nil,
+		"no body": http.NoBody,
+	} {
+		t.Run(name, func(t *testing.T) {
+			first, second, err := cloneBody(body)
+			require.NoError(t, err)
+			require.Equal(t, http.NoBody, first)
+			require.Equal(t, http.NoBody, second)
+		})
+	}
+
+	readErr := errors.New("read failed")
+	failedRead := &controlledReadCloser{
+		reader:  strings.NewReader("ignored"),
+		readErr: readErr,
+	}
+	first, second, err := cloneBody(failedRead)
+	require.ErrorIs(t, err, readErr)
+	require.Nil(t, first)
+	require.Same(t, failedRead, second)
+
+	closeErr := errors.New("close failed")
+	failedClose := &controlledReadCloser{
+		reader:   strings.NewReader("body"),
+		closeErr: closeErr,
+	}
+	first, second, err = cloneBody(failedClose)
+	require.ErrorIs(t, err, closeErr)
+	require.Nil(t, first)
+	require.Same(t, failedClose, second)
 }
