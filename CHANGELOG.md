@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.2 (2026-07-23)
+
+Full Changelog: [v0.6.1...v0.6.2](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.1...v0.6.2)
+
+### Chores
+
+* **internal:** codegen related update ([6ef7482](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/6ef7482867ab662f94192a476a98446a9e128dc6))
+
 ## 0.6.1 (2026-07-22)
 
 Full Changelog: [v0.6.0...v0.6.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.0...v0.6.1)
