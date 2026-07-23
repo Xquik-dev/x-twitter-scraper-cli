@@ -59,6 +59,15 @@ archives:
       - src: man/*/*
         info:
           mtime: '{{ .CommitDate }}'
+      - src: LICENSE
+        info:
+          mtime: '{{ .CommitDate }}'
+      - src: LICENSES/BSD-3-Clause.txt
+        info:
+          mtime: '{{ .CommitDate }}'
+      - src: THIRD_PARTY_NOTICES.md
+        info:
+          mtime: '{{ .CommitDate }}'
   - id: macos-archive
     ids: [macos]
     name_template: '{{ .ProjectName }}_{{ .Version }}_macos_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
@@ -72,6 +81,15 @@ archives:
       - src: man/*/*
         info:
           mtime: '{{ .CommitDate }}'
+      - src: LICENSE
+        info:
+          mtime: '{{ .CommitDate }}'
+      - src: LICENSES/BSD-3-Clause.txt
+        info:
+          mtime: '{{ .CommitDate }}'
+      - src: THIRD_PARTY_NOTICES.md
+        info:
+          mtime: '{{ .CommitDate }}'
   - id: windows-archive
     ids: [windows]
     name_template: '{{ .ProjectName }}_{{ .Version }}_windows_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
@@ -83,6 +101,15 @@ archives:
         info:
           mtime: '{{ .CommitDate }}'
       - src: man/*/*
+        info:
+          mtime: '{{ .CommitDate }}'
+      - src: LICENSE
+        info:
+          mtime: '{{ .CommitDate }}'
+      - src: LICENSES/BSD-3-Clause.txt
+        info:
+          mtime: '{{ .CommitDate }}'
+      - src: THIRD_PARTY_NOTICES.md
         info:
           mtime: '{{ .CommitDate }}'
 
@@ -106,5 +133,17 @@ nfpms:
     contents:
       - src: man/man1/*.1.gz
         dst: /usr/share/man/man1/
+        file_info:
+          mtime: '{{ .CommitDate }}'
+      - src: LICENSE
+        dst: /usr/share/doc/x-twitter-scraper/LICENSE
+        file_info:
+          mtime: '{{ .CommitDate }}'
+      - src: LICENSES/BSD-3-Clause.txt
+        dst: /usr/share/doc/x-twitter-scraper/BSD-3-Clause.txt
+        file_info:
+          mtime: '{{ .CommitDate }}'
+      - src: THIRD_PARTY_NOTICES.md
+        dst: /usr/share/doc/x-twitter-scraper/THIRD_PARTY_NOTICES.md
         file_info:
           mtime: '{{ .CommitDate }}'

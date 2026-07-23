@@ -18,7 +18,7 @@ No OpenSSF-defined ineligibility applies.
 
 | Area | Evidence |
 | --- | --- |
-| License | Apache-2.0 with REUSE 3.3 metadata |
+| License | Apache-2.0, REUSE 3.3 metadata, and bundled BSD-3-Clause terms |
 | Contribution process | `CONTRIBUTING.md`, DCO sign-off, and independent review policy |
 | Security reporting | Private GitHub reporting, response targets, and safe harbor in `SECURITY.md` |
 | Build | Pinned Go modules, checksum verification, and `./scripts/build` |
