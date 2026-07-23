@@ -9,7 +9,6 @@ import (
 )
 
 func TestAccountRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -21,7 +20,6 @@ func TestAccountRetrieve(t *testing.T) {
 }
 
 func TestAccountSetXUsername(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -45,7 +43,6 @@ func TestAccountSetXUsername(t *testing.T) {
 }
 
 func TestAccountUpdateLocale(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

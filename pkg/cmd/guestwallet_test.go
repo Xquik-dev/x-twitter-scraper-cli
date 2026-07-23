@@ -9,7 +9,6 @@ import (
 )
 
 func TestGuestWalletsCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -38,7 +37,6 @@ func TestGuestWalletsCreate(t *testing.T) {
 }
 
 func TestGuestWalletsRetrieveStatus(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -50,7 +48,6 @@ func TestGuestWalletsRetrieveStatus(t *testing.T) {
 }
 
 func TestGuestWalletsTopup(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

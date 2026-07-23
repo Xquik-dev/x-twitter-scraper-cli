@@ -24,7 +24,11 @@ var (
 )
 
 func init() {
-	Command = &cli.Command{
+	Command = newCommand()
+}
+
+func newCommand() *cli.Command {
+	return &cli.Command{
 		Name:      "x-twitter-scraper",
 		Usage:     "CLI for the x-twitter-scraper API",
 		Suggest:   true,

@@ -1,96 +1,89 @@
 package mocktest
 
 import (
-	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
-	"net/url"
+	"net/http/httptest"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
-	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
-	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var mockServerURL *url.URL
+type Runner func(*testing.T, context.Context, []string, []byte) error
 
-func init() {
-	mockServerURL, _ = url.Parse("http://localhost:4010")
-	if testURL := os.Getenv("TEST_API_BASE_URL"); testURL != "" {
-		if parsed, err := url.Parse(testURL); err == nil {
-			mockServerURL = parsed
-		}
+var runCLI Runner
+var commandTestMutex sync.Mutex
+var responseStatus atomic.Int64
+
+var mockServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	_, _ = io.Copy(io.Discard, r.Body)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(int(responseStatus.Load()))
+	_, _ = w.Write([]byte("{}"))
+}))
+
+func restrictNetworkToMockServer() func() {
+	dialer := &net.Dialer{}
+	allowedAddress := mockServer.Listener.Addr().String()
+	transport := &http.Transport{
+		DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+			if address != allowedAddress {
+				return nil, fmt.Errorf("blocked test network connection to %s", address)
+			}
+			return dialer.DialContext(ctx, network, address)
+		},
+	}
+
+	previousTransport := http.DefaultTransport
+	http.DefaultTransport = transport
+	return func() {
+		http.DefaultTransport = previousTransport
+		transport.CloseIdleConnections()
 	}
 }
 
-// OnlyMockServerDialer only allows network connections to the mock server
-type OnlyMockServerDialer struct{}
-
-func (d *OnlyMockServerDialer) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	if address == mockServerURL.Host {
-		return (&net.Dialer{}).DialContext(ctx, network, address)
-	}
-
-	return nil, fmt.Errorf("BLOCKED: connection to %s not allowed (only allowed: %s)", address, mockServerURL.Host)
-}
-
-func blockNetworkExceptMockServer() (http.RoundTripper, http.RoundTripper) {
-	restricted := &http.Transport{
-		DialContext: (&OnlyMockServerDialer{}).DialContext,
-	}
-
-	origClient, origDefault := http.DefaultClient.Transport, http.DefaultTransport
-	http.DefaultClient.Transport, http.DefaultTransport = restricted, restricted
-	return origClient, origDefault
-}
-
-func restoreNetwork(origClient, origDefault http.RoundTripper) {
-	http.DefaultClient.Transport, http.DefaultTransport = origClient, origDefault
+func RegisterRunner(runner Runner) {
+	runCLI = runner
 }
 
 // TestRunMockTestWithFlags runs a test against a mock server with the provided
 // CLI args and ensures it succeeds
 func TestRunMockTestWithFlags(t *testing.T, args ...string) {
+	t.Helper()
 	TestRunMockTestWithPipeAndFlags(t, nil, args...)
 }
 
 // TestRunMockTestWithPipeAndFlags runs a test against a mock server with the provided
 // data piped over stdin and CLI args and ensures it succeeds
 func TestRunMockTestWithPipeAndFlags(t *testing.T, pipeData []byte, args ...string) {
-	origClient, origDefault := blockNetworkExceptMockServer()
-	defer restoreNetwork(origClient, origDefault)
+	t.Helper()
+	require.NotNil(t, runCLI, "Register a CLI test runner before running command tests")
+	commandTestMutex.Lock()
+	defer commandTestMutex.Unlock()
+	defer restrictNetworkToMockServer()()
 
-	// Check if mock server is running
-	conn, err := net.DialTimeout("tcp", mockServerURL.Host, 2*time.Second)
-	if err != nil {
-		require.Fail(t, "Mock server is not running on "+mockServerURL.Host+". Please start the mock server before running tests.")
-	} else {
-		conn.Close()
-	}
+	responseStatus.Store(http.StatusOK)
+	commandArgs := append(
+		[]string{"x-twitter-scraper", "--base-url", mockServer.URL},
+		args...,
+	)
+	require.NoError(t, runCLI(t, context.Background(), commandArgs, pipeData))
 
-	// Get the path to the main command
-	_, filename, _, ok := runtime.Caller(0)
-	require.True(t, ok, "Could not get current file path")
-	dirPath := filepath.Dir(filename)
-	project := filepath.Join(dirPath, "..", "..", "cmd", "x-twitter-scraper")
+	unexpectedArgs := append(append([]string{}, commandArgs...), "unexpected")
+	require.Error(t, runCLI(t, context.Background(), unexpectedArgs, pipeData))
 
-	args = append([]string{"run", project, "--base-url", mockServerURL.String()}, args...)
+	require.Error(t, runCLI(t, context.Background(), commandArgs, []byte("{")))
 
-	t.Logf("Testing command: go run ./cmd/x-twitter-scraper %s", strings.Join(args[2:], " "))
-
-	cmd := exec.Command("go", args...)
-	cmd.Stdin = bytes.NewReader(pipeData)
-	output, err := cmd.CombinedOutput()
-	assert.NoError(t, err, "Test failed\nError: %v\nOutput: %s", err, output)
-
-	t.Logf("Test passed successfully\nOutput:\n%s", string(output))
+	responseStatus.Store(http.StatusBadRequest)
+	require.Error(t, runCLI(t, context.Background(), commandArgs, pipeData))
 }
 
 func TestFile(t *testing.T, contents string) string {

@@ -20,7 +20,7 @@ func (e *encoder) Encode(key string, value reflect.Value) ([]Pair, error) {
 	t := value.Type()
 	switch t.Kind() {
 	case reflect.Pointer:
-		if value.IsNil() || !value.IsValid() {
+		if value.IsNil() {
 			return []Pair{{key, ""}}, nil
 		}
 		return e.Encode(key, value.Elem())
@@ -120,12 +120,6 @@ func (e *encoder) encodeArray(key string, value reflect.Value) ([]Pair, error) {
 
 func (e *encoder) encodePrimitive(key string, value reflect.Value) ([]Pair, error) {
 	switch value.Kind() {
-	case reflect.Pointer:
-		if !value.IsValid() || value.IsNil() {
-			return nil, nil
-		}
-		return e.encodePrimitive(key, value.Elem())
-
 	case reflect.String:
 		return []Pair{{key, value.String()}}, nil
 
@@ -135,10 +129,10 @@ func (e *encoder) encodePrimitive(key string, value reflect.Value) ([]Pair, erro
 		}
 		return []Pair{{key, "false"}}, nil
 
-	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return []Pair{{key, strconv.FormatInt(value.Int(), 10)}}, nil
 
-	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return []Pair{{key, strconv.FormatUint(value.Uint(), 10)}}, nil
 
 	case reflect.Float32, reflect.Float64:
@@ -147,20 +141,4 @@ func (e *encoder) encodePrimitive(key string, value reflect.Value) ([]Pair, erro
 	default:
 		return nil, nil
 	}
-}
-
-func (e *encoder) encodeField(key string, value reflect.Value) ([]Pair, error) {
-	present := value.FieldByName("Present")
-	if !present.Bool() {
-		return nil, nil
-	}
-	null := value.FieldByName("Null")
-	if null.Bool() {
-		return nil, fmt.Errorf("apiquery: field cannot be null")
-	}
-	raw := value.FieldByName("Raw")
-	if !raw.IsNil() {
-		return e.Encode(key, raw)
-	}
-	return e.Encode(key, value.FieldByName("Value"))
 }

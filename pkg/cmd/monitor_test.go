@@ -9,7 +9,6 @@ import (
 )
 
 func TestMonitorsCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -39,7 +38,6 @@ func TestMonitorsCreate(t *testing.T) {
 }
 
 func TestMonitorsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -52,7 +50,6 @@ func TestMonitorsRetrieve(t *testing.T) {
 }
 
 func TestMonitorsUpdate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -82,7 +79,6 @@ func TestMonitorsUpdate(t *testing.T) {
 }
 
 func TestMonitorsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -94,7 +90,6 @@ func TestMonitorsList(t *testing.T) {
 }
 
 func TestMonitorsDeactivate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

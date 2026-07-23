@@ -9,7 +9,6 @@ import (
 )
 
 func TestCreditsRedirectTopupCheckout(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -22,7 +21,6 @@ func TestCreditsRedirectTopupCheckout(t *testing.T) {
 }
 
 func TestCreditsRetrieveBalance(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -34,7 +32,6 @@ func TestCreditsRetrieveBalance(t *testing.T) {
 }
 
 func TestCreditsRetrieveTopupStatus(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -47,7 +44,6 @@ func TestCreditsRetrieveTopupStatus(t *testing.T) {
 }
 
 func TestCreditsTopupBalance(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

@@ -305,14 +305,21 @@ func (f *Flag[T]) PreParse() error {
 func (f *Flag[T]) PostParse() error {
 	if !f.hasBeenSet {
 		if val, source, found := f.Sources.LookupWithSource(); found {
-			if val != "" || reflect.TypeOf(f.value).Kind() == reflect.String {
+			defaultType := reflect.TypeOf(f.Default)
+			if defaultType != nil && defaultType.Kind() == reflect.Pointer {
+				defaultType = defaultType.Elem()
+			}
+			isString := defaultType != nil && defaultType.Kind() == reflect.String
+			isBool := defaultType != nil && defaultType.Kind() == reflect.Bool
+
+			if val != "" || isString {
 				if err := f.Set(f.Name, val); err != nil {
 					return fmt.Errorf(
 						"could not parse %[1]q as %[2]T value from %[3]s for flag %[4]s: %[5]s",
 						val, f.value, source, f.Name, err,
 					)
 				}
-			} else if val == "" && reflect.TypeOf(f.value).Kind() == reflect.Bool {
+			} else if isBool {
 				_ = f.Set(f.Name, "false")
 			}
 

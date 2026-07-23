@@ -9,7 +9,6 @@ import (
 )
 
 func TestXTweetsRetweetCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -37,7 +36,6 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 }
 
 func TestXTweetsRetweetDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

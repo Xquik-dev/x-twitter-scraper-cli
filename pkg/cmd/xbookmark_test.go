@@ -9,7 +9,6 @@ import (
 )
 
 func TestXBookmarksList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -23,7 +22,6 @@ func TestXBookmarksList(t *testing.T) {
 }
 
 func TestXBookmarksRetrieveFolders(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

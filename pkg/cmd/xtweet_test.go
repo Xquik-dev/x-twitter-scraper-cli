@@ -9,7 +9,6 @@ import (
 )
 
 func TestXTweetsCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -47,7 +46,6 @@ func TestXTweetsCreate(t *testing.T) {
 }
 
 func TestXTweetsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -60,7 +58,6 @@ func TestXTweetsRetrieve(t *testing.T) {
 }
 
 func TestXTweetsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -73,7 +70,6 @@ func TestXTweetsList(t *testing.T) {
 }
 
 func TestXTweetsDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -101,7 +97,6 @@ func TestXTweetsDelete(t *testing.T) {
 }
 
 func TestXTweetsGetFavoriters(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -116,7 +111,6 @@ func TestXTweetsGetFavoriters(t *testing.T) {
 }
 
 func TestXTweetsGetQuotes(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -159,7 +153,6 @@ func TestXTweetsGetQuotes(t *testing.T) {
 }
 
 func TestXTweetsGetReplies(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -201,7 +194,6 @@ func TestXTweetsGetReplies(t *testing.T) {
 }
 
 func TestXTweetsGetRetweeters(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -216,7 +208,6 @@ func TestXTweetsGetRetweeters(t *testing.T) {
 }
 
 func TestXTweetsGetThread(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -231,7 +222,6 @@ func TestXTweetsGetThread(t *testing.T) {
 }
 
 func TestXTweetsSearch(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

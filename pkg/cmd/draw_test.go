@@ -9,7 +9,6 @@ import (
 )
 
 func TestDrawsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -22,7 +21,6 @@ func TestDrawsRetrieve(t *testing.T) {
 }
 
 func TestDrawsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -36,7 +34,6 @@ func TestDrawsList(t *testing.T) {
 }
 
 func TestDrawsExport(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -52,7 +49,6 @@ func TestDrawsExport(t *testing.T) {
 }
 
 func TestDrawsRun(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
