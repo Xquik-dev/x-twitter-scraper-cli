@@ -63,6 +63,21 @@ x-twitter-scraper x:tweets search \
   --limit 10
 ```
 
+## Common Commands
+
+Run each command with `--help` before adding flags.
+
+| Customer Question | Start Command |
+| --- | --- |
+| How do I search tweets? | `x-twitter-scraper x:tweets search --help` |
+| How do I get a user's posts? | `x-twitter-scraper x:users retrieve-tweets --help` |
+| How do I scrape followers? | `x-twitter-scraper x:users retrieve-followers --help` |
+| How do I scrape following accounts? | `x-twitter-scraper x:users retrieve-following --help` |
+| How do I read my home timeline? | `x-twitter-scraper x get-home-timeline --help` |
+| How do I export a large dataset? | `x-twitter-scraper extractions estimate-cost --help` |
+| How do I monitor an account? | `x-twitter-scraper monitors create --help` |
+| How do I post or reply? | `x-twitter-scraper x:tweets create --help` |
+
 For details about specific commands, use the `--help` flag.
 
 ### Environment variables
