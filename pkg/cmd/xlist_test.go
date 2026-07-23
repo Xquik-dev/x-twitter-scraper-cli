@@ -9,7 +9,6 @@ import (
 )
 
 func TestXListsRetrieveFollowers(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -24,7 +23,6 @@ func TestXListsRetrieveFollowers(t *testing.T) {
 }
 
 func TestXListsRetrieveMembers(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -39,7 +37,6 @@ func TestXListsRetrieveMembers(t *testing.T) {
 }
 
 func TestXListsRetrieveTweets(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

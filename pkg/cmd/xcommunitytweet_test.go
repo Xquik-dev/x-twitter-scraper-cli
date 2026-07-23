@@ -9,7 +9,6 @@ import (
 )
 
 func TestXCommunitiesTweetsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -26,7 +25,6 @@ func TestXCommunitiesTweetsList(t *testing.T) {
 }
 
 func TestXCommunitiesTweetsListByCommunity(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

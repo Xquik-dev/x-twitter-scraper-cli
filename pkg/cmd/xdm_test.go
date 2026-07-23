@@ -9,7 +9,6 @@ import (
 )
 
 func TestXDmRetrieveHistory(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -25,7 +24,6 @@ func TestXDmRetrieveHistory(t *testing.T) {
 }
 
 func TestXDmSend(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

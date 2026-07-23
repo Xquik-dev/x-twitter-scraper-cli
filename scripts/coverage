@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+coverage_threshold="${COVERAGE_THRESHOLD:-90.0}"
+coverage_workspace="$(mktemp -d)"
+coverage_binary_dir="$coverage_workspace/bin"
+coverage_data_dir="$coverage_workspace/data"
+
+cleanup() {
+  rm -rf -- "$coverage_workspace"
+}
+trap cleanup EXIT
+
+mkdir -p "$coverage_binary_dir" "$coverage_data_dir"
+
+package_index=0
+while IFS= read -r package_path; do
+  package_index=$((package_index + 1))
+  test_binary="$coverage_binary_dir/package-$package_index.test"
+
+  go test -c -coverpkg=./... -o "$test_binary" "$package_path"
+  if [[ -x "$test_binary" ]]; then
+    "$test_binary" \
+      -test.count=1 \
+      -test.gocoverdir="$coverage_data_dir"
+  fi
+done < <(go list ./...)
+
+coverage_profile="$coverage_workspace/coverage.out"
+go tool covdata textfmt \
+  -i="$coverage_data_dir" \
+  -o="$coverage_profile"
+
+coverage_percent="$(
+  go tool cover -func="$coverage_profile" |
+    awk '$1 == "total:" {gsub(/%/, "", $3); print $3}'
+)"
+
+if [[ -z "$coverage_percent" ]]; then
+  echo "Unable to calculate statement coverage." >&2
+  exit 1
+fi
+
+printf 'Total statement coverage: %s%%\n' "$coverage_percent"
+printf 'Required statement coverage: %s%%\n' "$coverage_threshold"
+
+if ! awk -v actual="$coverage_percent" -v required="$coverage_threshold" \
+  'BEGIN { exit !(actual + 0 >= required + 0) }'; then
+  echo "Statement coverage is below the required threshold." >&2
+  exit 1
+fi

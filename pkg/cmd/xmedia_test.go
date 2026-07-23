@@ -9,7 +9,6 @@ import (
 )
 
 func TestXMediaDownload(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -43,7 +42,6 @@ func TestXMediaDownload(t *testing.T) {
 }
 
 func TestXMediaUpload(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

@@ -9,7 +9,6 @@ import (
 )
 
 func TestMonitorsKeywordsCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -37,7 +36,6 @@ func TestMonitorsKeywordsCreate(t *testing.T) {
 }
 
 func TestMonitorsKeywordsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -50,7 +48,6 @@ func TestMonitorsKeywordsRetrieve(t *testing.T) {
 }
 
 func TestMonitorsKeywordsUpdate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -80,7 +77,6 @@ func TestMonitorsKeywordsUpdate(t *testing.T) {
 }
 
 func TestMonitorsKeywordsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -92,7 +88,6 @@ func TestMonitorsKeywordsList(t *testing.T) {
 }
 
 func TestMonitorsKeywordsDeactivate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

@@ -6,11 +6,14 @@ cd "$(dirname "$0")/.."
 
 # Mark the necessary Go modules as private to avoid Go's proxy
 export GOPRIVATE="${GOPRIVATE:+$GOPRIVATE,}github.com/Xquik-dev/x-twitter-scraper-go,github.com/stainless-sdks/x-twitter-scraper-go"
-
-
-
 echo "==> Running tests"
-go test ./... "$@"
+go mod verify
+go test -race ./... "$@"
+
+if [[ "$#" -eq 0 ]]; then
+  echo "==> Enforcing statement coverage"
+  ./scripts/coverage
+fi
 
 echo "==> Checking tests on Windows"
 GOARCH=amd64 GOOS=windows go test -c ./... "$@"

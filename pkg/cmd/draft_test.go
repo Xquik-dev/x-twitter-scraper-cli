@@ -9,7 +9,6 @@ import (
 )
 
 func TestDraftsCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -38,7 +37,6 @@ func TestDraftsCreate(t *testing.T) {
 }
 
 func TestDraftsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -51,7 +49,6 @@ func TestDraftsRetrieve(t *testing.T) {
 }
 
 func TestDraftsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -65,7 +62,6 @@ func TestDraftsList(t *testing.T) {
 }
 
 func TestDraftsDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

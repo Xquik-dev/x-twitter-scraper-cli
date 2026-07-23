@@ -42,6 +42,9 @@ jobs:
       - name: Bootstrap
         run: ./scripts/bootstrap
 
+      - name: Check Licensing
+        uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
+
       - name: Run Lints
         run: ./scripts/lint
 
@@ -67,10 +70,32 @@ jobs:
       - name: Run Tests
         run: ./scripts/test
 
+  security:
+    name: Dependency Security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set Up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: Verify Module Integrity
+        run: go mod verify
+
+      - name: Scan Reachable Vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+
   build:
     name: Build
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Check Out Repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -92,3 +117,27 @@ jobs:
         with:
           version: v2.17.0
           args: release --snapshot --clean
+
+      - name: Preserve First Checksum Manifest
+        env:
+          FIRST_CHECKSUMS: ${{ runner.temp }}/first-checksums.txt
+        run: |
+          set -euo pipefail
+          checksum_path="$(find dist -maxdepth 1 -type f -name '*_checksums.txt' -print -quit)"
+          test -n "$checksum_path"
+          install -m 0644 "$checksum_path" "$FIRST_CHECKSUMS"
+
+      - name: Rebuild Snapshot
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          version: v2.17.0
+          args: release --snapshot --clean
+
+      - name: Verify Reproducible Checksums
+        env:
+          FIRST_CHECKSUMS: ${{ runner.temp }}/first-checksums.txt
+        run: |
+          set -euo pipefail
+          checksum_path="$(find dist -maxdepth 1 -type f -name '*_checksums.txt' -print -quit)"
+          test -n "$checksum_path"
+          cmp "$FIRST_CHECKSUMS" "$checksum_path"

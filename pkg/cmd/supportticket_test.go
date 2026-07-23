@@ -9,7 +9,6 @@ import (
 )
 
 func TestSupportTicketsCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -38,7 +37,6 @@ func TestSupportTicketsCreate(t *testing.T) {
 }
 
 func TestSupportTicketsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -51,7 +49,6 @@ func TestSupportTicketsRetrieve(t *testing.T) {
 }
 
 func TestSupportTicketsUpdate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -77,7 +74,6 @@ func TestSupportTicketsUpdate(t *testing.T) {
 }
 
 func TestSupportTicketsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -89,7 +85,6 @@ func TestSupportTicketsList(t *testing.T) {
 }
 
 func TestSupportTicketsReply(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

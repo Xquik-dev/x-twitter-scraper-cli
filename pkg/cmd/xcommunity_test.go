@@ -9,7 +9,6 @@ import (
 )
 
 func TestXCommunitiesCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -40,7 +39,6 @@ func TestXCommunitiesCreate(t *testing.T) {
 }
 
 func TestXCommunitiesDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -71,7 +69,6 @@ func TestXCommunitiesDelete(t *testing.T) {
 }
 
 func TestXCommunitiesRetrieveInfo(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -84,7 +81,6 @@ func TestXCommunitiesRetrieveInfo(t *testing.T) {
 }
 
 func TestXCommunitiesRetrieveMembers(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -99,7 +95,6 @@ func TestXCommunitiesRetrieveMembers(t *testing.T) {
 }
 
 func TestXCommunitiesRetrieveModerators(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -113,7 +108,6 @@ func TestXCommunitiesRetrieveModerators(t *testing.T) {
 }
 
 func TestXCommunitiesRetrieveSearch(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

@@ -9,7 +9,6 @@ import (
 )
 
 func TestEventsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -22,7 +21,6 @@ func TestEventsRetrieve(t *testing.T) {
 }
 
 func TestEventsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

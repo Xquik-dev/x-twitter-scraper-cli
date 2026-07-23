@@ -9,7 +9,6 @@ import (
 )
 
 func TestExtractionsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -24,7 +23,6 @@ func TestExtractionsRetrieve(t *testing.T) {
 }
 
 func TestExtractionsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -40,7 +38,6 @@ func TestExtractionsList(t *testing.T) {
 }
 
 func TestExtractionsEstimateCost(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -141,7 +138,6 @@ func TestExtractionsEstimateCost(t *testing.T) {
 }
 
 func TestExtractionsExportResults(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -156,7 +152,6 @@ func TestExtractionsExportResults(t *testing.T) {
 }
 
 func TestExtractionsRun(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

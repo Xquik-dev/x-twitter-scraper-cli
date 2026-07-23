@@ -9,7 +9,6 @@ import (
 )
 
 func TestXProfileUpdate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -44,7 +43,6 @@ func TestXProfileUpdate(t *testing.T) {
 }
 
 func TestXProfileUpdateAvatar(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -73,7 +71,6 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 }
 
 func TestXProfileUpdateBanner(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

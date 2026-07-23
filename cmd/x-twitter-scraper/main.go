@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"slices"
@@ -17,20 +18,36 @@ import (
 )
 
 func main() {
-	app := cmd.Command
+	exitCode := run(cmd.Command, os.Args, os.LookupEnv, os.Stderr)
+	if exitCode != 0 {
+		os.Exit(exitCode)
+	}
+}
 
-	if slices.Contains(os.Args, "__complete") {
+func run(
+	app *cli.Command,
+	args []string,
+	lookupEnv func(string) (string, bool),
+	stderr io.Writer,
+) int {
+	if slices.Contains(args, "__complete") {
 		prepareForAutocomplete(app)
 	}
 
-	if baseURL, ok := os.LookupEnv("X_TWITTER_SCRAPER_BASE_URL"); ok {
+	if baseURL, ok := lookupEnv("X_TWITTER_SCRAPER_BASE_URL"); ok {
 		if err := cmd.ValidateBaseURL(baseURL, "X_TWITTER_SCRAPER_BASE_URL"); err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-			os.Exit(1)
+			fmt.Fprintf(stderr, "%s\n", err.Error())
+			return 1
 		}
 	}
 
-	if err := app.Run(context.Background(), os.Args); err != nil {
+	previousExitErrHandler := app.ExitErrHandler
+	app.ExitErrHandler = func(context.Context, *cli.Command, error) {}
+	defer func() {
+		app.ExitErrHandler = previousExitErrHandler
+	}()
+
+	if err := app.Run(context.Background(), args); err != nil {
 		exitCode := 1
 
 		// Check if error has a custom exit code
@@ -40,28 +57,29 @@ func main() {
 
 		var apierr *xtwitterscraper.Error
 		if errors.As(err, &apierr) {
-			fmt.Fprintf(os.Stderr, "%s %q: %d %s\n", apierr.Request.Method, apierr.Request.URL, apierr.Response.StatusCode, http.StatusText(apierr.Response.StatusCode))
+			fmt.Fprintf(stderr, "%s %q: %d %s\n", apierr.Request.Method, apierr.Request.URL, apierr.Response.StatusCode, http.StatusText(apierr.Response.StatusCode))
 			format := app.String("format-error")
 			json := gjson.Parse(apierr.RawJSON())
-			show_err := cmd.ShowJSON(json, cmd.ShowJSONOpts{
+			showErr := cmd.ShowJSON(json, cmd.ShowJSONOpts{
 				ExplicitFormat: app.IsSet("format-error"),
 				Format:         format,
 				Title:          "Error",
 				Transform:      app.String("transform-error"),
 			})
-			if show_err != nil {
+			if showErr != nil {
 				// Just print the original error:
-				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+				fmt.Fprintf(stderr, "%s\n", err.Error())
 			}
 		} else {
 			if cmd.CommandErrorBuffer.Len() > 0 {
-				os.Stderr.Write(cmd.CommandErrorBuffer.Bytes())
+				_, _ = stderr.Write(cmd.CommandErrorBuffer.Bytes())
 			} else {
-				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+				fmt.Fprintf(stderr, "%s\n", err.Error())
 			}
 		}
-		os.Exit(exitCode)
+		return exitCode
 	}
+	return 0
 }
 
 func prepareForAutocomplete(cmd *cli.Command) {

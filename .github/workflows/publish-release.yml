@@ -15,7 +15,7 @@ jobs:
   release:
     name: Build & Publish Release
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     environment: github-release
     permissions:
       attestations: write # Store signed provenance for release artifacts.
@@ -33,6 +33,18 @@ jobs:
         with:
           go-version-file: "go.mod"
           cache: false
+
+      - name: Verify Module Integrity
+        run: go mod verify
+
+      - name: Check Licensing
+        uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
+
+      - name: Run Release Tests
+        run: ./scripts/test
+
+      - name: Scan Reachable Vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3

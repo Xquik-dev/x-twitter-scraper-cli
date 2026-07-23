@@ -9,7 +9,6 @@ import (
 )
 
 func TestWebhooksCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -39,7 +38,6 @@ func TestWebhooksCreate(t *testing.T) {
 }
 
 func TestWebhooksUpdate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -71,7 +69,6 @@ func TestWebhooksUpdate(t *testing.T) {
 }
 
 func TestWebhooksList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -83,7 +80,6 @@ func TestWebhooksList(t *testing.T) {
 }
 
 func TestWebhooksDeactivate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -96,7 +92,6 @@ func TestWebhooksDeactivate(t *testing.T) {
 }
 
 func TestWebhooksListDeliveries(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -109,7 +104,6 @@ func TestWebhooksListDeliveries(t *testing.T) {
 }
 
 func TestWebhooksResume(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -122,7 +116,6 @@ func TestWebhooksResume(t *testing.T) {
 }
 
 func TestWebhooksTest(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

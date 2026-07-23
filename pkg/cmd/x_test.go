@@ -9,7 +9,6 @@ import (
 )
 
 func TestXGetArticle(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -22,7 +21,6 @@ func TestXGetArticle(t *testing.T) {
 }
 
 func TestXGetHomeTimeline(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -36,7 +34,6 @@ func TestXGetHomeTimeline(t *testing.T) {
 }
 
 func TestXGetNotifications(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -50,7 +47,6 @@ func TestXGetNotifications(t *testing.T) {
 }
 
 func TestXGetTrends(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

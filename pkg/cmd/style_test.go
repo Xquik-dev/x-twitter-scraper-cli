@@ -10,7 +10,6 @@ import (
 )
 
 func TestStylesRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -23,7 +22,6 @@ func TestStylesRetrieve(t *testing.T) {
 }
 
 func TestStylesUpdate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -69,7 +67,6 @@ func TestStylesUpdate(t *testing.T) {
 }
 
 func TestStylesList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -81,7 +78,6 @@ func TestStylesList(t *testing.T) {
 }
 
 func TestStylesDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -94,7 +90,6 @@ func TestStylesDelete(t *testing.T) {
 }
 
 func TestStylesAnalyze(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -118,7 +113,6 @@ func TestStylesAnalyze(t *testing.T) {
 }
 
 func TestStylesCompare(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -132,7 +126,6 @@ func TestStylesCompare(t *testing.T) {
 }
 
 func TestStylesGetPerformance(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,

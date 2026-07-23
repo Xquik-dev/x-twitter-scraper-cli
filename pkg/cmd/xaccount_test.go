@@ -9,7 +9,6 @@ import (
 )
 
 func TestXAccountsCreate(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -40,7 +39,6 @@ func TestXAccountsCreate(t *testing.T) {
 }
 
 func TestXAccountsRetrieve(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -53,7 +51,6 @@ func TestXAccountsRetrieve(t *testing.T) {
 }
 
 func TestXAccountsList(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -65,7 +62,6 @@ func TestXAccountsList(t *testing.T) {
 }
 
 func TestXAccountsDelete(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -78,7 +74,6 @@ func TestXAccountsDelete(t *testing.T) {
 }
 
 func TestXAccountsBulkRetry(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
@@ -90,7 +85,6 @@ func TestXAccountsBulkRetry(t *testing.T) {
 }
 
 func TestXAccountsReauth(t *testing.T) {
-	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
 			t,
