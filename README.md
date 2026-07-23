@@ -159,3 +159,5 @@ To link to a local copy of the SDK:
 ```
 
 If you run the link script without any arguments, it will default to `../xtwitterscraper-go`.
+
+Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
