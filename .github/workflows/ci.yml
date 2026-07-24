@@ -133,6 +133,9 @@ jobs:
           version: v2.17.0
           args: release --snapshot --clean
 
+      - name: Verify Debug Information
+        run: ./bin/check-release-debug-info
+
       - name: Verify Reproducible Checksums
         env:
           FIRST_CHECKSUMS: ${{ runner.temp }}/first-checksums.txt

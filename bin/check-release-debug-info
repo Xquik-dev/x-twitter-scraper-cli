@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -euo pipefail
+
+cd -- "$(dirname -- "$0")/.."
+
+manifest="${1:-dist/artifacts.json}"
+
+if [[ ! -f "$manifest" ]]; then
+  echo "Release artifact manifest is missing: $manifest" >&2
+  exit 1
+fi
+
+binary_path="$(
+  jq -er '
+    [
+      .[]
+      | select(
+          .type == "Binary"
+          and .goos == "linux"
+          and .goarch == "amd64"
+        )
+    ][0].path
+  ' "$manifest"
+)"
+
+if [[ "$binary_path" != /* ]]; then
+  binary_path="$(pwd)/$binary_path"
+fi
+
+if [[ ! -f "$binary_path" ]]; then
+  echo "Release binary is missing: $binary_path" >&2
+  exit 1
+fi
+
+section_table="$(objdump -h "$binary_path")"
+
+for section in .debug_info .debug_line; do
+  if ! grep -Eq "[[:space:]]\\${section}[[:space:]]" <<<"$section_table"; then
+    echo "Release binary lacks the $section section." >&2
+    exit 1
+  fi
+done
+
+echo "Release binary preserves DWARF debug information."
