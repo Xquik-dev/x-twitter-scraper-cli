@@ -15,6 +15,12 @@ It is generated with [Stainless](https://www.stainless.com/).
 
 <!-- x-release-please-start-version -->
 
+## Choose the CLI
+
+Use the CLI for terminals, shell scripts, and one-off automation.
+Choose a language SDK for long-running applications or custom error handling.
+Run `--help` before scripting generated commands and flags.
+
 ## Installation
 
 ### Installing with Go
@@ -159,5 +165,11 @@ To link to a local copy of the SDK:
 ```
 
 If you run the link script without any arguments, it will default to `../xtwitterscraper-go`.
+
+## Support & Project Policies
+
+- [Organization support policy](https://github.com/Xquik-dev/.github/blob/main/SUPPORT.md)
+- [Security policy](SECURITY.md)
+- [Contribution guide](https://github.com/Xquik-dev/.github/blob/main/CONTRIBUTING.md)
 
 Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
