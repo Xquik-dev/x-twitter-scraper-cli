@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.6.4 (2026-07-24)
+
+Full Changelog: [v0.6.3...v0.6.4](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.3...v0.6.4)
+
+### Chores
+
+* add per-file license evidence ([ed6a2e2](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/ed6a2e25993c057829c1f889919f9774bd4ec241))
+
+
+### Documentation
+
+* add independence disclosure ([c6cd7ac](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c6cd7acdee87eb39db4c7997681e8a3d0365e30d))
+* clarify repository discovery ([5b30a9e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5b30a9e95a8228ad957de6465d35613a943d5bf5))
+
+
+### Build System
+
+* bundle third-party license notices ([62ed5de](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/62ed5de80c66459cd666ab09e1e0820ee93616bb))
+* use patched Go release ([11b2524](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/11b2524332c26f772e5ae7d90333a2808f3d162f))
+
 ## 0.6.3 (2026-07-23)
 
 Full Changelog: [v0.6.2...v0.6.3](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.2...v0.6.3)
