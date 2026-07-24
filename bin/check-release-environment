@@ -15,6 +15,11 @@ for file in .goreleaser.yml release-please-config.json .github/workflows/publish
   fi
 done
 
+if [[ ! -x bin/check-release-debug-info ]]; then
+  echo "bin/check-release-debug-info must be executable" >&2
+  exit 1
+fi
+
 go run github.com/goreleaser/goreleaser/v2@v2.17.0 check
 
 jq -e '.draft == true' release-please-config.json >/dev/null

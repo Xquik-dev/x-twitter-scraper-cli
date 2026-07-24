@@ -135,6 +135,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Verify Debug Information
+        run: ./bin/check-release-debug-info
+
       - name: Locate Checksum Manifest
         id: checksums
         run: |
