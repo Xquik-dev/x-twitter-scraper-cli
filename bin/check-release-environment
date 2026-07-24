@@ -2,9 +2,11 @@
 
 errors=()
 
-lenErrors=${#errors[@]}
+if [[ ! -x bin/check-release-debug-info ]]; then
+  errors+=("bin/check-release-debug-info must be executable")
+fi
 
-if [[ lenErrors -gt 0 ]]; then
+if (( ${#errors[@]} > 0 )); then
   echo -e "Found the following errors in the release environment:\n"
 
   for error in "${errors[@]}"; do

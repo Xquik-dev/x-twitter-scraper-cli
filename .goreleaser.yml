@@ -21,7 +21,7 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags: [-trimpath]
     ldflags:
-      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+      - '-X main.version={{.Version}} -X main.commit={{.Commit}}'
 
   - id: linux
     goos: [linux]
@@ -33,7 +33,7 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags: [-trimpath]
     ldflags:
-      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+      - '-X main.version={{.Version}} -X main.commit={{.Commit}}'
 
   - id: windows
     goos: [windows]
@@ -43,7 +43,7 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags: [-trimpath]
     ldflags:
-      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+      - '-X main.version={{.Version}} -X main.commit={{.Commit}}'
 
 archives:
   - id: linux-archive
