@@ -3,17 +3,76 @@ name: Publish Release
 permissions: {}
 
 concurrency:
-  group: cli-release-${{ github.ref }}
+  group: cli-release
   cancel-in-progress: false
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+    paths:
+      - ".release-please-manifest.json"
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Exact release tag to publish
+        required: true
+        type: string
 
 jobs:
+  prepare:
+    name: Prepare Draft Release
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: write # Dispatch the tag-bound publisher.
+      contents: write # Create the exact release tag.
+    steps:
+      - name: Check Out Release Commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare Immutable Draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          version="$(jq -er '."."' .release-please-manifest.json)"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]
+          release_tag="v${version}"
+          release_json=""
+
+          for _ in {1..30}; do
+            if release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${release_tag}" 2>/dev/null)"; then
+              break
+            fi
+            sleep 10
+          done
+
+          test -n "$release_json"
+          test "$(jq -r '.draft' <<<"$release_json")" = "true"
+          test "$(jq -r '.target_commitish' <<<"$release_json")" = "$GITHUB_SHA"
+
+          if remote_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${release_tag}" --jq '.object.sha' 2>/dev/null)"; then
+            test "$remote_sha" = "$GITHUB_SHA"
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref="refs/tags/${release_tag}" \
+              -f sha="$GITHUB_SHA" >/dev/null
+          fi
+
+          gh workflow run publish-release.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$release_tag" \
+            -f release_ref="$release_tag"
+
   release:
     name: Build & Publish Release
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     environment: github-release
@@ -25,8 +84,30 @@ jobs:
       - name: Check Out Release Tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.release_ref }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Verify Immutable Draft
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_ref }}
+        run: |
+          set -euo pipefail
+
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]
+          test "$GITHUB_REF_TYPE" = "tag"
+          test "$GITHUB_REF_NAME" = "$RELEASE_TAG"
+          version="$(jq -er '."."' .release-please-manifest.json)"
+          test "$RELEASE_TAG" = "v${version}"
+          release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}")"
+
+          test "$(jq -r '.draft' <<<"$release_json")" = "true"
+          test "$(jq -r '.target_commitish' <<<"$release_json")" = "$GITHUB_SHA"
+          test "$(git rev-list -n 1 "$RELEASE_TAG")" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Set Up Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
@@ -72,7 +153,7 @@ jobs:
         env:
           ATTESTATION_BUNDLE: ${{ steps.attest.outputs.bundle-path }}
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
         run: |
           install -m 0644 "$ATTESTATION_BUNDLE" dist/provenance.intoto.jsonl
           gh release upload "$RELEASE_TAG" dist/provenance.intoto.jsonl --clobber
@@ -80,5 +161,5 @@ jobs:
       - name: Publish Verified Release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
         run: gh release edit "$RELEASE_TAG" --draft=false --latest --verify-tag

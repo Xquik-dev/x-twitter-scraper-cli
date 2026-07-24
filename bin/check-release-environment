@@ -1,17 +1,29 @@
 #!/usr/bin/env bash
 
-errors=()
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
 
-lenErrors=${#errors[@]}
+set -euo pipefail
 
-if [[ lenErrors -gt 0 ]]; then
-  echo -e "Found the following errors in the release environment:\n"
+cd -- "$(dirname -- "$0")/.."
 
-  for error in "${errors[@]}"; do
-    echo -e "- $error\n"
-  done
+for file in .goreleaser.yml release-please-config.json .github/workflows/publish-release.yml; do
+  if [[ ! -f "$file" ]]; then
+    echo "Missing required release file: $file" >&2
+    exit 1
+  fi
+done
 
-  exit 1
-fi
+go run github.com/goreleaser/goreleaser/v2@v2.17.0 check
 
-echo "The environment is ready to push releases!"
+jq -e '.draft == true' release-please-config.json >/dev/null
+grep -Fq 'draft: true' .goreleaser.yml
+grep -Fq 'environment: github-release' .github/workflows/publish-release.yml
+grep -Fq '".release-please-manifest.json"' .github/workflows/publish-release.yml
+grep -Fq 'Prepare Immutable Draft' .github/workflows/publish-release.yml
+grep -Fq 'workflow_dispatch:' .github/workflows/publish-release.yml
+grep -Fq 'gh workflow run publish-release.yml' .github/workflows/publish-release.yml
+grep -Fq "test \"\$(jq -r '.draft' <<<\"\$release_json\")\" = \"true\"" .github/workflows/publish-release.yml
+
+echo "Release configuration is valid. Publishing starts from an exact draft tag."
