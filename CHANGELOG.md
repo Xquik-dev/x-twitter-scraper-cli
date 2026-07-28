@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.5 (2026-07-28)
+
+Full Changelog: [v0.6.4...v0.6.5](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.4...v0.6.5)
+
+### Bug Fixes
+
+* publish assets before immutable release ([#18](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/18)) ([958f2c4](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/958f2c4c480f32a055ce297f64bca22bf536ae87))
+
+
+### Chores
+
+* **internal:** codegen related update ([7e99b32](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/7e99b32d5b2ddedadecda970c855852a3f492dc7))
+
+
+### Build System
+
+* **deps:** bump actions/setup-go from 6.5.0 to 7.0.0 ([#20](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/20)) ([95c49b3](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/95c49b309993bb9b277169426b0456ce33bcad8d))
+
 ## 0.6.4 (2026-07-24)
 
 Full Changelog: [v0.6.3...v0.6.4](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.6.3...v0.6.4)
