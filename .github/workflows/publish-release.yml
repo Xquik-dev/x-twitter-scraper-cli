@@ -47,12 +47,23 @@ jobs:
           release_json=""
 
           for _ in {1..30}; do
-            if release_json="$(
-              gh release view "$release_tag" \
-                --repo "$GITHUB_REPOSITORY" \
-                --json isDraft,tagName,targetCommitish \
-                2>/dev/null
-            )"; then
+          if release_json="$(
+            gh api --paginate --slurp \
+              "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+              2>/dev/null |
+              jq -ce --arg tag "$release_tag" '
+                [.[][] | select(.tag_name == $tag)]
+                | if length == 1 then
+                    {
+                      isDraft: .[0].draft,
+                      tagName: .[0].tag_name,
+                      targetCommitish: .[0].target_commitish
+                    }
+                  else
+                    empty
+                  end
+              '
+          )"; then
               break
             fi
             sleep 10
@@ -108,9 +119,20 @@ jobs:
           version="$(jq -er '."."' .release-please-manifest.json)"
           test "$RELEASE_TAG" = "v${version}"
           release_json="$(
-            gh release view "$RELEASE_TAG" \
-              --repo "$GITHUB_REPOSITORY" \
-              --json isDraft,tagName,targetCommitish
+            gh api --paginate --slurp \
+              "repos/${GITHUB_REPOSITORY}/releases?per_page=100" |
+              jq -ce --arg tag "$RELEASE_TAG" '
+                [.[][] | select(.tag_name == $tag)]
+                | if length == 1 then
+                    {
+                      isDraft: .[0].draft,
+                      tagName: .[0].tag_name,
+                      targetCommitish: .[0].target_commitish
+                    }
+                  else
+                    empty
+                  end
+              '
           )"
 
           test "$(jq -r '.isDraft' <<<"$release_json")" = "true"
