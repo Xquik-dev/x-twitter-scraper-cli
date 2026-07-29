@@ -43,7 +43,8 @@ var xAccountsCreate = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "totp-secret",
-			Usage:    "TOTP secret for 2FA",
+			Usage:    "Authenticator App TOTP secret required for durable login",
+			Required: true,
 			BodyPath: "totp_secret",
 		},
 	},
@@ -122,7 +123,7 @@ var xAccountsReauth = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "totp-secret",
-			Usage:    "TOTP secret for 2FA re-authentication",
+			Usage:    "Replacement Authenticator App TOTP secret. Omit it to reuse the saved secret.",
 			BodyPath: "totp_secret",
 		},
 	},
