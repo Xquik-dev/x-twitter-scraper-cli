@@ -16,7 +16,7 @@ import (
 
 var composeCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Run one step of Xquik's three-step writing workflow. Compose returns questions\nand editorial rules. Refine returns goal-specific guidance. Score applies\ndeterministic text checks. It does not predict reach or expose X ranking\nweights.",
+	Usage:   "Run one step of Xquik's three-step writing workflow. Compose returns questions,\neditorial rules, and source-specific Radar recommendations. Refine returns\ngoal-specific guidance. Score applies deterministic text checks. It does not\npredict reach or expose X ranking weights.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
