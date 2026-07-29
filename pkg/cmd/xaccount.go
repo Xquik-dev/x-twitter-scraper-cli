@@ -36,16 +36,16 @@ var xAccountsCreate = cli.Command{
 			BodyPath: "password",
 		},
 		&requestflag.Flag[string]{
-			Name:     "username",
-			Usage:    "X username",
-			Required: true,
-			BodyPath: "username",
-		},
-		&requestflag.Flag[string]{
 			Name:     "totp-secret",
 			Usage:    "Authenticator App TOTP secret required for durable login",
 			Required: true,
 			BodyPath: "totp_secret",
+		},
+		&requestflag.Flag[string]{
+			Name:     "username",
+			Usage:    "X username",
+			Required: true,
+			BodyPath: "username",
 		},
 	},
 	Action:          handleXAccountsCreate,

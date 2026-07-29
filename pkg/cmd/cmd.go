@@ -398,6 +398,14 @@ func newCommand() *cli.Command {
 				},
 			},
 			{
+				Name:     "x:account-connection-attempts",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&xAccountConnectionAttemptsRetrieve,
+				},
+			},
+			{
 				Name:     "x:bookmarks",
 				Category: "API RESOURCE",
 				Suggest:  true,
