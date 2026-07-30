@@ -21,8 +21,8 @@ func TestXAccountsCreate(t *testing.T) {
 			"x:accounts", "create",
 			"--email", "account@example.invalid",
 			"--password", "<ACCOUNT_PASSWORD>",
-			"--username", "your_x_username",
 			"--totp-secret", "<TOTP_SECRET>",
+			"--username", "your_x_username",
 		)
 	})
 
@@ -31,8 +31,8 @@ func TestXAccountsCreate(t *testing.T) {
 		pipeData := []byte("" +
 			"email: account@example.invalid\n" +
 			"password: <ACCOUNT_PASSWORD>\n" +
-			"username: your_x_username\n" +
-			"totp_secret: <TOTP_SECRET>\n")
+			"totp_secret: <TOTP_SECRET>\n" +
+			"username: your_x_username\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
 			"--api-key", "string",
