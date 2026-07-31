@@ -15,6 +15,7 @@ Full Changelog: [v0.8.0...v0.9.0](https://github.com/Xquik-dev/x-twitter-scraper
 
 * make draft release lookup reliable ([#21](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/21)) ([0b282f6](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/0b282f6e8d9f47cb31e0c972767a5f0e88eb6bcc))
 * publish assets before immutable release ([#18](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/18)) ([958f2c4](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/958f2c4c480f32a055ce297f64bca22bf536ae87))
+* use the published Go SDK v0.12.0 for reproducible release builds
 
 
 ### Chores
