@@ -237,7 +237,7 @@ var xTweetsGetQuotes = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -308,7 +308,7 @@ var xTweetsGetQuotes = cli.Command{
 
 var xTweetsGetReplies = cli.Command{
 	Name:    "get-replies",
-	Usage:   "Returns visible replies. For an unfiltered first page, Xquik compares a terminal\npage with the post's reported reply count. If the page is visibly incomplete,\nthe endpoint returns 424 `replies_incomplete` instead of presenting partial\ncoverage as complete. Use tweet search with a `conversation_id:{id}` query as\nthe broader fallback.",
+	Usage:   "Returns direct replies. Complete mode merges available timeline views, supported\nrankings, every forward cursor module, labeled hidden-content branches,\nexact-parent time partitions scaled to the reported reply count, and search. It\nseparates nested replies and returns 424 below 80% coverage.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -366,6 +366,12 @@ var xTweetsGetReplies = cli.Command{
 			Usage:     "Language code filter, e.g. en or tr.",
 			QueryPath: "language",
 		},
+		&requestflag.Flag[int64]{
+			Name:      "limit",
+			Usage:     "With mode=complete, maximum combined direct and nested reply rows (1-25000). Without complete mode, this is the deprecated pageSize alias and uses the normal 1-100 page range.\n",
+			Default:   25000,
+			QueryPath: "limit",
+		},
 		&requestflag.Flag[string]{
 			Name:      "media-type",
 			Usage:     "Filter by media type.",
@@ -396,9 +402,14 @@ var xTweetsGetReplies = cli.Command{
 			Usage:     "Minimum retweets threshold.",
 			QueryPath: "minRetweets",
 		},
+		&requestflag.Flag[string]{
+			Name:      "mode",
+			Usage:     "Set complete for maximum-coverage collection. Complete mode accepts only limit. Remove cursor, pageSize, count, time ranges, and tweet filters.\n",
+			QueryPath: "mode",
+		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -510,7 +521,7 @@ var xTweetsGetThread = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},

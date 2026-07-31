@@ -261,7 +261,7 @@ var xUsersRetrieveLikes = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -412,7 +412,7 @@ var xUsersRetrieveMedia = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -563,7 +563,7 @@ var xUsersRetrieveMentions = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -730,7 +730,7 @@ var xUsersRetrieveReplies = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -914,7 +914,7 @@ var xUsersRetrieveTweets = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum items requested from this page (1-100, default 20). The response can contain fewer items because the source returned fewer, filters removed items, or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true, even when a page is empty. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
