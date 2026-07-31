@@ -24,7 +24,7 @@ go run github.com/goreleaser/goreleaser/v2@v2.17.0 check
 
 jq -e '.draft == true' release-please-config.json >/dev/null
 grep -Fq 'draft: true' .goreleaser.yml
-grep -Fq 'use_existing_draft: true' .goreleaser.yml
+go test ./internal/releaseconfig
 grep -Fq 'environment: github-release' .github/workflows/publish-release.yml
 grep -Fq '".release-please-manifest.json"' .github/workflows/publish-release.yml
 grep -Fq 'Prepare Immutable Draft' .github/workflows/publish-release.yml
