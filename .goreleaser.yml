@@ -118,6 +118,7 @@ snapshot:
 
 release:
   draft: true
+  use_existing_draft: true
 
 nfpms:
   - license: Apache-2.0

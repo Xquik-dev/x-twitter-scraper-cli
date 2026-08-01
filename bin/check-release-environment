@@ -24,11 +24,22 @@ go run github.com/goreleaser/goreleaser/v2@v2.17.0 check
 
 jq -e '.draft == true' release-please-config.json >/dev/null
 grep -Fq 'draft: true' .goreleaser.yml
+go test ./internal/releaseconfig
 grep -Fq 'environment: github-release' .github/workflows/publish-release.yml
 grep -Fq '".release-please-manifest.json"' .github/workflows/publish-release.yml
 grep -Fq 'Prepare Immutable Draft' .github/workflows/publish-release.yml
 grep -Fq 'workflow_dispatch:' .github/workflows/publish-release.yml
 grep -Fq 'gh workflow run publish-release.yml' .github/workflows/publish-release.yml
-grep -Fq "test \"\$(jq -r '.draft' <<<\"\$release_json\")\" = \"true\"" .github/workflows/publish-release.yml
+test "$(grep -Fc 'gh api --paginate --slurp' .github/workflows/publish-release.yml)" -eq 2
+test "$(
+  grep -Fc '"repos/${GITHUB_REPOSITORY}/releases?per_page=100"' \
+    .github/workflows/publish-release.yml
+)" -eq 2
+test "$(
+  grep -Fc '[.[][] | select(.tag_name == $tag)]' .github/workflows/publish-release.yml
+)" -eq 2
+grep -Fq "test \"\$(jq -r '.isDraft' <<<\"\$release_json\")\" = \"true\"" .github/workflows/publish-release.yml
+grep -Fq "test \"\$(jq -r '.tagName' <<<\"\$release_json\")\" = \"\$release_tag\"" .github/workflows/publish-release.yml
+grep -Fq "test \"\$(jq -r '.targetCommitish' <<<\"\$release_json\")\" = \"\$GITHUB_SHA\"" .github/workflows/publish-release.yml
 
 echo "Release configuration is valid. Publishing starts from an exact draft tag."
