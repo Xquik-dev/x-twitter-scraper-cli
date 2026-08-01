@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.1 (2026-08-01)
+
+Full Changelog: [v0.9.0...v0.9.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.9.0...v0.9.1)
+
+### Bug Fixes
+
+* **release:** reuse verified CLI draft ([#28](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/28)) ([278b326](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/278b326f6df10da9ba48d9e29299cea768ed5ce2))
+
 ## 0.9.0 (2026-07-31)
 
 Full Changelog: [v0.8.0...v0.9.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.8.0...v0.9.0)
