@@ -33,6 +33,7 @@ func TestEventsList(t *testing.T) {
 			"events", "list",
 			"--cursor", "cursor",
 			"--event-type", "tweet.new",
+			"--keyword-monitor-id", "keywordMonitorId",
 			"--limit", "1",
 			"--monitor-id", "monitorId",
 		)

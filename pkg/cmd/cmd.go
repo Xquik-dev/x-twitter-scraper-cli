@@ -433,6 +433,14 @@ func newCommand() *cli.Command {
 				},
 			},
 			{
+				Name:     "support:attachments",
+				Category: "API RESOURCE",
+				Suggest:  true,
+				Commands: []*cli.Command{
+					&supportAttachmentsDownload,
+				},
+			},
+			{
 				Name:     "support:tickets",
 				Category: "API RESOURCE",
 				Suggest:  true,
