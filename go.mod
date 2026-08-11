@@ -3,7 +3,7 @@ module github.com/Xquik-dev/x-twitter-scraper-cli
 go 1.26.5
 
 require (
-	github.com/Xquik-dev/x-twitter-scraper-go v0.13.0
+	github.com/Xquik-dev/x-twitter-scraper-go v0.15.0
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
