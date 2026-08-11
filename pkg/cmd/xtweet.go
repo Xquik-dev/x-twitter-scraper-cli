@@ -125,15 +125,85 @@ var xTweetsGetFavoriters = cli.Command{
 			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
+			Name:      "bio-contains",
+			Usage:     "Match any comma-separated or line-separated bio term, ignoring case.\n",
+			QueryPath: "bioContains",
+		},
+		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for favoriters",
 			QueryPath: "cursor",
 		},
+		&requestflag.Flag[bool]{
+			Name:      "has-location",
+			Usage:     "Only return profiles with a location.",
+			QueryPath: "hasLocation",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "has-website",
+			Usage:     "Only return profiles with a website.",
+			QueryPath: "hasWebsite",
+		},
+		&requestflag.Flag[string]{
+			Name:      "location-contains",
+			Usage:     "Match a location substring, ignoring case.",
+			QueryPath: "locationContains",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-followers",
+			Usage:     "Maximum follower count. Missing counts pass this maximum.",
+			QueryPath: "maxFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-following",
+			Usage:     "Maximum following count.",
+			QueryPath: "maxFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-statuses",
+			Usage:     "Maximum post count. maxPosts is also accepted.",
+			QueryPath: "maxStatuses",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-account-age-days",
+			Usage:     "Minimum account age in whole days.",
+			QueryPath: "minAccountAgeDays",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-followers",
+			Usage:     "Minimum follower count. Filtering happens before billing.",
+			QueryPath: "minFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-following",
+			Usage:     "Minimum following count.",
+			QueryPath: "minFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-statuses",
+			Usage:     "Minimum post count. minPosts is also accepted.",
+			QueryPath: "minStatuses",
+		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum user profiles requested from this page (20-200, default 200). The response can contain fewer profiles because the source returned fewer or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum user profiles requested from this page (20-200, default 200). Source, filters, or credits can return fewer profiles. Keep requesting next_cursor while has_next_page is true. Deprecated aliases remain accepted.\n",
 			Default:   200,
 			QueryPath: "pageSize",
+		},
+		&requestflag.Flag[string]{
+			Name:      "username-contains",
+			Usage:     "Match a username substring, ignoring case.",
+			QueryPath: "usernameContains",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "verified-only",
+			Usage:     "Only return verified profiles.",
+			QueryPath: "verifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "verified-type",
+			Usage:     "Match the verification type exactly, ignoring case.",
+			QueryPath: "verifiedType",
 		},
 	},
 	Action:          handleXTweetsGetFavoriters,
@@ -154,6 +224,16 @@ var xTweetsGetQuotes = cli.Command{
 			Name:      "any-words",
 			Usage:     "Words or quoted phrases where any one can match. Separate with spaces, commas, or lines.",
 			QueryPath: "anyWords",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "blue-verified-only",
+			Usage:     "Only return tweets from Blue-verified authors.",
+			QueryPath: "blueVerifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "card-name",
+			Usage:     "Match the Tweet card name.",
+			QueryPath: "cardName",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cashtags",
@@ -176,6 +256,11 @@ var xTweetsGetQuotes = cli.Command{
 			QueryPath: "exactPhrase",
 		},
 		&requestflag.Flag[string]{
+			Name:      "exclude-source",
+			Usage:     "Exclude a source application.",
+			QueryPath: "excludeSource",
+		},
+		&requestflag.Flag[string]{
 			Name:      "exclude-words",
 			Usage:     "Words or quoted phrases to exclude. Separate with spaces, commas, or lines.",
 			QueryPath: "excludeWords",
@@ -184,6 +269,11 @@ var xTweetsGetQuotes = cli.Command{
 			Name:      "from-user",
 			Usage:     "Filter by author username.",
 			QueryPath: "fromUser",
+		},
+		&requestflag.Flag[string]{
+			Name:      "geocode",
+			Usage:     "Match latitude, longitude, and radius.",
+			QueryPath: "geocode",
 		},
 		&requestflag.Flag[string]{
 			Name:      "hashtags",
@@ -205,6 +295,31 @@ var xTweetsGetQuotes = cli.Command{
 			Usage:     "Language code filter, e.g. en or tr.",
 			QueryPath: "language",
 		},
+		&requestflag.Flag[int64]{
+			Name:      "max-faves",
+			Usage:     "Maximum likes threshold. maxLikes is also accepted.",
+			QueryPath: "maxFaves",
+		},
+		&requestflag.Flag[string]{
+			Name:      "max-id",
+			Usage:     "Return Tweets older than this Tweet ID.",
+			QueryPath: "maxId",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-quotes",
+			Usage:     "Maximum quotes threshold.",
+			QueryPath: "maxQuotes",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-replies",
+			Usage:     "Maximum replies threshold.",
+			QueryPath: "maxReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-retweets",
+			Usage:     "Maximum retweets threshold.",
+			QueryPath: "maxRetweets",
+		},
 		&requestflag.Flag[string]{
 			Name:      "media-type",
 			Usage:     "Filter by media type.",
@@ -214,6 +329,11 @@ var xTweetsGetQuotes = cli.Command{
 			Name:      "mentioning",
 			Usage:     "Filter tweets mentioning a username.",
 			QueryPath: "mentioning",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-bookmarks",
+			Usage:     "Minimum bookmark count threshold.",
+			QueryPath: "minBookmarks",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
@@ -234,6 +354,26 @@ var xTweetsGetQuotes = cli.Command{
 			Name:      "min-retweets",
 			Usage:     "Minimum retweets threshold.",
 			QueryPath: "minRetweets",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-views",
+			Usage:     "Minimum view count threshold.",
+			QueryPath: "minViews",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "native-retweets",
+			Usage:     "Only return native reposts.",
+			QueryPath: "nativeRetweets",
+		},
+		&requestflag.Flag[string]{
+			Name:      "near",
+			Usage:     "Match a place name.",
+			QueryPath: "near",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "news",
+			Usage:     "Only return news results.",
+			QueryPath: "news",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
@@ -266,15 +406,30 @@ var xTweetsGetQuotes = cli.Command{
 			Usage:     "Only retweets of this tweet ID.",
 			QueryPath: "retweetsOfTweetId",
 		},
+		&requestflag.Flag[bool]{
+			Name:      "safe",
+			Usage:     "Enable the safe-search filter.",
+			QueryPath: "safe",
+		},
 		&requestflag.Flag[any]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
 		},
 		&requestflag.Flag[string]{
+			Name:      "since-id",
+			Usage:     "Return Tweets newer than this Tweet ID.",
+			QueryPath: "sinceId",
+		},
+		&requestflag.Flag[string]{
 			Name:      "since-time",
 			Usage:     "Unix timestamp - return quotes posted after this time",
 			QueryPath: "sinceTime",
+		},
+		&requestflag.Flag[string]{
+			Name:      "source",
+			Usage:     "Match the source application.",
+			QueryPath: "source",
 		},
 		&requestflag.Flag[string]{
 			Name:      "to-user",
@@ -301,6 +456,16 @@ var xTweetsGetQuotes = cli.Command{
 			Usage:     "Only return tweets from verified authors.",
 			QueryPath: "verifiedOnly",
 		},
+		&requestflag.Flag[string]{
+			Name:      "within",
+			Usage:     "Set the radius for the near filter.",
+			QueryPath: "within",
+		},
+		&requestflag.Flag[string]{
+			Name:      "within-time",
+			Usage:     "Match Tweets inside a recent time window.",
+			QueryPath: "withinTime",
+		},
 	},
 	Action:          handleXTweetsGetQuotes,
 	HideHelpCommand: true,
@@ -308,7 +473,7 @@ var xTweetsGetQuotes = cli.Command{
 
 var xTweetsGetReplies = cli.Command{
 	Name:    "get-replies",
-	Usage:   "Returns direct replies. Complete mode merges available timeline views, supported\nrankings, every forward cursor module, labeled hidden-content branches,\nexact-parent time partitions scaled to the reported reply count, and search. It\nseparates nested replies and returns 424 below 80% coverage.",
+	Usage:   "Returns direct replies. Omit mode for automatic maximum coverage with resumable\npagination. Complete mode returns nested replies, diagnostics, and 424 when\ndirect coverage stays below 80%.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -320,6 +485,16 @@ var xTweetsGetReplies = cli.Command{
 			Name:      "any-words",
 			Usage:     "Words or quoted phrases where any one can match. Separate with spaces, commas, or lines.",
 			QueryPath: "anyWords",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "blue-verified-only",
+			Usage:     "Only return tweets from Blue-verified authors.",
+			QueryPath: "blueVerifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "card-name",
+			Usage:     "Match the Tweet card name.",
+			QueryPath: "cardName",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cashtags",
@@ -333,13 +508,24 @@ var xTweetsGetReplies = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor for tweet replies",
+			Usage:     "Cursor from the previous response. Xquik cursors resume automatic coverage. Existing unprefixed cursors keep legacy standard behavior.\n",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
 			Name:      "exact-phrase",
 			Usage:     "Exact phrase to match.",
 			QueryPath: "exactPhrase",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "exclude-original-author",
+			Usage:     "Exclude replies written by the source-post author.",
+			Default:   false,
+			QueryPath: "excludeOriginalAuthor",
+		},
+		&requestflag.Flag[string]{
+			Name:      "exclude-source",
+			Usage:     "Exclude a source application.",
+			QueryPath: "excludeSource",
 		},
 		&requestflag.Flag[string]{
 			Name:      "exclude-words",
@@ -352,9 +538,26 @@ var xTweetsGetReplies = cli.Command{
 			QueryPath: "fromUser",
 		},
 		&requestflag.Flag[string]{
+			Name:      "geocode",
+			Usage:     "Match latitude, longitude, and radius.",
+			QueryPath: "geocode",
+		},
+		&requestflag.Flag[string]{
 			Name:      "hashtags",
 			Usage:     "Hashtags separated by spaces, commas, or lines.",
 			QueryPath: "hashtags",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "has-media-only",
+			Usage:     "Only return replies containing media.",
+			Default:   false,
+			QueryPath: "hasMediaOnly",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "include-original-post",
+			Usage:     "Include the source post and count it toward limit.",
+			Default:   false,
+			QueryPath: "includeOriginalPost",
 		},
 		&requestflag.Flag[string]{
 			Name:      "in-reply-to-tweet-id",
@@ -368,9 +571,38 @@ var xTweetsGetReplies = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "With mode=complete, maximum combined direct and nested reply rows (1-25000). Without complete mode, this is the deprecated pageSize alias and uses the normal 1-100 page range.\n",
-			Default:   25000,
+			Usage:     "With mode=complete, maximum combined direct and nested reply rows (1-25000, default 25000). Automatic pages accept 1-300. Standard pages accept 1-100. Prefer pageSize outside complete mode.\n",
 			QueryPath: "limit",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-depth",
+			Usage:     "Maximum reply depth from the source post.",
+			QueryPath: "maxDepth",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-faves",
+			Usage:     "Maximum likes threshold. maxLikes is also accepted.",
+			QueryPath: "maxFaves",
+		},
+		&requestflag.Flag[string]{
+			Name:      "max-id",
+			Usage:     "Return Tweets older than this Tweet ID.",
+			QueryPath: "maxId",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-quotes",
+			Usage:     "Maximum quotes threshold.",
+			QueryPath: "maxQuotes",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-replies",
+			Usage:     "Maximum replies threshold.",
+			QueryPath: "maxReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-retweets",
+			Usage:     "Maximum retweets threshold.",
+			QueryPath: "maxRetweets",
 		},
 		&requestflag.Flag[string]{
 			Name:      "media-type",
@@ -381,6 +613,11 @@ var xTweetsGetReplies = cli.Command{
 			Name:      "mentioning",
 			Usage:     "Filter tweets mentioning a username.",
 			QueryPath: "mentioning",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-bookmarks",
+			Usage:     "Minimum bookmark count threshold.",
+			QueryPath: "minBookmarks",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
@@ -402,14 +639,34 @@ var xTweetsGetReplies = cli.Command{
 			Usage:     "Minimum retweets threshold.",
 			QueryPath: "minRetweets",
 		},
+		&requestflag.Flag[int64]{
+			Name:      "min-views",
+			Usage:     "Minimum view count threshold.",
+			QueryPath: "minViews",
+		},
 		&requestflag.Flag[string]{
 			Name:      "mode",
-			Usage:     "Set complete for maximum-coverage collection. Complete mode accepts only limit. Remove cursor, pageSize, count, time ranges, and tweet filters.\n",
+			Usage:     "Optional advanced override. Omit mode for automatic maximum direct reply coverage with pagination. Standard keeps legacy pagination. Complete returns direct and nested replies with diagnostics, scope, depth, sorting, and original-post controls.\n",
 			QueryPath: "mode",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "native-retweets",
+			Usage:     "Only return native reposts.",
+			QueryPath: "nativeRetweets",
+		},
+		&requestflag.Flag[string]{
+			Name:      "near",
+			Usage:     "Match a place name.",
+			QueryPath: "near",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "news",
+			Usage:     "Only return news results.",
+			QueryPath: "news",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Automatic pages accept 1-300 Tweets. Standard pages keep 1-100. Default 20. Continue while has_next_page is true. Deprecated aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -438,15 +695,42 @@ var xTweetsGetReplies = cli.Command{
 			Usage:     "Only retweets of this tweet ID.",
 			QueryPath: "retweetsOfTweetId",
 		},
+		&requestflag.Flag[bool]{
+			Name:      "safe",
+			Usage:     "Enable the safe-search filter.",
+			QueryPath: "safe",
+		},
+		&requestflag.Flag[string]{
+			Name:      "scope",
+			Usage:     "Select all replies, direct replies, or nested replies.",
+			Default:   "all",
+			QueryPath: "scope",
+		},
 		&requestflag.Flag[any]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
 		},
 		&requestflag.Flag[string]{
+			Name:      "since-id",
+			Usage:     "Return Tweets newer than this Tweet ID.",
+			QueryPath: "sinceId",
+		},
+		&requestflag.Flag[string]{
 			Name:      "since-time",
 			Usage:     "Unix timestamp - return replies posted after this time",
 			QueryPath: "sinceTime",
+		},
+		&requestflag.Flag[string]{
+			Name:      "sort",
+			Usage:     "Sort the selected replies before applying limit.",
+			Default:   "relevance",
+			QueryPath: "sort",
+		},
+		&requestflag.Flag[string]{
+			Name:      "source",
+			Usage:     "Match the source application.",
+			QueryPath: "source",
 		},
 		&requestflag.Flag[string]{
 			Name:      "to-user",
@@ -473,6 +757,16 @@ var xTweetsGetReplies = cli.Command{
 			Usage:     "Only return tweets from verified authors.",
 			QueryPath: "verifiedOnly",
 		},
+		&requestflag.Flag[string]{
+			Name:      "within",
+			Usage:     "Set the radius for the near filter.",
+			QueryPath: "within",
+		},
+		&requestflag.Flag[string]{
+			Name:      "within-time",
+			Usage:     "Match Tweets inside a recent time window.",
+			QueryPath: "withinTime",
+		},
 	},
 	Action:          handleXTweetsGetReplies,
 	HideHelpCommand: true,
@@ -489,15 +783,85 @@ var xTweetsGetRetweeters = cli.Command{
 			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
+			Name:      "bio-contains",
+			Usage:     "Match any comma-separated or line-separated bio term, ignoring case.\n",
+			QueryPath: "bioContains",
+		},
+		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for retweeters",
 			QueryPath: "cursor",
 		},
+		&requestflag.Flag[bool]{
+			Name:      "has-location",
+			Usage:     "Only return profiles with a location.",
+			QueryPath: "hasLocation",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "has-website",
+			Usage:     "Only return profiles with a website.",
+			QueryPath: "hasWebsite",
+		},
+		&requestflag.Flag[string]{
+			Name:      "location-contains",
+			Usage:     "Match a location substring, ignoring case.",
+			QueryPath: "locationContains",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-followers",
+			Usage:     "Maximum follower count. Missing counts pass this maximum.",
+			QueryPath: "maxFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-following",
+			Usage:     "Maximum following count.",
+			QueryPath: "maxFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-statuses",
+			Usage:     "Maximum post count. maxPosts is also accepted.",
+			QueryPath: "maxStatuses",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-account-age-days",
+			Usage:     "Minimum account age in whole days.",
+			QueryPath: "minAccountAgeDays",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-followers",
+			Usage:     "Minimum follower count. Filtering happens before billing.",
+			QueryPath: "minFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-following",
+			Usage:     "Minimum following count.",
+			QueryPath: "minFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-statuses",
+			Usage:     "Minimum post count. minPosts is also accepted.",
+			QueryPath: "minStatuses",
+		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum user profiles requested from this page (20-200, default 200). The response can contain fewer profiles because the source returned fewer or remaining credits cover fewer results. Keep requesting next_cursor while has_next_page is true. The deprecated limit and count aliases remain accepted.\n",
+			Usage:     "Maximum user profiles requested from this page (20-200, default 200). Source, filters, or credits can return fewer profiles. Keep requesting next_cursor while has_next_page is true. Deprecated aliases remain accepted.\n",
 			Default:   200,
 			QueryPath: "pageSize",
+		},
+		&requestflag.Flag[string]{
+			Name:      "username-contains",
+			Usage:     "Match a username substring, ignoring case.",
+			QueryPath: "usernameContains",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "verified-only",
+			Usage:     "Only return verified profiles.",
+			QueryPath: "verifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "verified-type",
+			Usage:     "Match the verification type exactly, ignoring case.",
+			QueryPath: "verifiedType",
 		},
 	},
 	Action:          handleXTweetsGetRetweeters,
@@ -532,12 +896,12 @@ var xTweetsGetThread = cli.Command{
 
 var xTweetsSearch = cli.Command{
 	Name:    "search",
-	Usage:   "Search tweets by query, Tweet ID, X status URL, or account date window",
+	Usage:   "No-mode search maximizes coverage.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "q",
-			Usage:     "Search query (keywords,",
+			Usage:     "Query, Tweet ID, or status URL. Valid inline bounds apply per page.",
 			Required:  true,
 			QueryPath: "q",
 		},
@@ -551,10 +915,20 @@ var xTweetsSearch = cli.Command{
 			Usage:     "Words or quoted phrases where any one can match. Separate with spaces, commas, or lines.",
 			QueryPath: "anyWords",
 		},
+		&requestflag.Flag[bool]{
+			Name:      "blue-verified-only",
+			Usage:     "Only return tweets from Blue-verified authors.",
+			QueryPath: "blueVerifiedOnly",
+		},
 		&requestflag.Flag[string]{
 			Name:      "bounding-box",
 			Usage:     "Geo bounding box, e.g. -74.1 40.6 -73.9 40.8.",
 			QueryPath: "boundingBox",
+		},
+		&requestflag.Flag[string]{
+			Name:      "card-name",
+			Usage:     "Match the Tweet card name.",
+			QueryPath: "cardName",
 		},
 		&requestflag.Flag[string]{
 			Name:      "cashtags",
@@ -568,13 +942,18 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Pagination cursor from previous response",
+			Usage:     "Cursor from the previous response. Xquik cursors resume automatic coverage. Existing unprefixed cursors keep legacy standard behavior.\n",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
 			Name:      "exact-phrase",
 			Usage:     "Exact phrase to match.",
 			QueryPath: "exactPhrase",
+		},
+		&requestflag.Flag[string]{
+			Name:      "exclude-source",
+			Usage:     "Exclude a source application.",
+			QueryPath: "excludeSource",
 		},
 		&requestflag.Flag[string]{
 			Name:      "exclude-words",
@@ -585,6 +964,11 @@ var xTweetsSearch = cli.Command{
 			Name:      "from-user",
 			Usage:     "Filter by author username.",
 			QueryPath: "fromUser",
+		},
+		&requestflag.Flag[string]{
+			Name:      "geocode",
+			Usage:     "Match latitude, longitude, and radius.",
+			QueryPath: "geocode",
 		},
 		&requestflag.Flag[string]{
 			Name:      "hashtags",
@@ -603,14 +987,38 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
-			Usage:     "Max tweets to return (server paginates internally). Omit for single page (~20). This is an upper bound for paid authenticated calls: remaining credits can reduce the returned page size, and zero affordable results returns 402 insufficient_credits.\n",
-			Default:   20,
+			Usage:     "Result upper bound. Omit it for the existing 20-row page size. Explicit coverage defaults to 2000 and allows 10000. For paid requests, remaining credits can reduce results. Zero affordable results returns 402.\n",
 			QueryPath: "limit",
 		},
 		&requestflag.Flag[string]{
 			Name:      "list-id",
 			Usage:     "Search within a list ID.",
 			QueryPath: "listId",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-faves",
+			Usage:     "Maximum likes threshold. maxLikes is also accepted.",
+			QueryPath: "maxFaves",
+		},
+		&requestflag.Flag[string]{
+			Name:      "max-id",
+			Usage:     "Return Tweets older than this Tweet ID.",
+			QueryPath: "maxId",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-quotes",
+			Usage:     "Maximum quotes threshold.",
+			QueryPath: "maxQuotes",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-replies",
+			Usage:     "Maximum replies threshold.",
+			QueryPath: "maxReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-retweets",
+			Usage:     "Maximum retweets threshold.",
+			QueryPath: "maxRetweets",
 		},
 		&requestflag.Flag[string]{
 			Name:      "media-type",
@@ -621,6 +1029,11 @@ var xTweetsSearch = cli.Command{
 			Name:      "mentioning",
 			Usage:     "Filter tweets mentioning a username.",
 			QueryPath: "mentioning",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-bookmarks",
+			Usage:     "Minimum bookmark count threshold.",
+			QueryPath: "minBookmarks",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
@@ -641,6 +1054,31 @@ var xTweetsSearch = cli.Command{
 			Name:      "min-retweets",
 			Usage:     "Minimum retweets threshold.",
 			QueryPath: "minRetweets",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-views",
+			Usage:     "Minimum view count threshold.",
+			QueryPath: "minViews",
+		},
+		&requestflag.Flag[string]{
+			Name:      "mode",
+			Usage:     "Omit mode for resumable maximum coverage. Standard keeps legacy pagination. Coverage returns diagnostics once and rejects cursors.\n",
+			QueryPath: "mode",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "native-retweets",
+			Usage:     "Only return native reposts.",
+			QueryPath: "nativeRetweets",
+		},
+		&requestflag.Flag[string]{
+			Name:      "near",
+			Usage:     "Match a place name.",
+			QueryPath: "near",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "news",
+			Usage:     "Only return news results.",
+			QueryPath: "news",
 		},
 		&requestflag.Flag[string]{
 			Name:      "place",
@@ -688,15 +1126,30 @@ var xTweetsSearch = cli.Command{
 			Usage:     "Only retweets of this tweet ID.",
 			QueryPath: "retweetsOfTweetId",
 		},
+		&requestflag.Flag[bool]{
+			Name:      "safe",
+			Usage:     "Enable the safe-search filter.",
+			QueryPath: "safe",
+		},
 		&requestflag.Flag[any]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
 		},
 		&requestflag.Flag[string]{
+			Name:      "since-id",
+			Usage:     "Return Tweets newer than this Tweet ID.",
+			QueryPath: "sinceId",
+		},
+		&requestflag.Flag[string]{
 			Name:      "since-time",
-			Usage:     "ISO 8601 timestamp - only return tweets after this time",
+			Usage:     "Inclusive ISO bound.",
 			QueryPath: "sinceTime",
+		},
+		&requestflag.Flag[string]{
+			Name:      "source",
+			Usage:     "Match the source application.",
+			QueryPath: "source",
 		},
 		&requestflag.Flag[string]{
 			Name:      "to-user",
@@ -710,7 +1163,7 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "until-time",
-			Usage:     "ISO 8601 timestamp - only return tweets before this time",
+			Usage:     "Exclusive ISO bound.",
 			QueryPath: "untilTime",
 		},
 		&requestflag.Flag[string]{
@@ -722,6 +1175,16 @@ var xTweetsSearch = cli.Command{
 			Name:      "verified-only",
 			Usage:     "Only return tweets from verified authors.",
 			QueryPath: "verifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "within",
+			Usage:     "Set the radius for the near filter.",
+			QueryPath: "within",
+		},
+		&requestflag.Flag[string]{
+			Name:      "within-time",
+			Usage:     "Match Tweets inside a recent time window.",
+			QueryPath: "withinTime",
 		},
 	},
 	Action:          handleXTweetsSearch,

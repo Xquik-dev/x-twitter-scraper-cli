@@ -37,7 +37,7 @@ var drawsList = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Cursor for keyset pagination from prior response next_cursor",
+			Usage:     "Previous nextCursor.",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[int64]{
@@ -63,7 +63,7 @@ var drawsExport = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "format",
-			Usage:     "Export output format",
+			Usage:     "Export output format. PDF entry exports include up to 10,000 rows. Other entry formats include up to 100,000 rows.",
 			Required:  true,
 			QueryPath: "format",
 		},
