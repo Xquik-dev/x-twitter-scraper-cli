@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.1 (2026-08-11)
+
+Full Changelog: [v0.12.0...v0.12.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.12.0...v0.12.1)
+
+### Bug Fixes
+
+* **api:** clarify idempotent guest-wallet replays ([#46](https://github.com/Xquik-dev/x-twitter-scraper-cli/pull/46))
+
 ## 0.12.0 (2026-08-11)
 
 Full Changelog: [v0.11.1...v0.12.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.11.1...v0.12.0)
