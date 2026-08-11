@@ -16,7 +16,7 @@ import (
 
 var guestWalletsCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Create a one-use Stripe-hosted checkout after the user explicitly confirms a\n$10-$250 USD amount. This request creates no charge by itself. The user opens\ncheckout_url on Stripe. This endpoint returns the paid-read API key without\nrequiring an Xquik account, email, dashboard, or Xquik web page. An idempotent\nreplay returns the same key.",
+	Usage:   "Create a one-use hosted checkout after the user confirms $10-$250 USD. The\nrequest creates no charge. It returns a paid-read API key without an Xquik\naccount. Replays return the same key.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
@@ -44,7 +44,7 @@ var guestWalletsCreate = cli.Command{
 
 var guestWalletsRetrieveStatus = cli.Command{
 	Name:            "retrieve-status",
-	Usage:           "Poll after Stripe payment. Use usable to decide whether paid reads can run. An\nactive wallet can remain usable while a top-up is pending. A new wallet becomes\nusable only after verified webhook fulfillment. Send the guest key as\nAuthorization: Bearer.",
+	Usage:           "Poll after payment. Use usable to decide whether paid reads can run. An active\nwallet can remain usable while a top-up is pending. A new wallet becomes usable\nonly after payment is verified. Send the guest key as Authorization: Bearer.",
 	Suggest:         true,
 	Flags:           []cli.Flag{},
 	Action:          handleGuestWalletsRetrieveStatus,
@@ -53,7 +53,7 @@ var guestWalletsRetrieveStatus = cli.Command{
 
 var guestWalletsTopup = cli.Command{
 	Name:    "topup",
-	Usage:   "Create a one-use Stripe-hosted checkout for an existing paid-read guest key\nafter the user explicitly confirms a $10-$250 USD amount. The key remains the\nsame. This request creates no charge by itself and never redirects through an\nXquik web page.",
+	Usage:   "Create a one-use hosted checkout after the user confirms a $10-$250 USD amount\nfor an existing paid-read guest key. The key remains the same. This request\ncreates no charge and never redirects through Xquik.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
