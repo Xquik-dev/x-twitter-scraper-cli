@@ -20,7 +20,7 @@ import (
 
 var guestWalletsCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Create a one-use hosted checkout after the user confirms $10-$250 USD. The\nrequest creates no charge. It returns a paid-read API key without an Xquik\naccount. Replays return the same key.",
+	Usage:   "Create a one-use hosted checkout after the user confirms $10-$250 USD. The\nrequest creates no charge. It returns a paid-read API key without an Xquik\naccount. Idempotent replays return the same key.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
