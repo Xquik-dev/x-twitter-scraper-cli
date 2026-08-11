@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0 (2026-08-11)
+
+Full Changelog: [v0.11.1...v0.12.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.11.1...v0.12.0)
+
+### Features
+
+* **api:** api update ([3c26575](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/3c265756ebfb94822cadfc88191a0a96ac676652))
+* **api:** api update ([6bfaa5b](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/6bfaa5be0f93ac9644245b74058f9741c9b6b09d))
+
 ## 0.11.1 (2026-08-11)
 
 Full Changelog: [v0.11.0...v0.11.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.11.0...v0.11.1)
