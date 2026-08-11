@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.1 (2026-08-11)
+
+Full Changelog: [v0.11.0...v0.11.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.11.0...v0.11.1)
+
+### Build System
+
+* **deps:** bump actions/attest from 4.2.1 to 4.2.2 ([#41](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/41)) ([5fdc44e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5fdc44eb4021807e18845683dae77f835792adef))
+
 ## 0.11.0 (2026-08-11)
 
 Full Changelog: [v0.10.0...v0.11.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.10.0...v0.11.0)
