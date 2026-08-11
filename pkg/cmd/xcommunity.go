@@ -108,15 +108,85 @@ var xCommunitiesRetrieveMembers = cli.Command{
 			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
+			Name:      "bio-contains",
+			Usage:     "Match any comma-separated or line-separated bio term, ignoring case.\n",
+			QueryPath: "bioContains",
+		},
+		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "has-location",
+			Usage:     "Only return profiles with a location.",
+			QueryPath: "hasLocation",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "has-website",
+			Usage:     "Only return profiles with a website.",
+			QueryPath: "hasWebsite",
+		},
+		&requestflag.Flag[string]{
+			Name:      "location-contains",
+			Usage:     "Match a location substring, ignoring case.",
+			QueryPath: "locationContains",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-followers",
+			Usage:     "Maximum follower count. Missing counts pass this maximum.",
+			QueryPath: "maxFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-following",
+			Usage:     "Maximum following count.",
+			QueryPath: "maxFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-statuses",
+			Usage:     "Maximum post count. maxPosts is also accepted.",
+			QueryPath: "maxStatuses",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-account-age-days",
+			Usage:     "Minimum account age in whole days.",
+			QueryPath: "minAccountAgeDays",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-followers",
+			Usage:     "Minimum follower count. Filtering happens before billing.",
+			QueryPath: "minFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-following",
+			Usage:     "Minimum following count.",
+			QueryPath: "minFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-statuses",
+			Usage:     "Minimum post count. minPosts is also accepted.",
+			QueryPath: "minStatuses",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
 			Usage:     "Items per page (20-200, default 20). This is an upper bound for paid authenticated calls: remaining credits can reduce the returned page size, and zero affordable results returns 402 insufficient_credits.\n",
 			Default:   20,
 			QueryPath: "pageSize",
+		},
+		&requestflag.Flag[string]{
+			Name:      "username-contains",
+			Usage:     "Match a username substring, ignoring case.",
+			QueryPath: "usernameContains",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "verified-only",
+			Usage:     "Only return verified profiles.",
+			QueryPath: "verifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "verified-type",
+			Usage:     "Match the verification type exactly, ignoring case.",
+			QueryPath: "verifiedType",
 		},
 	},
 	Action:          handleXCommunitiesRetrieveMembers,
@@ -134,9 +204,79 @@ var xCommunitiesRetrieveModerators = cli.Command{
 			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
+			Name:      "bio-contains",
+			Usage:     "Match any comma-separated or line-separated bio term, ignoring case.\n",
+			QueryPath: "bioContains",
+		},
+		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for community moderators",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "has-location",
+			Usage:     "Only return profiles with a location.",
+			QueryPath: "hasLocation",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "has-website",
+			Usage:     "Only return profiles with a website.",
+			QueryPath: "hasWebsite",
+		},
+		&requestflag.Flag[string]{
+			Name:      "location-contains",
+			Usage:     "Match a location substring, ignoring case.",
+			QueryPath: "locationContains",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-followers",
+			Usage:     "Maximum follower count. Missing counts pass this maximum.",
+			QueryPath: "maxFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-following",
+			Usage:     "Maximum following count.",
+			QueryPath: "maxFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-statuses",
+			Usage:     "Maximum post count. maxPosts is also accepted.",
+			QueryPath: "maxStatuses",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-account-age-days",
+			Usage:     "Minimum account age in whole days.",
+			QueryPath: "minAccountAgeDays",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-followers",
+			Usage:     "Minimum follower count. Filtering happens before billing.",
+			QueryPath: "minFollowers",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-following",
+			Usage:     "Minimum following count.",
+			QueryPath: "minFollowing",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-statuses",
+			Usage:     "Minimum post count. minPosts is also accepted.",
+			QueryPath: "minStatuses",
+		},
+		&requestflag.Flag[string]{
+			Name:      "username-contains",
+			Usage:     "Match a username substring, ignoring case.",
+			QueryPath: "usernameContains",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "verified-only",
+			Usage:     "Only return verified profiles.",
+			QueryPath: "verifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "verified-type",
+			Usage:     "Match the verification type exactly, ignoring case.",
+			QueryPath: "verifiedType",
 		},
 	},
 	Action:          handleXCommunitiesRetrieveModerators,

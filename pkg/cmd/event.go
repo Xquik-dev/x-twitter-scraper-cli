@@ -40,13 +40,18 @@ var eventsList = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "cursor",
-			Usage:     "Cursor for keyset pagination from prior response next_cursor",
+			Usage:     "Previous nextCursor.",
 			QueryPath: "cursor",
 		},
 		&requestflag.Flag[string]{
 			Name:      "event-type",
 			Usage:     "Type of monitor event fired when account activity occurs.",
 			QueryPath: "eventType",
+		},
+		&requestflag.Flag[string]{
+			Name:      "keyword-monitor-id",
+			Usage:     "Keyword monitor ID.",
+			QueryPath: "keywordMonitorId",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "limit",
@@ -56,7 +61,7 @@ var eventsList = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "monitor-id",
-			Usage:     "Filter events by monitor ID",
+			Usage:     "Account monitor ID.",
 			QueryPath: "monitorId",
 		},
 	},
