@@ -61,7 +61,7 @@ var creditsRetrieveTopupStatus = cli.Command{
 
 var creditsTopupBalance = cli.Command{
 	Name:    "topup-balance",
-	Usage:   "Create a Stripe Checkout session only after the user confirms. The request never\ncompletes payment or adds credits by itself.",
+	Usage:   "Create a hosted checkout only after the user confirms. The request never\ncompletes payment or adds credits.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
