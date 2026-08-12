@@ -341,7 +341,7 @@ var xTweetsGetQuotes = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
@@ -625,7 +625,7 @@ var xTweetsGetReplies = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
@@ -883,15 +883,175 @@ var xTweetsGetThread = cli.Command{
 			PathParam: "id",
 		},
 		&requestflag.Flag[string]{
+			Name:      "any-words",
+			Usage:     "Words or quoted phrases where any one can match. Separate with spaces, commas, or lines.",
+			QueryPath: "anyWords",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "blue-verified-only",
+			Usage:     "Only return tweets from Blue-verified authors.",
+			QueryPath: "blueVerifiedOnly",
+		},
+		&requestflag.Flag[string]{
+			Name:      "cashtags",
+			Usage:     "Cashtags separated by spaces, commas, or lines.",
+			QueryPath: "cashtags",
+		},
+		&requestflag.Flag[string]{
+			Name:      "conversation-id",
+			Usage:     "Conversation ID filter.",
+			QueryPath: "conversationId",
+		},
+		&requestflag.Flag[string]{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for thread tweets",
 			QueryPath: "cursor",
+		},
+		&requestflag.Flag[string]{
+			Name:      "exact-phrase",
+			Usage:     "Exact phrase to match.",
+			QueryPath: "exactPhrase",
+		},
+		&requestflag.Flag[string]{
+			Name:      "exclude-words",
+			Usage:     "Words or quoted phrases to exclude. Separate with spaces, commas, or lines.",
+			QueryPath: "excludeWords",
+		},
+		&requestflag.Flag[string]{
+			Name:      "from-user",
+			Usage:     "Filter by author username.",
+			QueryPath: "fromUser",
+		},
+		&requestflag.Flag[string]{
+			Name:      "hashtags",
+			Usage:     "Hashtags separated by spaces, commas, or lines.",
+			QueryPath: "hashtags",
+		},
+		&requestflag.Flag[string]{
+			Name:      "in-reply-to-tweet-id",
+			Usage:     "Only replies to this tweet ID.",
+			QueryPath: "inReplyToTweetId",
+		},
+		&requestflag.Flag[string]{
+			Name:      "language",
+			Usage:     "Language code filter, e.g. en or tr.",
+			QueryPath: "language",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-faves",
+			Usage:     "Maximum likes threshold. maxLikes is also accepted.",
+			QueryPath: "maxFaves",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-quotes",
+			Usage:     "Maximum quotes threshold.",
+			QueryPath: "maxQuotes",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-replies",
+			Usage:     "Maximum replies threshold.",
+			QueryPath: "maxReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "max-retweets",
+			Usage:     "Maximum retweets threshold.",
+			QueryPath: "maxRetweets",
+		},
+		&requestflag.Flag[string]{
+			Name:      "media-type",
+			Usage:     "Filter by media type.",
+			QueryPath: "mediaType",
+		},
+		&requestflag.Flag[string]{
+			Name:      "mentioning",
+			Usage:     "Filter tweets mentioning a username.",
+			QueryPath: "mentioning",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-bookmarks",
+			Usage:     "Minimum bookmark count threshold.",
+			QueryPath: "minBookmarks",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-faves",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
+			QueryPath: "minFaves",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-quotes",
+			Usage:     "Minimum quote count threshold.",
+			QueryPath: "minQuotes",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-replies",
+			Usage:     "Minimum replies threshold.",
+			QueryPath: "minReplies",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-retweets",
+			Usage:     "Minimum retweets threshold.",
+			QueryPath: "minRetweets",
+		},
+		&requestflag.Flag[int64]{
+			Name:      "min-views",
+			Usage:     "Minimum view count threshold.",
+			QueryPath: "minViews",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
 			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
+		},
+		&requestflag.Flag[string]{
+			Name:      "quotes",
+			Usage:     "Quote mode.",
+			QueryPath: "quotes",
+		},
+		&requestflag.Flag[string]{
+			Name:      "quotes-of-tweet-id",
+			Usage:     "Only quotes of this tweet ID.",
+			QueryPath: "quotesOfTweetId",
+		},
+		&requestflag.Flag[string]{
+			Name:      "replies",
+			Usage:     "Reply mode.",
+			QueryPath: "replies",
+		},
+		&requestflag.Flag[string]{
+			Name:      "retweets",
+			Usage:     "Retweet mode.",
+			QueryPath: "retweets",
+		},
+		&requestflag.Flag[string]{
+			Name:      "retweets-of-tweet-id",
+			Usage:     "Only retweets of this tweet ID.",
+			QueryPath: "retweetsOfTweetId",
+		},
+		&requestflag.Flag[any]{
+			Name:      "since-date",
+			Usage:     "Start date in YYYY-MM-DD format.",
+			QueryPath: "sinceDate",
+		},
+		&requestflag.Flag[string]{
+			Name:      "to-user",
+			Usage:     "Filter replies sent to a username.",
+			QueryPath: "toUser",
+		},
+		&requestflag.Flag[any]{
+			Name:      "until-date",
+			Usage:     "End date in YYYY-MM-DD format.",
+			QueryPath: "untilDate",
+		},
+		&requestflag.Flag[string]{
+			Name:      "url",
+			Usage:     "URL substring or domain filter.",
+			QueryPath: "url",
+		},
+		&requestflag.Flag[bool]{
+			Name:      "verified-only",
+			Usage:     "Only return tweets from verified authors.",
+			QueryPath: "verifiedOnly",
 		},
 	},
 	Action:          handleXTweetsGetThread,
@@ -900,7 +1060,7 @@ var xTweetsGetThread = cli.Command{
 
 var xTweetsSearch = cli.Command{
 	Name:    "search",
-	Usage:   "No-mode search maximizes coverage.",
+	Usage:   "No-mode search maximizes coverage. New cursorless `Latest` sessions return rows\nnewest-first across cursor pages. Existing cursors preserve their established\nordering.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
@@ -1041,7 +1201,7 @@ var xTweetsSearch = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
