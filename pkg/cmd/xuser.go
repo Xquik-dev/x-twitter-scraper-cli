@@ -511,7 +511,7 @@ var xUsersRetrieveLikes = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
@@ -757,7 +757,7 @@ var xUsersRetrieveMedia = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
@@ -1003,7 +1003,7 @@ var xUsersRetrieveMentions = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
@@ -1265,7 +1265,7 @@ var xUsersRetrieveReplies = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
@@ -1614,7 +1614,7 @@ var xUsersRetrieveTweets = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "min-faves",
-			Usage:     "Minimum likes threshold.",
+			Usage:     "Minimum likes threshold. minLikes is also accepted.",
 			QueryPath: "minFaves",
 		},
 		&requestflag.Flag[int64]{
