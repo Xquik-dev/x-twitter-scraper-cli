@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.0 (2026-08-12)
+
+Full Changelog: [v0.12.1...v0.13.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.12.1...v0.13.0)
+
+### Features
+
+* **api:** sync public contracts ([0be1be0](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/0be1be0aef1fd0d09b08b4aa7992e0da8911b436))
+
 ## 0.12.1 (2026-08-11)
 
 Full Changelog: [v0.12.0...v0.12.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.12.0...v0.12.1)
