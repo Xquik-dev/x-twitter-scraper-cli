@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.1 (2026-08-18)
+
+Full Changelog: [v0.13.0...v0.13.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.0...v0.13.1)
+
+### Build System
+
+* update Go and all CLI modules ([#49](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/49)) ([692e04b](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/692e04bf57ef5e3f0da74188dd002c7a86f0d1df))
+
 ## 0.13.0 (2026-08-12)
 
 Full Changelog: [v0.12.1...v0.13.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.12.1...v0.13.0)
