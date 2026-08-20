@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.13.3 (2026-08-21)
+
+Full Changelog: [v0.13.2...v0.13.3](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.2...v0.13.3)
+
+### Documentation
+
+* keep API keys out of command examples and remove repeated selection copy
+* consolidate branch coverage evidence
+
 ## 0.13.2 (2026-08-20)
 
 Full Changelog: [v0.13.1...v0.13.2](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.1...v0.13.2)

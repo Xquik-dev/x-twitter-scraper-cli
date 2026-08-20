@@ -20,7 +20,7 @@ No OpenSSF exclusion applies.
 | Security reporting | Private GitHub reporting, response targets, & safe harbor in `SECURITY.md` |
 | Build | Pinned Go modules, checksum verification, & `./scripts/build` |
 | Tests | Race-enabled tests & regression coverage through `./scripts/test` |
-| Statement coverage | `./scripts/coverage` enforces 90%; current result is 91.1% |
+| Statement coverage | `./scripts/coverage` enforces 90%; current result is 91.2% |
 | Branch coverage | `./scripts/branch-coverage` enforces 80%; current result is 881/1,100 (80.09%) |
 | Static analysis | `go vet` & CodeQL security-extended queries |
 | Dynamic analysis | Scheduled native Go fuzzing & race detection |
@@ -43,13 +43,8 @@ go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 
 ## Branch Coverage Evidence
 
-The branch gate pins an exact FLOSS [`gocove`][gocove] version.
-It rebuilds & instruments every shipped Go package.
-Native Go coverage confirms each executed range.
-The verifier corrects nested-block associations from the beta reporter.
-Only the verifier package is excluded from shipped-code coverage.
-
-The current result is 881 of 1,100 branches, or 80.09%.
+The branch gate pins [`gocove`][gocove], rebuilds every shipped package, and
+validates observations with native Go coverage. Only verifier tests are excluded.
 
 ## Outstanding Gold Blockers
 
@@ -64,8 +59,6 @@ Repository automation cannot supply these human or organizational controls.
 | Human security review | No completed independent review exists within five years | Commission and publish a scoped human review |
 
 The repository must not claim Gold while any mandatory criterion remains unmet.
-
-Gold eligibility still requires review by a different human.
 
 ## Maintenance
 
