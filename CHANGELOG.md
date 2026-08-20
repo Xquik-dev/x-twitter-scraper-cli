@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.14.0 (2026-08-20)
+
+Full Changelog: [v0.13.3...v0.14.0](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.3...v0.14.0)
+
+### Features
+
+* **api:** align reply extraction contracts ([#26](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/26)) ([9876ffd](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/9876ffd9d90d211e14275e2f41069f38a603574f))
+* **api:** api update ([88a9325](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/88a9325d0c3ad47f4e9157ed15afdcd759362b8f))
+* **api:** api update ([117f17e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/117f17ed4d15b4a76ac3d7306cf5cdc42122e51a))
+* **api:** api update ([#46](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/46)) ([e953f8f](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/e953f8f035416c30f56ca331c181fb4aeaad1e6e))
+* **api:** publish current checkout contracts ([#44](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/44)) ([0bf43df](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/0bf43dfbabffb0276089f1a23128e2f33cfb68dc))
+
+
+### Bug Fixes
+
+* make draft release lookup reliable ([#21](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/21)) ([0b282f6](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/0b282f6e8d9f47cb31e0c972767a5f0e88eb6bcc))
+* publish assets before immutable release ([#18](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/18)) ([958f2c4](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/958f2c4c480f32a055ce297f64bca22bf536ae87))
+* **release:** reuse verified CLI draft ([#28](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/28)) ([278b326](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/278b326f6df10da9ba48d9e29299cea768ed5ce2))
+* use published Go SDK for releases ([#27](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/27)) ([1df3aca](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/1df3aca24b97cbf6c3995bbbb6d010bd12adeb96))
+
+
+### Chores
+
+* add FUNDING.yml pointing to xquik.com ([cef589d](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/cef589d107e4022c9b947a0f05c9167b102cb48d))
+* add per-file license evidence ([ed6a2e2](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/ed6a2e25993c057829c1f889919f9774bd4ec241))
+* **internal:** codegen related update ([5825005](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/582500590e8819c6e141e044b7237396b052deae))
+* prepare v0.5.1 ([8f1b0bf](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/8f1b0bf1ba1561cb0fcab7381830d1f8e7db0668))
+* prepare v0.5.2 ([55d27ef](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/55d27efd9369ab973a449054025204c795573d45))
+* sync repo ([407156b](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/407156bf1984a27f82a4e27d0a0679afcc2e4acc))
+* update SDK settings ([e20e024](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/e20e024081537cc77b42f7e119715625e9aee512))
+* update SDK settings ([f5f5697](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/f5f569769f18cb84abcf8797f99e321630202e81))
+
+
+### Documentation
+
+* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+* add DeepWiki badge ([a352c58](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/a352c586128dd5ed42e98bd3feb21bb92aff41b5))
+* add independence disclosure ([c6cd7ac](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c6cd7acdee87eb39db4c7997681e8a3d0365e30d))
+* clarify repository discovery ([5b30a9e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5b30a9e95a8228ad957de6465d35613a943d5bf5))
+* map common CLI tasks ([#11](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/11)) ([1b4522c](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/1b4522c76a0379bbecbc54d6fbb7d8c891cc7389))
+* remove repeated CLI copy ([#53](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/53)) ([13c294c](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/13c294c68a37eca5d16d49c871f0db42b5dfb9fc))
+* sharpen CLI copy and diagnostics ([#51](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/51)) ([6868b80](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/6868b809265178233547f7d75bee0717f6cacdbd))
+
+
+### Build System
+
+* bundle third-party license notices ([62ed5de](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/62ed5de80c66459cd666ab09e1e0820ee93616bb))
+* **deps:** bump actions/attest from 4.2.1 to 4.2.2 ([#41](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/41)) ([5fdc44e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5fdc44eb4021807e18845683dae77f835792adef))
+* **deps:** bump actions/setup-go from 6.5.0 to 7.0.0 ([#20](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/20)) ([95c49b3](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/95c49b309993bb9b277169426b0456ce33bcad8d))
+* **deps:** bump github/codeql-action/upload-sarif from 4.37.1 to 4.37.6 ([#34](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/34)) ([06973af](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/06973af6a3746c6db3c549bbc860d79fdb5aa601))
+* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 ([#37](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/37)) ([8718549](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/8718549cc12b5b36937a79fbae00b87e01c73fb9))
+* update Go and all CLI modules ([#49](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/49)) ([692e04b](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/692e04bf57ef5e3f0da74188dd002c7a86f0d1df))
+* use patched Go release ([11b2524](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/11b2524332c26f772e5ae7d90333a2808f3d162f))
+
 ## 0.13.3 (2026-08-21)
 
 Full Changelog: [v0.13.2...v0.13.3](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.2...v0.13.3)
