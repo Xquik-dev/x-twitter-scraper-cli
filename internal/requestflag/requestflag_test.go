@@ -140,7 +140,7 @@ func TestDateTimeValueParse(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 
-				// Parse the string back to ensure it's valid RFC3339
+				// Parse again to verify RFC3339.
 				_, parseErr := time.Parse(time.RFC3339, d.String())
 				assert.NoError(t, parseErr)
 			}
@@ -608,7 +608,7 @@ func TestYamlHandling(t *testing.T) {
 // TestNullLiteralHandling pins how each Flag[T] type handles the literal value "null"
 // when passed via the CLI. Pointer-typed flags serialize nil as JSON null, which is how
 // nullable body fields (`anyOf: [T, null]` / `{nullable: true}`) let users clear a field
-// via `--foo null`. Non-pointer primitive flags treat "null" as a raw value — these are
+// via `--foo null`. Non-pointer primitive flags treat "null" as a raw value. These are
 // non-nullable schemas where explicit null has no API semantics anyway.
 func TestNullLiteralHandling(t *testing.T) {
 	t.Parallel()
@@ -768,7 +768,7 @@ func TestNullLiteralHandling(t *testing.T) {
 		assert.Error(t, cv.Set("not-a-time"))
 	})
 
-	// Nullable maps don't need pointer wrapping — a nil map already marshals as JSON null.
+	// Nil maps already marshal as JSON null.
 	t.Run("Flag[map[string]any] null sends JSON null", func(t *testing.T) {
 		t.Parallel()
 		cv := &cliValue[map[string]any]{}
@@ -811,7 +811,7 @@ func TestFlagTypeNames(t *testing.T) {
 // TestInnerFlagDispatchOnUntypedFlag pins inner-flag behavior for `Flag[any]`,
 // which is the codegen output for nullable complex schemas (`anyOf: [T, null]`
 // or `{nullable: true}`). The untyped-nil zero value carries no reflect.Kind,
-// so SetInnerField has nowhere to dispatch the assignment — without explicit
+// so SetInnerField has nowhere to dispatch the assignment. Without explicit
 // help the inner-field value silently drops.
 func TestInnerFlagDispatchOnUntypedFlag(t *testing.T) {
 	t.Parallel()
@@ -1186,7 +1186,7 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 		}
 		assert.NoError(t, flag.PreParse())
 
-		// Both canonical and alias present — canonical should win because it's checked first.
+		// The canonical key wins when both forms are present.
 		data := map[string]any{
 			"account_id": "canonical_value",
 			"accountId":  "alias_value",

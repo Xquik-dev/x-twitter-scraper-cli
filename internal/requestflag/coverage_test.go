@@ -218,7 +218,7 @@ func TestInnerFlagMetadataAndValidation(t *testing.T) {
 		InnerField: "value",
 		OuterFlag:  &cli.StringFlag{Name: "outer"},
 	}
-	assert.ErrorContains(t, unsupportedOuter.Set("outer.value", "value"), "Cannot set inner field")
+	assert.ErrorContains(t, unsupportedOuter.Set("outer.value", "value"), "cannot set an inner field")
 }
 
 func TestInnerFlagAssemblyChecks(t *testing.T) {

@@ -17,5 +17,5 @@ if [[ -d "$REPLACEMENT" ]] || go list -m "$REPLACEMENT" >/dev/null; then
     go mod edit -replace github.com/Xquik-dev/x-twitter-scraper-go="$REPLACEMENT"
     go mod tidy -e
 else
-    echo "Skipping Go SDK replacement (branch may not exist on Go SDK)"
+    echo "Go SDK replacement skipped. Check the path, branch, tag, or module version."
 fi

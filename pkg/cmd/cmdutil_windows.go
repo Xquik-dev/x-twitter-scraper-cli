@@ -18,8 +18,7 @@ var (
 )
 
 func isPipedDataAvailableOSSpecific() bool {
-	// On Windows, unix.Poll is not available. Use PeekNamedPipe to check if data is available
-	// on the pipe without consuming it.
+	// Peek without consuming input because Windows lacks unix.Poll.
 	var available uint32
 	r, _, _ := procPeekNamedPipe.Call(
 		os.Stdin.Fd(),
@@ -33,7 +32,6 @@ func isPipedDataAvailableOSSpecific() bool {
 }
 
 func streamOutputOSSpecific(label string, generateOutput func(w *os.File) error) error {
-	// We have a trick with sockets that we use when possible on Unix-like systems. Those APIs aren't
-	// available on Windows, so we fall back to using pipes.
+	// Windows uses pipes because Unix socket paging is unavailable.
 	return streamToPagerWithPipe(label, generateOutput)
 }

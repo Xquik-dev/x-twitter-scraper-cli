@@ -85,11 +85,9 @@ func formatJSONArray(result gjson.Result, indent, width int) string {
 		number := fmt.Sprintf("%d.", i+1)
 		numbering := getIndent(indent) + bulletStyle.Render(number)
 
-		// If the item will be a one-liner, put it inline after the numbering,
-		// otherwise it starts with a newline and goes below the numbering.
+		// Place multiline values below their number.
 		itemWidth := width
 		if isSingleLine(item, indent+1) {
-			// Add right-padding:
 			numbering += strings.Repeat(" ", numberWidth-lipgloss.Width(number))
 			itemWidth = width - lipgloss.Width(numbering)
 		}
@@ -109,8 +107,7 @@ func formatJSONObject(result gjson.Result, indent, width int) string {
 	for _, key := range keys {
 		value := result.Get(key.String())
 		keyStr := getIndent(indent) + keyStyle.Render(key.String()+":")
-		// If item will be a one-liner, put it inline after the key, otherwise
-		// it starts with a newline and goes below the key.
+		// Place multiline values below their key.
 		itemWidth := width
 		if isSingleLine(value, indent+1) {
 			keyStr += " "

@@ -33,8 +33,7 @@ import (
 
 var OutputFormats = []string{"auto", "explore", "json", "jsonl", "pretty", "raw", "yaml"}
 
-// ValidateBaseURL checks that a base URL is correctly prefixed with a protocol scheme and produces a better
-// error message than the person would see otherwise if it doesn't.
+// ValidateBaseURL requires an HTTP or HTTPS scheme.
 func ValidateBaseURL(value, source string) error {
 	if value != "" && !strings.HasPrefix(value, "http://") && !strings.HasPrefix(value, "https://") {
 		return fmt.Errorf("%s %q is missing a scheme (expected http:// or https://)", source, value)
@@ -57,7 +56,6 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 		opts = append(opts, option.WithBearerToken(cmd.String("bearer-token")))
 	}
 
-	// Override base URL if the --base-url flag is provided
 	if baseURL := cmd.String("base-url"); baseURL != "" {
 		opts = append(opts, option.WithBaseURL(baseURL))
 	}
@@ -70,7 +68,7 @@ var debugMiddlewareOption = option.WithMiddleware(
 		logger := log.Default()
 
 		if reqBytes, err := httputil.DumpRequest(r, true); err == nil {
-			logger.Printf("Request Content:\n%s\n", reqBytes)
+			logger.Printf("HTTP Request:\n%s\n", reqBytes)
 		}
 
 		resp, err := mn(r)
@@ -79,17 +77,14 @@ var debugMiddlewareOption = option.WithMiddleware(
 		}
 
 		if respBytes, err := httputil.DumpResponse(resp, true); err == nil {
-			logger.Printf("Response Content:\n%s\n", respBytes)
+			logger.Printf("HTTP Response:\n%s\n", respBytes)
 		}
 
 		return resp, err
 	},
 )
 
-// isInputPiped tries to check for input being piped into the CLI which tells us that we should try to read
-// from stdin. This can be a bit tricky in some cases like when an stdin is connected to a pipe but nothing is
-// being piped in (this may happen in some environments like Cursor's integration terminal or CI), which is
-// why this function is a little more elaborate than it'd be otherwise.
+// isInputPiped reports whether stdin has readable data.
 func isInputPiped() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
@@ -98,19 +93,13 @@ func isInputPiped() bool {
 
 	mode := stat.Mode()
 
-	// Regular file (redirect like < file.txt) — only if non-empty.
-	//
-	// Notably, on Unix the case like `< /dev/null` is handled below because `/dev/null` is not a regular
-	// file. On Windows, NUL appears as a regular file with size 0, so it's also handled correctly.
+	// Empty regular files include Windows NUL and contain no input.
 	if mode.IsRegular() && stat.Size() > 0 {
 		return true
 	}
 
-	// For pipes/sockets (e.g. `echo foo | stainlesscli`), use an OS-specific check to determine whether
-	// data is actually available. Some environments like Cursor's integrated terminal connect stdin as a
-	// pipe even when nothing is being piped.
+	// Some terminals connect an empty pipe, so poll before reading.
 	if mode&(os.ModeNamedPipe|os.ModeSocket) != 0 {
-		// Defined in either cmdutil_unix.go or cmdutil_windows.go.
 		return isPipedDataAvailableOSSpecific()
 	}
 
@@ -127,18 +116,11 @@ func isTerminal(w io.Writer) bool {
 }
 
 func streamOutput(label string, generateOutput func(w *os.File) error) error {
-	// For non-tty output (probably a pipe), write directly to stdout
 	if !isTerminal(os.Stdout) {
 		return streamToStdout(generateOutput)
 	}
 
-	// When streaming output on Unix-like systems, there's a special trick involving creating two socket pairs
-	// that we prefer because it supports small buffer sizes which results in less pagination per buffer. The
-	// constructs needed to run it don't exist on Windows builds, so we have this function broken up into
-	// OS-specific files with conditional build comments. Under Windows (and in case our fancy constructs fail
-	// on Unix), we fall back to using pipes (`streamToPagerWithPipe`), which are OS agnostic.
-	//
-	// Defined in either cmdutil_unix.go or cmdutil_windows.go.
+	// Unix sockets reduce pagination; Windows and failures use pipes.
 	return streamOutputOSSpecific(label, generateOutput)
 }
 
@@ -176,9 +158,7 @@ func streamToPagerWithPipe(label string, generateOutput func(w *os.File) error) 
 		return err
 	}
 
-	// If we would be streaming to a terminal and aren't forcing color one way
-	// or the other, we should configure things to use color so the pager gets
-	// colorized input.
+	// Preserve terminal colors inside the pager.
 	if isTerminal(os.Stdout) && os.Getenv("FORCE_COLOR") == "" {
 		os.Setenv("FORCE_COLOR", "1")
 	}
@@ -200,9 +180,7 @@ func streamToStdout(generateOutput func(w *os.File) error) error {
 	return err
 }
 
-// writeBinaryResponse writes a binary response to stdout or a file.
-//
-// Takes in a stdout reference so we can test this function without overriding os.Stdout in tests.
+// writeBinaryResponse writes bytes to stdout or a file.
 func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile string) (string, error) {
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
@@ -214,15 +192,13 @@ func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile stri
 		_, err := stdout.Write(body)
 		return "", err
 	case "":
-		// If output file is unspecified, then print to stdout for plain text or
-		// if stdout is not a terminal:
+		// Print text and piped output directly.
 		if !isTerminal(os.Stdout) || isUTF8TextFile(body) {
 			_, err := stdout.Write(body)
 			return "", err
 		}
 
-		// If response has a suggested filename in the content-disposition
-		// header, then use that (with an optional suffix to ensure uniqueness):
+		// Otherwise, use the response filename or a unique fallback.
 		file, err := createDownloadFile(response, body)
 		if err != nil {
 			return "", err
@@ -231,27 +207,24 @@ func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile stri
 		if _, err := file.Write(body); err != nil {
 			return "", err
 		}
-		return fmt.Sprintf("Wrote output to: %s", file.Name()), nil
+		return fmt.Sprintf("Wrote output to %s.", file.Name()), nil
 	default:
 		if err := os.WriteFile(outfile, body, 0644); err != nil {
 			return "", err
 		}
-		return fmt.Sprintf("Wrote output to: %s", outfile), nil
+		return fmt.Sprintf("Wrote output to %s.", outfile), nil
 	}
 }
 
-// Return a writable file handle to a new file, which attempts to choose a good filename
-// based on the Content-Disposition header or sniffing the MIME filetype of the response.
+// createDownloadFile uses response metadata or detected MIME type.
 func createDownloadFile(response *http.Response, data []byte) (*os.File, error) {
 	filename := "file"
-	// If the header provided an output filename, use that
 	disp := response.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(disp)
 	if err == nil {
 		if dispFilename, ok := params["filename"]; ok {
-			// Only use the last path component to prevent directory traversal
+			// Strip directories to prevent traversal.
 			filename = filepath.Base(dispFilename)
-			// Try to create the file with exclusive flag to avoid race conditions
 			file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
 			if err == nil {
 				return file, nil
@@ -259,7 +232,6 @@ func createDownloadFile(response *http.Response, data []byte) (*os.File, error) 
 		}
 	}
 
-	// If file already exists, create a unique filename using CreateTemp
 	ext := filepath.Ext(filename)
 	if ext == "" {
 		ext = guessExtension(data)
@@ -271,7 +243,7 @@ func createDownloadFile(response *http.Response, data []byte) (*os.File, error) 
 func guessExtension(data []byte) string {
 	ct := http.DetectContentType(data)
 
-	// Prefer common extensions over obscure ones
+	// Prefer common extensions.
 	switch ct {
 	case "application/gzip":
 		return ".gz"
@@ -325,8 +297,7 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 			res = transformed
 		}
 	}
-	// Modeled after `jq -r` (`--raw-output`): if the result is a string, print it without JSON quotes so that
-	// it's easier to pipe into other programs.
+	// Match jq -r by printing strings without JSON quotes.
 	if opts.RawOutput && res.Type == gjson.String {
 		return []byte(res.Str + "\n"), nil
 	}
@@ -346,7 +317,7 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 			return prettyJSON, nil
 		}
 	case "jsonl":
-		// @ugly is gjson syntax for "no whitespace", so it fits on one line
+		// @ugly removes whitespace for JSON Lines.
 		oneLineJSON := res.Get("@ugly").Raw
 		if shouldUseColors(opts.Stdout) {
 			bytes := append(pretty.Color([]byte(oneLineJSON), pretty.TerminalStyle), '\n')
@@ -365,11 +336,11 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 		_, err := opts.Stdout.Write([]byte(yaml.String()))
 		return nil, err
 	default:
-		return nil, fmt.Errorf("Invalid format: %s, valid formats are: %s", opts.Format, strings.Join(OutputFormats, ", "))
+		return nil, fmt.Errorf("format %q is invalid. Choose one of: %s", opts.Format, strings.Join(OutputFormats, ", "))
 	}
 }
 
-const warningExploreNotSupported = "Warning: Output format 'explore' not supported for non-terminal output; falling back to 'json'\n"
+const warningExploreNotSupported = "Explore format requires a terminal. Using JSON instead.\n"
 
 // ShowJSONOpts configures how JSON output is displayed.
 type ShowJSONOpts struct {
@@ -427,7 +398,7 @@ func ShowJSON(res gjson.Result, opts ShowJSONOpts) error {
 	}
 }
 
-// Get the number of lines that would be output by writing the data to the terminal
+// countTerminalLines returns the rendered terminal height.
 func countTerminalLines(data []byte, terminalWidth int) int {
 	return bytes.Count([]byte(wrap.String(string(data), terminalWidth)), []byte("\n"))
 }
@@ -436,7 +407,7 @@ type hasRawJSON interface {
 	RawJSON() string
 }
 
-// ShowJSONIterator displays an iterator of values to the user. Use itemsToDisplay = -1 for no limit.
+// ShowJSONIterator displays streamed values. Use -1 for no limit.
 func ShowJSONIterator[T any](iter jsonview.Iterator[T], itemsToDisplay int64, opts ShowJSONOpts) error {
 	opts.setDefaults()
 
@@ -456,11 +427,10 @@ func ShowJSONIterator[T any](iter jsonview.Iterator[T], itemsToDisplay int64, op
 		terminalHeight = 40
 	}
 
-	// Decide whether or not to use a pager based on whether it's a short output or a long output
+	// Page output that exceeds the terminal.
 	usePager := false
 	output := []byte{}
 	numberOfNewlines := 0
-	// -1 is used to signal no limit of items to display
 	for itemsToDisplay != 0 && iter.Next() {
 		item := iter.Current()
 		var obj gjson.Result
@@ -482,7 +452,6 @@ func ShowJSONIterator[T any](iter jsonview.Iterator[T], itemsToDisplay int64, op
 		itemsToDisplay -= 1
 		numberOfNewlines += countTerminalLines(json, terminalWidth)
 
-		// If the output won't fit in the terminal window, stream it to a pager
 		if numberOfNewlines >= terminalHeight-3 {
 			usePager = true
 			break

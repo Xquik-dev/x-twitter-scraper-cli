@@ -14,8 +14,7 @@ import (
 	"strings"
 )
 
-// For the time being these type definitions are duplicated here so that we can
-// test this file in a non-generated context.
+// These aliases keep redaction tests independent from generated code.
 type (
 	Middleware     = func(*http.Request, MiddlewareNext) (*http.Response, error)
 	MiddlewareNext = func(*http.Request) (*http.Response, error)
@@ -23,8 +22,7 @@ type (
 
 const redactedPlaceholder = "<REDACTED>"
 
-// Headers known to contain sensitive information like an API key. Note that this exclude `Authorization`,
-// which is handled specially in `redactRequest` below.
+// Authorization needs separate redaction, so this list excludes it.
 var sensitiveHeaders = []string{
 	"api-key",
 	"x-api-key",
@@ -38,7 +36,7 @@ type RequestLogger struct {
 	sensitiveHeaders []string                            // field for testability; usually sensitiveHeaders
 }
 
-// NewRequestLogger returns a new RequestLogger instance with default options.
+// NewRequestLogger returns a logger with default redaction.
 func NewRequestLogger() *RequestLogger {
 	return &RequestLogger{
 		logger:           log.Default(),
@@ -53,7 +51,7 @@ func (m *RequestLogger) Middleware() Middleware {
 			return nil, err
 		}
 		if reqBytes, err := httputil.DumpRequest(redacted, true); err == nil {
-			m.logger.Printf("Request Content:\n%s\n", reqBytes)
+			m.logger.Printf("HTTP Request:\n%s\n", reqBytes)
 		}
 
 		resp, err := mn(req)
@@ -62,29 +60,23 @@ func (m *RequestLogger) Middleware() Middleware {
 		}
 
 		if respBytes, err := httputil.DumpResponse(resp, true); err == nil {
-			m.logger.Printf("Response Content:\n%s\n", respBytes)
+			m.logger.Printf("HTTP Response:\n%s\n", respBytes)
 		}
 
 		return resp, err
 	}
 }
 
-// redactRequest redacts sensitive information from the request for logging
-// purposes. If redaction is necessary, the request is cloned before mutating
-// the original and that clone is returned. As a small optimization, the
-// original is request is returned unchanged if no redaction is necessary.
+// redactRequest clones requests only when a sensitive header needs redaction.
 func (m *RequestLogger) redactRequest(req *http.Request) (*http.Request, error) {
 	redactedHeaders := req.Header.Clone()
 
-	// Notably, the clauses below are written so they can redact multiple
-	// headers of the same name if necessary.
+	// Redact every value when a header appears more than once.
 	if values := redactedHeaders.Values("Authorization"); len(values) > 0 {
 		redactedHeaders.Del("Authorization")
 
 		for _, value := range values {
-			// In case we're using something like a bearer token (e.g. `Bearer
-			// <my_token>`), keep the `Bearer` part for more debugging
-			// information.
+			// Keep the authorization scheme for debugging.
 			if authKind, _, ok := strings.Cut(value, " "); ok {
 				redactedHeaders.Add("Authorization", authKind+" "+redactedPlaceholder)
 			} else {
@@ -117,9 +109,7 @@ func (m *RequestLogger) redactRequest(req *http.Request) (*http.Request, error) 
 	return redacted, err
 }
 
-// This function returns two copies of an HTTP request body that can each be
-// read independently without affecting the other.
-// This logic is taken from `drainBody` in net/http/httputil.
+// cloneBody returns 2 independent readers, following net/http/httputil.drainBody.
 func cloneBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	if b == nil || b == http.NoBody {
 		// No copying needed. Preserve the magic sentinel meaning of NoBody.

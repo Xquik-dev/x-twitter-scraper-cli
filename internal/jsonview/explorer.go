@@ -26,7 +26,6 @@ import (
 )
 
 const (
-	// UI layout constants
 	borderPadding     = 2
 	heightOffset      = 5
 	tableMinHeight    = 2
@@ -34,12 +33,10 @@ const (
 	titlePaddingTop   = 0
 	footerPaddingLeft = 1
 
-	// Column width constants
 	defaultColumnWidth = 10
 	keyColumnWidth     = 3
 	valueColumnWidth   = 5
 
-	// String formatting constants
 	maxStringLength  = 100
 	maxPreviewLength = 24
 
@@ -77,7 +74,7 @@ var keys = keyMap{
 	),
 	Back: key.NewBinding(
 		key.WithKeys("left", "h", "backspace"),
-		key.WithHelp("←/h", "go back"),
+		key.WithHelp("←/h", "back"),
 	),
 	Enter: key.NewBinding(
 		key.WithKeys("right", "l"),
@@ -85,11 +82,11 @@ var keys = keyMap{
 	),
 	PrintValue: key.NewBinding(
 		key.WithKeys("p"),
-		key.WithHelp("p", "print and exit"),
+		key.WithHelp("p", "print & exit"),
 	),
 	Raw: key.NewBinding(
 		key.WithKeys("r"),
-		key.WithHelp("r", "toggle raw JSON"),
+		key.WithHelp("r", "raw JSON"),
 	),
 	Quit: key.NewBinding(
 		key.WithKeys("q", "esc", "ctrl+c", "enter"),
@@ -133,12 +130,10 @@ func (tv *TableView) Update(msg tea.Msg, raw bool) tea.Cmd {
 	var cmd tea.Cmd
 	tv.table, cmd = tv.table.Update(msg)
 
-	// Check if we need to load more data
 	if tv.iterator != nil && !tv.isLoading && tv.data.IsArray() {
 		cursor := tv.table.Cursor()
 		totalRows := len(tv.table.Rows())
 
-		// Load more when we're at the last row
 		if cursor == totalRows-1 {
 			tv.isLoading = true
 			return tv.loadMoreData(raw)
@@ -172,13 +167,10 @@ func (tv *TableView) loadMoreData(raw bool) tea.Cmd {
 			return nil
 		}
 
-		// Add the new item to our data
 		tv.rowData = append(tv.rowData, result)
 
-		// Add new row to the table
 		newRow := table.Row{formatValue(result, raw)}
 
-		// For array of objects, we need to format according to columns
 		if len(tv.columns) > 1 && result.IsObject() {
 			newRow = make(table.Row, len(tv.columns))
 			for i, col := range tv.columns {
@@ -190,7 +182,6 @@ func (tv *TableView) loadMoreData(raw bool) tea.Cmd {
 		rows = append(rows, newRow)
 		tv.table.SetRows(rows)
 
-		// Resize columns to accommodate the new data
 		tv.Resize(tv.width, tv.height)
 
 		tv.isLoading = false
@@ -209,7 +200,6 @@ func (tv *TableView) updateColumnWidths(width int) {
 	columns := tv.table.Columns()
 	widths := make([]int, len(columns))
 
-	// Calculate required widths from headers and content
 	for i, col := range columns {
 		widths[i] = lipgloss.Width(col.Title)
 	}
@@ -297,7 +287,7 @@ type JSONViewer struct {
 	help    help.Model
 }
 
-// ExploreJSON explores a single JSON value known ahead of time
+// ExploreJSON opens an interactive view for one JSON value.
 func ExploreJSON(title string, json gjson.Result) error {
 	view, err := newView("", json, false)
 	if err != nil {
@@ -318,7 +308,7 @@ type hasRawJSON interface {
 	RawJSON() string
 }
 
-// ExploreJSONStream explores JSON data loaded incrementally via an iterator
+// ExploreJSONStream opens an interactive view for streamed JSON.
 func ExploreJSONStream[T any](title string, it Iterator[T]) error {
 	anyIt := genericToAnyIterator(it)
 
@@ -347,7 +337,6 @@ func ExploreJSONStream[T any](title string, it Iterator[T]) error {
 		return err
 	}
 
-	// Set iterator if there might be more data
 	if len(items) == preloadCount {
 		view.iterator = anyIt
 	}
@@ -468,7 +457,6 @@ func (v *JSONViewer) buildNavigationPath(tableView *TableView, cursor int) strin
 }
 
 func quoteString(s string) string {
-	// Replace backslashes and quotes with escaped versions
 	s = strings.ReplaceAll(s, "\\", "\\\\")
 	s = strings.ReplaceAll(s, "\"", "\\\"")
 	return stringLiteralStyle.Render("\"" + s + "\"")
@@ -601,7 +589,6 @@ func newArrayTableView(path string, data gjson.Result, array []gjson.Result, raw
 }
 
 func newArrayOfObjectsTableView(path string, data gjson.Result, array []gjson.Result, raw bool) *TableView {
-	// Collect unique keys
 	keySet := make(map[string]struct{})
 	var columns []table.Column
 
@@ -651,7 +638,6 @@ func newObjectTableView(path string, data gjson.Result, raw bool) *TableView {
 		rowData = append(rowData, value)
 	}
 
-	// Adjust column widths based on content
 	for _, row := range rows {
 		for i, cell := range row {
 			if i < len(columns) {
@@ -677,7 +663,6 @@ func createTable(columns []table.Column, rows []table.Row, bgColor lipgloss.Colo
 		table.WithFocused(true),
 	)
 
-	// Set common table styles
 	s := table.DefaultStyles()
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
@@ -744,9 +729,9 @@ func formatArray(value gjson.Result) string {
 	case 0:
 		return "[]"
 	case 1:
-		return "[...1 item...]"
+		return "[1 item]"
 	default:
-		return fmt.Sprintf("[...%d items...]", count)
+		return fmt.Sprintf("[%d items]", count)
 	}
 }
 
@@ -767,22 +752,21 @@ func sum(ints []int) int {
 	return total
 }
 
-// An iterator over `any` values
+// AnyIterator iterates over arbitrary values.
 type AnyIterator interface {
 	Next() bool
 	Err() error
 	Current() any
 }
 
-// A generic iterator interface that is used by the `genericIterator` struct
-// below to convert iterators over specific types to an AnyIterator
+// Iterator provides typed iteration.
 type Iterator[T any] interface {
 	Next() bool
 	Err() error
 	Current() T
 }
 
-// genericIterator adapts a generic Iterator[T] to an AnyIterator.
+// genericIterator adapts Iterator[T] to AnyIterator.
 type genericIterator[T any] struct {
 	iterator Iterator[T]
 	current  any

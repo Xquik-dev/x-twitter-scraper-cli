@@ -1,4 +1,4 @@
-name: Refresh Context7 Docs
+name: Refresh Context7 Documentation
 
 on:
   push:
@@ -28,14 +28,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Trigger Context7 refresh
+      - name: Request Context7 Refresh
         env:
           CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
         run: |
           set -euo pipefail
 
           if [ -z "$CONTEXT7_API_KEY" ]; then
-            echo "::warning ::CONTEXT7_API_KEY secret is not configured. Configure it to enable automatic Context7 refreshes."
+            echo "::warning ::Context7 API key is missing. Add CONTEXT7_API_KEY to enable refreshes."
             exit 0
           fi
 
@@ -52,30 +52,30 @@ jobs:
               ;;
             400)
               if grep -Eiq "active-task|being processed|already.*process" "$body_file"; then
-                echo "::warning ::Context7 is already processing another library. Retry on the next docs change."
+                echo "::warning ::Another Context7 refresh is running. This workflow will retry after the next docs change."
                 cat "$body_file"
               elif grep -Eiq "too-early|minimum .* days|required between updates" "$body_file"; then
-                echo "::warning ::Context7 refresh is not due yet."
+                echo "::warning ::Context7 refresh is not due. This workflow will retry after the next docs change."
                 cat "$body_file"
               else
-                echo "::error ::Context7 refresh returned HTTP $status."
+                echo "::error ::Context7 rejected the refresh with HTTP $status. Check the response below."
                 cat "$body_file"
                 exit 1
               fi
               ;;
             404)
-              echo "::warning ::Context7 library /xquik-dev/x-twitter-scraper-cli is not available yet. Add processing may still be pending."
+              echo "::warning ::Context7 library /xquik-dev/x-twitter-scraper-cli is unavailable. Wait for initial processing."
               cat "$body_file"
               ;;
             401|403)
-              echo "::error ::Context7 authentication failed."
+              echo "::error ::Context7 authentication failed. Update CONTEXT7_API_KEY."
               exit 1
               ;;
             429)
-              echo "::warning ::Context7 refresh is rate limited. Retry on the next docs change."
+              echo "::warning ::Context7 rate limit reached. This workflow will retry after the next docs change."
               ;;
             *)
-              echo "::error ::Context7 refresh returned HTTP $status."
+              echo "::error ::Context7 refresh failed with HTTP $status. Check the response below."
               cat "$body_file"
               exit 1
               ;;

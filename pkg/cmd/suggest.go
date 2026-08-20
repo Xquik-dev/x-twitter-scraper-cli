@@ -13,12 +13,9 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// This entire file is mostly taken from urfave/cli/v3's source, with the exception of suggestCommand which is
-// modified for a nicer error message.
+// Derived from urfave/cli/v3, with Xquik's command message.
 
-// jaroDistance is the measure of similarity between two strings. It returns a
-// value between 0 and 1, where 1 indicates identical strings and 0 indicates
-// completely different strings.
+// jaroDistance returns string similarity from 0 to 1.
 //
 // Adapted from https://github.com/xrash/smetrics/blob/5f08fbb34913bc8ab95bb4f2a89a0637ca922666/jaro.go.
 func jaroDistance(a, b string) float64 {
@@ -75,8 +72,7 @@ func jaroDistance(a, b string) float64 {
 	return ((matches / lenA) + (matches / lenB) + ((matches - transpositions) / matches)) / 3.0
 }
 
-// jaroWinkler is more accurate when strings have a common prefix up to a
-// defined maximum length.
+// jaroWinkler favors shared prefixes.
 //
 // Adapted from https://github.com/xrash/smetrics/blob/5f08fbb34913bc8ab95bb4f2a89a0637ca922666/jaro-winkler.go.
 func jaroWinkler(a, b string) float64 {
@@ -102,8 +98,7 @@ func jaroWinkler(a, b string) float64 {
 	return jaroDist + 0.1*prefixMatch*(1.0-jaroDist)
 }
 
-// suggestCommand takes a list of commands and a provided string to suggest a
-// command name
+// suggestCommand returns the closest command name.
 func suggestCommand(commands []*cli.Command, provided string) string {
 	distance := 0.0
 	var lineage []*cli.Command

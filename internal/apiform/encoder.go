@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-// Marshal encodes a value as multipart form data using default settings
+// Marshal encodes a value as multipart form data.
 func Marshal(value any, writer *multipart.Writer) error {
 	e := &encoder{
 		format: FormatRepeat,
@@ -24,7 +24,7 @@ func Marshal(value any, writer *multipart.Writer) error {
 	return e.marshal(value, writer)
 }
 
-// MarshalWithSettings encodes a value with custom array format
+// MarshalWithSettings encodes a value with a custom array format.
 func MarshalWithSettings(value any, writer *multipart.Writer, arrayFormat FormFormat) error {
 	e := &encoder{
 		format: arrayFormat,
@@ -106,11 +106,10 @@ func (e *encoder) encodeArray(key string, val reflect.Value, writer *multipart.W
 		for i := 0; i < val.Len(); i++ {
 			item := val.Index(i)
 			if (item.Kind() == reflect.Pointer || item.Kind() == reflect.Interface) && item.IsNil() {
-				// Null values are sent as an empty string
+				// Send null as an empty field.
 				values = append(values, "")
 				continue
 			}
-			// If item is an interface, reduce it to the concrete type
 			if item.Kind() == reflect.Interface {
 				item = item.Elem()
 			}
@@ -176,18 +175,15 @@ func (e *encoder) encodeReader(key string, val reflect.Value, writer *multipart.
 		return nil
 	}
 
-	// Set defaults
 	filename := "anonymous_file"
 	contentType := "application/octet-stream"
 
-	// Get filename if available
 	if named, ok := reader.(interface{ Filename() string }); ok {
 		filename = named.Filename()
 	} else if named, ok := reader.(interface{ Name() string }); ok {
 		filename = path.Base(named.Name())
 	}
 
-	// Get content type if available
 	if typed, ok := reader.(interface{ ContentType() string }); ok {
 		contentType = typed.ContentType()
 	}
@@ -215,7 +211,7 @@ func (e *encoder) encodeMap(key string, val reflect.Value, writer *multipart.Wri
 		key = key + "."
 	}
 
-	// Collect and sort map entries for deterministic output
+	// Sort map entries for deterministic output.
 	pairs := []mapPair{}
 	iter := val.MapRange()
 	for iter.Next() {
@@ -229,7 +225,6 @@ func (e *encoder) encodeMap(key string, val reflect.Value, writer *multipart.Wri
 		return pairs[i].key < pairs[j].key
 	})
 
-	// Process sorted pairs
 	for _, p := range pairs {
 		if err := e.encodeValue(key+p.key, p.value, writer); err != nil {
 			return err

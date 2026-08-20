@@ -21,7 +21,7 @@ done < <(find "$DIST_DIR" -type f \( \
   \) -print0)
 
 if [[ ${#files[@]} -eq 0 ]]; then
-  echo -e "\033[31mNo binaries found for packaging.\033[0m"
+  echo -e "\033[31mBuild binaries are missing. Run the release build first.\033[0m"
   exit 1
 fi
 
@@ -47,7 +47,7 @@ RESPONSE=$(curl -X POST "$URL?filename=$FILENAME" \
 SIGNED_URL=$(echo "$RESPONSE" | jq -r '.url')
 
 if [[ "$SIGNED_URL" == "null" ]]; then
-  echo -e "\033[31mFailed to get signed URL.\033[0m"
+  echo -e "\033[31mUpload URL is unavailable. Retry the release.\033[0m"
   exit 1
 fi
 
@@ -56,9 +56,9 @@ UPLOAD_RESPONSE=$(curl -v -X PUT \
   --data-binary "@${DIST_DIR}/${FILENAME}" "$SIGNED_URL" 2>&1)
 
 if echo "$UPLOAD_RESPONSE" | grep -q "HTTP/[0-9.]* 200"; then
-  echo -e "\033[32mUploaded build to Stainless storage.\033[0m"
-  echo -e "\033[32mInstallation: Download and unzip: 'https://pkg.stainless.com/s/x-twitter-scraper-cli/$SHA'. On macOS, run 'xattr -d com.apple.quarantine {executable name}'.\033[0m"
+  echo -e "\033[32mBuild uploaded.\033[0m"
+  echo -e "\033[32mDownload & unzip 'https://pkg.stainless.com/s/x-twitter-scraper-cli/$SHA'. On macOS, run 'xattr -d com.apple.quarantine {executable name}'.\033[0m"
 else
-  echo -e "\033[31mFailed to upload artifact.\033[0m"
+  echo -e "\033[31mArtifact upload failed. Check the release logs.\033[0m"
   exit 1
 fi
