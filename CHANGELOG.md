@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.2 (2026-08-20)
+
+Full Changelog: [v0.13.1...v0.13.2](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.1...v0.13.2)
+
+### Documentation
+
+* sharpen CLI copy and diagnostics ([#51](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/51)) ([6868b80](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/6868b809265178233547f7d75bee0717f6cacdbd))
+
 ## 0.13.1 (2026-08-18)
 
 Full Changelog: [v0.13.0...v0.13.1](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.0...v0.13.1)
