@@ -12,8 +12,8 @@ You may also email [support@xquik.com](mailto:support@xquik.com).
 Do not open a public issue.
 Do not include secrets in screenshots, logs, or examples.
 
-We aim to acknowledge reports within 3 business days.
-We coordinate disclosure after confirming the issue.
+Maintainers acknowledge reports within 3 business days.
+Maintainers coordinate disclosure after confirming the issue.
 
 ## Scope
 

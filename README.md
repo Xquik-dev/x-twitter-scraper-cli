@@ -11,12 +11,6 @@ It wraps the [Xquik REST API](https://xquik.com) as a command-line Twitter API a
 
 <!-- x-release-please-start-version -->
 
-## Choose the CLI
-
-Use it for terminals, shell scripts, and one-off automation.
-Choose an SDK for long-running apps or custom error handling.
-Run `--help` before scripting generated commands and flags.
-
 ## Installation
 
 ### Install With Go
@@ -36,8 +30,6 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 
 <!-- x-release-please-end -->
 
-### Run Locally
-
 Run `./scripts/run args...` from the cloned repository.
 
 ## Usage
@@ -50,7 +42,6 @@ x-twitter-scraper [resource] <command> [flags...]
 
 ```sh
 x-twitter-scraper x:tweets search \
-  --api-key 'My API Key' \
   --q from:elonmusk \
   --limit 10
 ```
@@ -61,14 +52,14 @@ Run each command with `--help` before adding flags.
 
 | Task | Start Command |
 | --- | --- |
-| How do I search tweets? | `x-twitter-scraper x:tweets search --help` |
-| How do I get a user's posts? | `x-twitter-scraper x:users retrieve-tweets --help` |
-| How do I scrape followers? | `x-twitter-scraper x:users retrieve-followers --help` |
-| How do I scrape following accounts? | `x-twitter-scraper x:users retrieve-following --help` |
-| How do I read my home timeline? | `x-twitter-scraper x get-home-timeline --help` |
-| How do I export a large dataset? | `x-twitter-scraper extractions estimate-cost --help` |
-| How do I monitor an account? | `x-twitter-scraper monitors create --help` |
-| How do I post or reply? | `x-twitter-scraper x:tweets create --help` |
+| Search tweets | `x-twitter-scraper x:tweets search --help` |
+| Get a user's posts | `x-twitter-scraper x:users retrieve-tweets --help` |
+| Scrape Twitter followers | `x-twitter-scraper x:users retrieve-followers --help` |
+| Scrape following accounts | `x-twitter-scraper x:users retrieve-following --help` |
+| Read a home timeline | `x-twitter-scraper x get-home-timeline --help` |
+| Export a large dataset | `x-twitter-scraper extractions estimate-cost --help` |
+| Monitor an account | `x-twitter-scraper monitors create --help` |
+| Post or reply | `x-twitter-scraper x:tweets create --help` |
 
 ### Environment Variables
 
@@ -118,8 +109,6 @@ Escape a leading `@` when sending a literal value:
 x-twitter-scraper <command> --username '\@abe'
 ```
 
-#### Explicit Encoding
-
 JSON endpoints detect text and binary files.
 Use `@file://` for text, `@data://` for base64, and 3 slashes for absolute paths.
 
@@ -127,16 +116,16 @@ Use `@file://` for text, `@data://` for base64, and 3 slashes for absolute paths
 x-twitter-scraper <command> --arg @data://file.txt
 ```
 
-## Link Another Go SDK Version
+## Test Another Go SDK Version
 
-Use `./scripts/link` to test another Xquik Go SDK version:
+Pass a module version or local path to `./scripts/link`:
 
 ```bash
 ./scripts/link github.com/org/repo@version
 ./scripts/link ../path/to/xtwitterscraper-go
 ```
 
-Without an argument, the script uses `../x-twitter-scraper-go`.
+The script defaults to `../x-twitter-scraper-go`.
 
 ## Support & Policies
 
