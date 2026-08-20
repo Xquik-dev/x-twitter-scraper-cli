@@ -42,20 +42,15 @@ const (
 type FileEmbedStyle int
 
 const (
-	// EmbedText reads referenced files fully into memory and substitutes the file's contents back into the
-	// value as a string. Binary files are base64-encoded. Used for JSON request bodies and for headers and
-	// query parameters, where the file contents need to be serialized inline.
+	// EmbedText loads files inline. It base64-encodes binary data.
 	EmbedText FileEmbedStyle = iota
 
-	// EmbedIOReader replaces file references with an io.Reader that streams the file's contents. Used for
-	// `multipart/form-data` and `application/octet-stream` request bodies, where files are uploaded as binary
-	// parts rather than embedded into a text value.
+	// EmbedIOReader streams binary request bodies through io.Reader.
 	EmbedIOReader
 )
 
-// onceStdinReader wraps an io.Reader that can only be consumed once, used to ensure stdin is read by at most
-// one parameter (or only for a body root parameter or only for YAML parameter input). If reason is set, stdin
-// is unavailable and read() returns an error explaining why.
+// onceStdinReader gives 1 request parameter exclusive access to stdin.
+// A failure reason blocks access before the first read.
 type onceStdinReader struct {
 	stdinReader   io.Reader
 	failureReason string
@@ -101,9 +96,8 @@ func embedFiles(obj any, embedStyle FileEmbedStyle, stdin *onceStdinReader) (any
 	return result.Interface(), nil
 }
 
-// Replace "@file.txt" with the file's contents inside a value
+// embedFilesValue replaces file references with their contents.
 func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdinReader) (reflect.Value, error) {
-	// Unwrap interface values to get the concrete type
 	if v.Kind() == reflect.Interface {
 		if v.IsNil() {
 			return v, nil
@@ -116,7 +110,6 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 		if v.Len() == 0 {
 			return v, nil
 		}
-		// Always create map[string]any to handle potential type changes when embedding files
 		result := reflect.MakeMap(reflect.TypeOf(map[string]any{}))
 
 		iter := v.MapRange()
@@ -135,7 +128,6 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 		if v.Len() == 0 {
 			return v, nil
 		}
-		// Use `[]any` to allow for types to change when embedding files
 		result := reflect.MakeSlice(reflect.TypeOf([]any{}), v.Len(), v.Len())
 		for i := 0; i < v.Len(); i++ {
 			newVal, err := embedFilesValue(v.Index(i), embedStyle, stdin)
@@ -147,9 +139,7 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 		return result, nil
 
 	case reflect.String:
-		// FilePathValue is always treated as a file path without needing the "@" prefix.
-		// These only appear on binary upload parameters (multipart/octet-stream), which
-		// always use EmbedIOReader.
+		// FilePathValue never needs an @ prefix.
 		if v.Type() == reflect.TypeOf(FilePathValue("")) {
 			s := v.String()
 			if s == "" {
@@ -185,14 +175,13 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 
 		s := v.String()
 		if literal, ok := strings.CutPrefix(s, "\\@"); ok {
-			// Allow for escaped @ signs if you don't want them to be treated as files
+			// Preserve escaped @ literals.
 			return reflect.ValueOf("@" + literal), nil
 		}
 
 		if embedStyle == EmbedText {
 			if filename, ok := strings.CutPrefix(s, "@data://"); ok {
-				// The "@data://" prefix is for files you explicitly want to upload
-				// as base64-encoded (even if the file itself is plain text)
+				// @data:// always uses base64.
 				if isStdinPath(filename) {
 					content, err := stdin.readAll()
 					if err != nil {
@@ -206,9 +195,7 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 				}
 				return reflect.ValueOf(base64.StdEncoding.EncodeToString(content)), nil
 			} else if filename, ok := strings.CutPrefix(s, "@file://"); ok {
-				// The "@file://" prefix is for files that you explicitly want to
-				// upload as a string literal with backslash escapes (not base64
-				// encoded)
+				// @file:// always uses text.
 				if isStdinPath(filename) {
 					content, err := stdin.readAll()
 					if err != nil {
@@ -234,32 +221,21 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 				}
 				content, err := os.ReadFile(filename)
 				if err != nil {
-					// If the string is "@username", it's probably supposed to be a
-					// string literal and not a file reference. However, if the
-					// string looks like "@file.txt" or "@/tmp/file", then it's
-					// probably supposed to be a file.
+					// Treat @username as text, but file-like values as paths.
 					probablyFile := strings.Contains(filename, ".") || strings.Contains(filename, "/")
 					if probablyFile {
-						// Give a useful error message if the user tried to upload a
-						// file, but the file couldn't be read (e.g. mistyped
-						// filename or permission error)
 						return v, err
 					}
-					// Fall back to the raw value if the user provided something
-					// like "@username" that's not intended to be a file.
 					return v, nil
 				}
-				// If the file looks like a plain text UTF8 file format, then use the contents directly.
 				if isUTF8TextFile(content) {
 					return reflect.ValueOf(string(content)), nil
 				}
-				// Otherwise it's a binary file, so encode it with base64
 				return reflect.ValueOf(base64.StdEncoding.EncodeToString(content)), nil
 			}
 		} else {
 			if filename, ok := strings.CutPrefix(s, "@"); ok {
-				// Behavior is the same for @file, @data://file, and @file://file, except that
-				// @username will be treated as a literal string if no "username" file exists
+				// Prefixes share upload behavior; @username remains text.
 				expectsFile := true
 				if withoutPrefix, ok := strings.CutPrefix(filename, "data://"); ok {
 					filename = withoutPrefix
@@ -280,7 +256,6 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 				upload, err := openFileUpload(filename)
 				if err != nil {
 					if !expectsFile {
-						// For strings that start with "@" and don't look like a filename, return the string
 						return v, nil
 					}
 					return v, err
@@ -295,11 +270,9 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdi
 	}
 }
 
-// Guess whether a file's contents are binary (e.g. a .jpg or .mp3), as opposed
-// to plain text (e.g. .txt or .md).
+// isUTF8TextFile reports whether MIME sniffing finds valid UTF-8 text.
 func isUTF8TextFile(content []byte) bool {
-	// Go's DetectContentType follows https://mimesniff.spec.whatwg.org/ and
-	// these are the sniffable content types that are plain text:
+	// DetectContentType follows https://mimesniff.spec.whatwg.org/.
 	textTypes := []string{
 		"text/",
 		"application/json",
@@ -325,8 +298,7 @@ func flagOptions(
 	arrayFormat apiquery.ArrayQueryFormat,
 	bodyType BodyContentType,
 
-	// This parameter is true if stdin is already in use to pass a binary parameter by using the special value
-	// "-". In this case, we won't attempt to read it as a JSON/YAML blob for options setting.
+	// ignoreStdin reserves stdin for a binary parameter named "-".
 	ignoreStdin bool,
 ) ([]option.RequestOption, error) {
 	var options []option.RequestOption
@@ -336,8 +308,7 @@ func flagOptions(
 
 	requestContents := requestflag.ExtractRequestContents(cmd)
 
-	// Translate inner-field aliases in YAML values that came from flags (e.g.
-	// `--parent '{"alias": val}'` resolving to the canonical inner field).
+	// Map YAML aliases to canonical API fields.
 	if bodyMap, ok := requestContents.Body.(map[string]any); ok {
 		applyDataAliases(cmd, bodyMap)
 	}
@@ -353,21 +324,15 @@ func flagOptions(
 			stdinConsumedByPipe = true
 			var bodyData any
 			if err := yaml.Unmarshal(pipeData, &bodyData); err != nil {
-				return nil, fmt.Errorf("Failed to parse piped data as YAML/JSON:\n%w", err)
+				return nil, fmt.Errorf("piped data is invalid YAML or JSON. Fix the input:\n%w", err)
 			}
 			if bodyMap, ok := bodyData.(map[string]any); ok {
 				applyDataAliases(cmd, bodyMap)
-				// Apply any matching keys from the piped data to path, query, and header flags
-				// that have not already been set via the command line.
 				if err := requestflag.ApplyStdinDataToFlags(cmd, bodyMap); err != nil {
 					return nil, err
 				}
-				// Re-extract request contents now that flags may have been updated.
 				requestContents = requestflag.ExtractRequestContents(cmd)
-				// Remove keys that were consumed as query, header, or path params so they
-				// don't also leak into the request body via the maps.Copy merge below.
-				// We delete both the canonical key and any aliases since the user may have
-				// piped data using an alias name rather than the canonical API name.
+				// Remove path, query, and header keys before merging the body.
 				for _, flag := range cmd.Flags {
 					inReq, ok := flag.(requestflag.InRequest)
 					if !ok || !flag.IsSet() {
@@ -392,7 +357,7 @@ func flagOptions(
 				}
 			} else if bodyType != EmptyBody {
 				if flagMap, ok := requestContents.Body.(map[string]any); ok && len(flagMap) > 0 {
-					return nil, fmt.Errorf("Cannot merge flags with a body that is not a map: %v", bodyData)
+					return nil, fmt.Errorf("request body must be a map when using flags. Fix the input: %v", bodyData)
 				} else {
 					requestContents.Body = bodyData
 				}
@@ -402,23 +367,20 @@ func flagOptions(
 
 	if missingFlags := requestflag.GetMissingRequiredFlags(cmd, requestContents.Body); len(missingFlags) > 0 {
 		if len(missingFlags) == 1 {
-			return nil, fmt.Errorf("Required flag %q not set\nRun '%s --help' for usage information", missingFlags[0].Names()[0], cmd.FullName())
+			return nil, fmt.Errorf("required flag %q is missing. Run '%s --help' for usage", missingFlags[0].Names()[0], cmd.FullName())
 		} else {
 			names := []string{}
 			for _, flag := range missingFlags {
 				names = append(names, flag.Names()[0])
 			}
-			return nil, fmt.Errorf("Required flags %q not set\nRun '%s --help' for usage information", strings.Join(names, ", "), cmd.FullName())
+			return nil, fmt.Errorf("required flags %q are missing. Run '%s --help' for usage", strings.Join(names, ", "), cmd.FullName())
 		}
 	}
 
-	// For flags marked as FileInput (type: string, format: binary), the value is always
-	// a file path. Wrap with FilePathValue so embedFiles reads the file automatically
-	// without requiring the user to type the "@" prefix. This handles both values set
-	// via explicit CLI flags and values that arrived via piped YAML/JSON data.
+	// Wrap binary paths so file expansion never needs an @ prefix.
 	wrapFileInputValues(cmd, &requestContents)
 
-	// Determine stdin availability for FileInput params that use "-".
+	// Reserve stdin for one input source.
 	var stdinReader onceStdinReader
 	if ignoreStdin {
 		stdinReader = onceStdinReader{failureReason: "stdin is already being used for the request body"}
@@ -428,7 +390,7 @@ func flagOptions(
 		stdinReader = onceStdinReader{stdinReader: os.Stdin}
 	}
 
-	// Embed files passed as "@file.jpg" in the request body, headers, and query:
+	// Expand file references across the request.
 	embedStyle := EmbedText
 	if bodyType == ApplicationOctetStream || bodyType == MultipartFormEncoded {
 		embedStyle = EmbedIOReader
@@ -456,7 +418,6 @@ func flagOptions(
 		ArrayFormat:  arrayFormat,
 	}
 
-	// Add query parameters:
 	if values, err := apiquery.MarshalWithSettings(requestContents.Queries, querySettings); err != nil {
 		return nil, err
 	} else {
@@ -472,7 +433,6 @@ func flagOptions(
 		}
 	}
 
-	// Add header parameters
 	headerSettings := apiquery.QuerySettings{
 		NestedFormat: apiquery.NestedQueryFormatDots,
 		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
@@ -499,10 +459,9 @@ func flagOptions(
 		buf := new(bytes.Buffer)
 		writer := multipart.NewWriter(buf)
 
-		// For multipart/form-encoded, we need a map structure
 		bodyMap, ok := requestContents.Body.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("Cannot send a non-map value to a form-encoded endpoint: %v\n", requestContents.Body)
+			return nil, fmt.Errorf("form request body must be a map. Fix the input: %v", requestContents.Body)
 		}
 		encodingFormat := apiform.FormatComma
 		if err := apiform.MarshalWithSettings(bodyMap, writer, encodingFormat); err != nil {
@@ -521,7 +480,7 @@ func flagOptions(
 		options = append(options, option.WithRequestBody("application/json", bodyBytes))
 
 	case ApplicationOctetStream:
-		// If there is a body root parameter, that will handle setting the request body, we don't need to do it here.
+		// Body-root flags already set the request body.
 		for _, flag := range cmd.Flags {
 			if toSend, ok := flag.(requestflag.InRequest); ok && toSend.IsBodyRoot() {
 				return options, nil
@@ -532,27 +491,22 @@ func flagOptions(
 		} else if bodyStr, ok := requestContents.Body.(string); ok {
 			options = append(options, option.WithRequestBody("application/octet-stream", []byte(bodyStr)))
 		} else {
-			return nil, fmt.Errorf("Unsupported body for application/octet-stream: %v", requestContents.Body)
+			return nil, fmt.Errorf("octet-stream body is unsupported. Pass bytes or text: %v", requestContents.Body)
 		}
 
 	default:
-		panic("Invalid body content type!")
+		panic("invalid body content type")
 	}
 
 	return options, nil
 }
 
-// FilePathValue is a string wrapper that marks a value as a file path whose contents should be read
-// and embedded in the request. Unlike a regular string, embedFilesValue always treats a FilePathValue
-// as a file path without needing the "@" prefix.
+// FilePathValue marks a path for expansion without an @ prefix.
 type FilePathValue string
 
-// fileUpload wraps an io.Reader with filename and content-type metadata for
-// use as a multipart form part. The apiform encoder detects the Filename and
-// ContentType methods and uses them to populate the Content-Disposition
-// filename and the Content-Type header on the part.
+// fileUpload carries multipart filename and content type metadata.
 type fileUpload struct {
-	io.Reader   // apiform checks for reader and reads its contents during encode
+	io.Reader
 	filename    string
 	contentType string
 }
@@ -566,9 +520,7 @@ func (f fileUpload) Close() error {
 	return nil
 }
 
-// openFileUpload opens the file at path and returns a fileUpload whose filename
-// is the path's basename and whose content type is derived from the file
-// extension (falling back to application/octet-stream when unknown).
+// openFileUpload opens a path and derives its multipart metadata.
 func openFileUpload(path string) (fileUpload, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -585,13 +537,9 @@ func openFileUpload(path string) (fileUpload, error) {
 	}, nil
 }
 
-// applyDataAliases rewrites keys in a body map based on flag `DataAliases` metadata. For top-level flags,
-// `{alias: value}` becomes `{canonical: value}`. For inner flags (those registered under an outer flag
-// via WithInnerFlags), the alias translation is also applied to the nested map under the outer flag's
-// body path, so values like `--parent '{"alias": val}'` resolve to the canonical inner field name.
+// applyDataAliases maps top-level and nested aliases to canonical API fields.
 func applyDataAliases(cmd *cli.Command, bodyMap map[string]any) {
 	for _, flag := range cmd.Flags {
-		// Inner flags: rewrite aliases inside the nested map under the outer flag's body path.
 		if inner, ok := flag.(requestflag.HasOuterFlag); ok {
 			outer, outerOk := inner.GetOuterFlag().(requestflag.InRequest)
 			if !outerOk {
@@ -602,17 +550,13 @@ func applyDataAliases(cmd *cli.Command, bodyMap map[string]any) {
 			}
 			continue
 		}
-		// Top-level flags: rewrite aliases in the body map.
 		if inReq, ok := flag.(requestflag.InRequest); ok && inReq.GetBodyPath() != "" {
 			rewriteAliases(bodyMap, inReq.GetBodyPath(), inReq.GetDataAliases())
 		}
 	}
 }
 
-// rewriteAliases replaces each alias key in m with the canonical key, preserving the value. The
-// "canonical" key is the name the API itself expects (the OpenAPI property/field name) — e.g. for
-// a top-level flag, the parameter's BodyPath; for an inner flag, the inner field name. Aliases are
-// the user-facing alternate names declared via x-stainless-cli-data-alias.
+// rewriteAliases replaces alias keys with one canonical key.
 func rewriteAliases(m map[string]any, canonical string, aliases []string) {
 	for _, alias := range aliases {
 		if alias == "" || alias == canonical {
@@ -625,10 +569,7 @@ func rewriteAliases(m map[string]any, canonical string, aliases []string) {
 	}
 }
 
-// wrapFileInputValues replaces string values for FileInput flags (type: string, format: binary) with
-// FilePathValue sentinel values. embedFilesValue recognizes FilePathValue and reads the file contents
-// directly, so the user doesn't need to type the "@" prefix. This handles both values set via explicit
-// CLI flags and values that arrived via piped YAML/JSON data.
+// wrapFileInputValues marks binary paths from flags and piped data.
 func wrapFileInputValues(cmd *cli.Command, contents *requestflag.RequestContents) {
 	bodyMap, _ := contents.Body.(map[string]any)
 
@@ -638,7 +579,6 @@ func wrapFileInputValues(cmd *cli.Command, contents *requestflag.RequestContents
 			continue
 		}
 
-		// Wrap values set via explicit CLI flags.
 		if flag.IsSet() {
 			if wrapped, changed := wrapFileInputValue(flag.Get()); changed {
 				if bodyPath := inReq.GetBodyPath(); bodyPath != "" {
@@ -653,7 +593,6 @@ func wrapFileInputValues(cmd *cli.Command, contents *requestflag.RequestContents
 			}
 		}
 
-		// Wrap values that arrived via piped YAML/JSON data in the body map.
 		if bodyPath := inReq.GetBodyPath(); bodyPath != "" && bodyMap != nil {
 			if value, exists := bodyMap[bodyPath]; exists {
 				if wrapped, changed := wrapFileInputValue(value); changed {

@@ -10,15 +10,14 @@ function ____APPNAME___fish_autocomplete
     set -l completions (env COMPLETION_STYLE=fish $cmd __complete -- $args $current 2>>/tmp/fish-debug.log)
     set -l exit_code $status
 
-    # Check for custom file completion patterns
-    # Patterns can appear anywhere in the word (e.g., inside quotes: 'my file is @file://path')
+    # Detect file references anywhere in the token.
     set -l prefix ""
     set -l file_part "$current"
     set -l force_file_completion 0
 
     if string match -gqr '^(?<before>.*)@(?<protocol>file://|data://)?(?<file_part>.*)$' -- $current
         if string match -qr '^[\'"]' -- $before
-            # Ensures we don't insert an extra quote when the user is building an argument in quotes
+            # Avoid inserting a second opening quote.
             set before (string sub -s 2 -- $before)
         end
 
@@ -33,13 +32,13 @@ function ____APPNAME___fish_autocomplete
     else
         switch $exit_code
             case 10
-                # File completion
+                # Complete files.
                 __fish_complete_path "$current"
             case 11
-                # No completion
+                # Disable completion.
                 return 0
             case 0
-                # Use returned completions
+                # Use command completions.
                 for completion in $completions
                     echo $completion
                 end
@@ -48,4 +47,3 @@ function ____APPNAME___fish_autocomplete
 end
 
 complete -c __APPNAME__ -f -a '(____APPNAME___fish_autocomplete)'
-

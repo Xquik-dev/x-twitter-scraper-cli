@@ -11,14 +11,14 @@ type Marshaler interface {
 type FormFormat int
 
 const (
-	// FormatRepeat represents arrays as repeated keys with the same value
+	// FormatRepeat uses repeated keys.
 	FormatRepeat FormFormat = iota
-	// Comma-separated values 1,2,3
+	// FormatComma joins values with commas.
 	FormatComma
-	// FormatBrackets uses the key[] notation for arrays
+	// FormatBrackets uses key[].
 	FormatBrackets
-	// FormatIndicesDots uses key.0, key.1, etc. notation
+	// FormatIndicesDots uses key.0 and key.1.
 	FormatIndicesDots
-	// FormatIndicesBrackets uses key[0], key[1], etc. notation
+	// FormatIndicesBrackets uses key[0] and key[1].
 	FormatIndicesBrackets
 )

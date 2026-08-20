@@ -58,15 +58,13 @@ func RegisterRunner(runner Runner) {
 	runCLI = runner
 }
 
-// TestRunMockTestWithFlags runs a test against a mock server with the provided
-// CLI args and ensures it succeeds
+// TestRunMockTestWithFlags runs CLI arguments against a mock server.
 func TestRunMockTestWithFlags(t *testing.T, args ...string) {
 	t.Helper()
 	TestRunMockTestWithPipeAndFlags(t, nil, args...)
 }
 
-// TestRunMockTestWithPipeAndFlags runs a test against a mock server with the provided
-// data piped over stdin and CLI args and ensures it succeeds
+// TestRunMockTestWithPipeAndFlags adds piped stdin to a mock CLI test.
 func TestRunMockTestWithPipeAndFlags(t *testing.T, pipeData []byte, args ...string) {
 	t.Helper()
 	require.NotNil(t, runCLI, "Register a CLI test runner before running command tests")

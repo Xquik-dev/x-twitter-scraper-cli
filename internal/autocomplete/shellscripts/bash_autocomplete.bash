@@ -11,8 +11,7 @@ ____APPNAME___bash_autocomplete() {
 
     local last_token="$cur"
 
-    # If the last token has been split apart by a ':', join it back together.
-    # Ex: 'a:b' will be represented in COMP_WORDS as 'a', ':', 'b'
+    # Rejoin colon-delimited tokens split by Bash.
     if [[ $COMP_CWORD -ge 2 ]]; then
       local prev2="${COMP_WORDS[COMP_CWORD - 2]}"
       local prev1="${COMP_WORDS[COMP_CWORD - 1]}"
@@ -21,7 +20,7 @@ ____APPNAME___bash_autocomplete() {
       fi
     fi
 
-    # Check for custom file completion patterns
+    # Detect embedded file references.
     local prefix=""
     local file_part="$cur"
     local force_file_completion=false
@@ -47,9 +46,9 @@ ____APPNAME___bash_autocomplete() {
       mapfile -t COMPREPLY < <(compgen -f -- "$file_part" | sed "s|^|$prefix|")
     else
       case $exit_code in
-      10) mapfile -t COMPREPLY < <(compgen -f -- "$cur") ;; # file completion
-      11) COMPREPLY=() ;;                                   # no completion
-      0) mapfile -t COMPREPLY <<<"$completions" ;;          # use returned completions
+      10) mapfile -t COMPREPLY < <(compgen -f -- "$cur") ;; # Complete files.
+      11) COMPREPLY=() ;;                                   # Disable completion.
+      0) mapfile -t COMPREPLY <<<"$completions" ;;          # Use command completions.
       esac
     fi
     return 0

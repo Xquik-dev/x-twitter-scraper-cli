@@ -16,7 +16,7 @@ import (
 
 func main() {
 	if len(os.Args) != 4 {
-		exitf("usage: branch_coverage.go REPORT PROFILE MINIMUM")
+		exitf("Usage: branch_coverage.go REPORT PROFILE MINIMUM")
 	}
 	minimum, err := strconv.ParseFloat(os.Args[3], 64)
 	if err != nil {
@@ -42,12 +42,12 @@ func main() {
 		exitf("measure branch coverage: %v", err)
 	}
 	if total == 0 {
-		exitf("branch report has no branches")
+		exitf("Branch report has no branches. Check gocove output.")
 	}
 
 	percent := 100 * float64(covered) / float64(total)
 	fmt.Printf(
-		"branch coverage: %d/%d (%.2f%%); minimum %.2f%%\n",
+		"Branch coverage: %d/%d (%.2f%%); minimum %.2f%%\n",
 		covered,
 		total,
 		percent,

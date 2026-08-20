@@ -10,13 +10,13 @@ cd -- "$(dirname -- "$0")/.."
 
 for file in .goreleaser.yml release-please-config.json .github/workflows/publish-release.yml; do
   if [[ ! -f "$file" ]]; then
-    echo "Missing required release file: $file" >&2
+    echo "Release file is missing: $file. Restore it before publishing." >&2
     exit 1
   fi
 done
 
 if [[ ! -x bin/check-release-debug-info ]]; then
-  echo "bin/check-release-debug-info must be executable" >&2
+  echo "Release checker is not executable. Run chmod +x bin/check-release-debug-info." >&2
   exit 1
 fi
 

@@ -57,13 +57,13 @@ func OutputCompletionScript(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if cmd.Args().Len() == 0 {
-		return cli.Exit(fmt.Sprintf("no shell provided for completion command. available shells are %+v", shells), 1)
+		return cli.Exit(fmt.Sprintf("Shell is missing. Choose one of: %+v", shells), 1)
 	}
 	s := CompletionStyle(cmd.Args().First())
 
 	renderCompletion, ok := shellCompletions[s]
 	if !ok {
-		return cli.Exit(fmt.Sprintf("unknown shell %s, available shells are %+v", s, shells), 1)
+		return cli.Exit(fmt.Sprintf("Shell %q is unsupported. Choose one of: %+v", s, shells), 1)
 	}
 
 	completionScript, err := renderCompletion(cmd, cmd.Root().Name)
@@ -188,9 +188,8 @@ func (scb *shellCompletionBuilder) createFromFlag(input string, flag *cli.Flag, 
 func GetCompletions(completionStyle CompletionStyle, root *cli.Command, args []string) CompletionResult {
 	result := getAllPossibleCompletions(completionStyle, root, args)
 
-	// If the user has not put in a colon, filter out colon commands
+	// Hide colon-delimited subcommands until the user enters a colon.
 	if len(args) > 0 && !strings.Contains(args[len(args)-1], ":") {
-		// Nothing with anything after a colon. Create a single entry for groups with the same colon subset
 		foundNames := make([]string, 0, len(result.Completions))
 		filteredCompletions := make([]ShellCompletion, 0, len(result.Completions))
 
@@ -237,7 +236,7 @@ func getAllPossibleCompletions(completionStyle CompletionStyle, root *cli.Comman
 			if flag == nil {
 				i++
 			} else if docFlag, ok := (*flag).(cli.DocGenerationFlag); ok && docFlag.TakesValue() {
-				// All flags except for bool flags take values
+				// Non-boolean flags consume the next argument.
 				i += 2
 			} else {
 				i++
@@ -251,7 +250,7 @@ func getAllPossibleCompletions(completionStyle CompletionStyle, root *cli.Comman
 		}
 	}
 
-	// Check if the previous arg was a flag expecting a value
+	// Complete a value when the previous argument expects one.
 	if len(preceding) > 0 {
 		prev := preceding[len(preceding)-1]
 		if isFlag(prev) {
@@ -266,7 +265,6 @@ func getAllPossibleCompletions(completionStyle CompletionStyle, root *cli.Comman
 		}
 	}
 
-	// Completing a flag name
 	if isFlag(current) {
 		for _, flag := range cmd.Flags {
 			completions = builder.createFromFlag(current, &flag, completions)
@@ -301,10 +299,10 @@ func ExecuteShellCompletion(ctx context.Context, cmd *cli.Command) error {
 		case "fish":
 			completionStyle = CompletionStyleFish
 		default:
-			return cli.Exit("COMPLETION_STYLE must be set to 'bash', 'zsh', 'pwsh', or 'fish'", 1)
+			return cli.Exit("COMPLETION_STYLE is invalid. Use 'bash', 'zsh', 'pwsh', or 'fish'.", 1)
 		}
 	} else {
-		return cli.Exit("COMPLETION_STYLE must be set to 'bash', 'zsh', 'pwsh', 'fish'", 1)
+		return cli.Exit("COMPLETION_STYLE is invalid. Use 'bash', 'zsh', 'pwsh', or 'fish'.", 1)
 	}
 
 	result := GetCompletions(completionStyle, root, args)
@@ -325,12 +323,8 @@ func ExecuteShellCompletion(ctx context.Context, cmd *cli.Command) error {
 	return cli.Exit("", int(result.Behavior))
 }
 
-// When CLI arguments are passed in, they are separated on word barriers.
-// Most commonly this is whitespace but in some cases that may also be colons.
-// We wish to allow arguments with colons. To handle this, we append/prepend colons to their neighboring
-// arguments.
-//
-// Example: `rebuildColonSeparatedArgs(["a", "b", ":", "c", "d"])` => `["a", "b:c", "d"]`
+// rebuildColonSeparatedArgs rejoins colon-delimited commands split by shells.
+// Example: `["a", "b", ":", "c", "d"]` becomes `["a", "b:c", "d"]`.
 func rebuildColonSeparatedArgs(args []string) []string {
 	if len(args) == 0 {
 		return args
@@ -342,12 +336,10 @@ func rebuildColonSeparatedArgs(args []string) []string {
 	for i < len(args) {
 		current := args[i]
 
-		// Keep joining while the next element is ":" or the current element ends with ":"
 		for i+1 < len(args) && (args[i+1] == ":" || strings.HasSuffix(current, ":")) {
 			if args[i+1] == ":" {
 				current += ":"
 				i++
-				// Check if there's a following element after the ":"
 				if i+1 < len(args) && args[i+1] != ":" {
 					current += args[i+1]
 					i++

@@ -1,15 +1,14 @@
-# X (Twitter) Scraper CLI: Search Tweets, Get Profile Tweets, Followers & Post Replies
+# Xquik CLI: Twitter Search, Followers & X Automation
 
-> **Xquik is an independent third-party service.** Not affiliated with X Corp.
-> "Twitter" and "X" are trademarks of X Corp.
+> Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13732/badge)](https://www.bestpractices.dev/projects/13732)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg?url=https%3A%2F%2Fgithub.com%2FXquik-dev%2Fx-twitter-scraper-cli)](https://deepwiki.com/Xquik-dev/x-twitter-scraper-cli)
 [![Skills.sh x-twitter-scraper Skill](https://skills.sh/b/xquik-dev/x-twitter-scraper)](https://skills.sh/xquik-dev/x-twitter-scraper)
 
-The Xquik CLI for the [X Twitter Scraper REST API](https://xquik.com), a command line Twitter API alternative for tweet search, advanced Twitter search queries, profile tweets, user lookup, follower export, media download, monitoring, webhooks, and posting automation.
-
-Use it from shell scripts and terminals to get tweets from profiles, search tweets by keyword or operator query, send tweets, post replies, like, repost, follow, DM, run giveaway draws, and automate X workflows.
+Use the Xquik CLI for Twitter search, profile tweets, user lookup, and follower exports.
+Download media, monitor X, manage webhooks, and run X automation from a terminal.
+It wraps the [Xquik REST API](https://xquik.com) as a command-line Twitter API alternative.
 
 It is generated with [Stainless](https://www.stainless.com/).
 
@@ -17,29 +16,24 @@ It is generated with [Stainless](https://www.stainless.com/).
 
 ## Choose the CLI
 
-Use the CLI for terminals, shell scripts, and one-off automation.
-Choose a language SDK for long-running applications or custom error handling.
+Use it for terminals, shell scripts, and one-off automation.
+Choose an SDK for long-running apps or custom error handling.
 Run `--help` before scripting generated commands and flags.
 
 ## Installation
 
-### Installing with Go
+### Install With Go
 
-To test or install the CLI locally, you need [Go](https://go.dev/doc/install) version 1.22 or later installed.
+Install [Go](https://go.dev/doc/install) 1.22 or later.
 
 ```sh
 go install 'github.com/Xquik-dev/x-twitter-scraper-cli/cmd/x-twitter-scraper@latest'
 ```
 
-Once you have run `go install`, the binary is placed in your Go bin directory:
-
-- **Default location**: `$HOME/go/bin` (or `$GOPATH/bin` if GOPATH is set)
-- **Check your path**: Run `go env GOPATH` to see the base directory
-
-If commands aren't found after installation, add the Go bin directory to your PATH:
+Go writes the binary to `$GOBIN` or `$(go env GOPATH)/bin`.
+If the command is unavailable, add that directory to `PATH`:
 
 ```sh
-# Add to your shell profile (.zshrc, .bashrc, etc.)
 export PATH="$PATH:$(go env GOPATH)/bin"
 ```
 
@@ -47,8 +41,7 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 
 ### Running Locally
 
-After cloning the git repository for this project, you can use the
-`scripts/run` script to run the tool locally:
+Run the cloned source with:
 
 ```sh
 ./scripts/run args...
@@ -73,7 +66,7 @@ x-twitter-scraper x:tweets search \
 
 Run each command with `--help` before adding flags.
 
-| Customer Question | Start Command |
+| Task | Start Command |
 | --- | --- |
 | How do I search tweets? | `x-twitter-scraper x:tweets search --help` |
 | How do I get a user's posts? | `x-twitter-scraper x:users retrieve-tweets --help` |
@@ -84,37 +77,38 @@ Run each command with `--help` before adding flags.
 | How do I monitor an account? | `x-twitter-scraper monitors create --help` |
 | How do I post or reply? | `x-twitter-scraper x:tweets create --help` |
 
-For details about specific commands, use the `--help` flag.
-
-### Environment variables
+### Environment Variables
 
 | Environment variable             | Description            | Required | Default value |
 | -------------------------------- | ---------------------- | -------- | ------------- |
-| `X_TWITTER_SCRAPER_API_KEY`      |                        | no       | `null`        |
+| `X_TWITTER_SCRAPER_API_KEY`      | Xquik API key          | no       | `null`        |
 | `X_TWITTER_SCRAPER_BEARER_TOKEN` | OAuth 2.1 access token | no       | `null`        |
 
-### Global flags
+### Global Flags
 
-- `--api-key` (can also be set with `X_TWITTER_SCRAPER_API_KEY` env var)
-- `--bearer-token` - OAuth 2.1 access token (can also be set with `X_TWITTER_SCRAPER_BEARER_TOKEN` env var)
-- `--help` - Show command line usage
-- `--debug` - Enable debug logging (includes HTTP request/response details)
-- `--version`, `-v` - Show the CLI version
-- `--base-url` - Use a custom API backend URL
-- `--format` - Change the output format (`auto`, `explore`, `json`, `jsonl`, `pretty`, `raw`, `yaml`)
-- `--format-error` - Change the output format for errors (`auto`, `explore`, `json`, `jsonl`, `pretty`, `raw`, `yaml`)
-- `--transform` - Transform the data output using [GJSON syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md)
-- `--transform-error` - Transform the error output using [GJSON syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md)
+- `--api-key`: Set the Xquik API key.
+- `--bearer-token`: Set an OAuth 2.1 access token.
+- `--help`: Show command-line usage.
+- `--debug`: Include HTTP request & response details in logs.
+- `--version`, `-v`: Show the CLI version.
+- `--base-url`: Use a custom API base URL.
+- `--format`: Set the output format.
+- `--format-error`: Set the error format.
+- `--transform`: Filter output with [GJSON syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md).
+- `--transform-error`: Filter errors with GJSON syntax.
 
-### Passing files as arguments
+Credential flags also read their matching environment variables.
+Debug logs may contain private response data. Do not share them.
 
-To pass files to your API, you can use the `@myfile.ext` syntax:
+### Passing Files as Arguments
+
+Prefix a path with `@` to send its contents:
 
 ```bash
 x-twitter-scraper <command> --arg @abe.jpg
 ```
 
-Files can also be passed inside JSON or YAML blobs:
+Use file references inside JSON or YAML:
 
 ```bash
 x-twitter-scraper <command> --arg '{image: "@abe.jpg"}'
@@ -125,48 +119,40 @@ arg:
 YAML
 ```
 
-If you need to pass a string literal that begins with an `@` sign, you can
-escape the `@` sign to avoid accidentally passing a file.
+Escape a leading `@` when sending a literal value:
 
 ```bash
 x-twitter-scraper <command> --username '\@abe'
 ```
 
-#### Explicit encoding
+#### Explicit Encoding
 
-For JSON endpoints, the CLI tool does filetype sniffing to determine whether the
-file contents should be sent as a string literal (for plain text files) or as a
-base64-encoded string literal (for binary files). If you need to explicitly send
-the file as either plain text or base64-encoded data, you can use
-`@file://myfile.txt` (for string encoding) or `@data://myfile.dat` (for
-base64-encoding). Note that absolute paths will begin with `@file://` or
-`@data://`, followed by a third `/` (for example, `@file:///tmp/file.txt`).
+JSON endpoints detect text and binary files automatically.
+Use `@file://myfile.txt` for text or `@data://myfile.dat` for base64 data.
+Absolute paths use a third slash, such as `@file:///tmp/file.txt`.
 
 ```bash
 x-twitter-scraper <command> --arg @data://file.txt
 ```
 
-## Linking different Go SDK versions
+## Link Another Go SDK Version
 
-You can link the CLI against a different version of the X Twitter Scraper Go SDK
-for development purposes using the `./scripts/link` script.
-
-To link to a specific version from a repository (version can be a branch,
-git tag, or commit hash):
+Use `./scripts/link` to test another Xquik Go SDK version.
+Pass a branch, tag, or commit:
 
 ```bash
 ./scripts/link github.com/org/repo@version
 ```
 
-To link to a local copy of the SDK:
+Pass a local SDK path:
 
 ```bash
 ./scripts/link ../path/to/xtwitterscraper-go
 ```
 
-If you run the link script without any arguments, it will default to `../xtwitterscraper-go`.
+Without an argument, the script uses `../x-twitter-scraper-go`.
 
-## Support & Project Policies
+## Support & Policies
 
 - [Organization support policy](https://github.com/Xquik-dev/.github/blob/main/SUPPORT.md)
 - [Security policy](SECURITY.md)

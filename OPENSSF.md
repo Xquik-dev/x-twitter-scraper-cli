@@ -1,6 +1,6 @@
 # OpenSSF Best Practices Evidence
 
-This file tracks the Gold assessment for this repository.
+This file records the repository's Gold assessment.
 
 The official project is [bestpractices.dev project 13732][badge].
 
@@ -8,29 +8,26 @@ Assessment date: 2026-07-23.
 
 ## Eligibility
 
-This public command-line client is active and released.
-
-It is eligible for the OpenSSF Best Practices badge.
-
-No OpenSSF-defined ineligibility applies.
+This active public CLI qualifies for the OpenSSF Best Practices badge.
+No OpenSSF exclusion applies.
 
 ## Verified Technical Controls
 
 | Area | Evidence |
 | --- | --- |
-| License | Apache-2.0, REUSE 3.3 metadata, and bundled BSD-3-Clause terms |
-| Contribution process | `CONTRIBUTING.md`, DCO sign-off, and independent review policy |
-| Security reporting | Private GitHub reporting, response targets, and safe harbor in `SECURITY.md` |
-| Build | Pinned Go modules, checksum verification, and `./scripts/build` |
-| Tests | Race-enabled tests and regression coverage through `./scripts/test` |
-| Statement coverage | `./scripts/coverage` enforces 90%; current result is 91.2% |
-| Branch coverage | `./scripts/branch-coverage` enforces 80%; current result is 873/1,090 (80.09%) |
-| Static analysis | `go vet` and CodeQL security-extended queries |
-| Dynamic analysis | Scheduled native Go fuzzing and race detection |
-| Dependency review | Dependabot, `go mod verify`, and `govulncheck` |
-| CI | Same-repository and fork pull requests run all required jobs |
-| Releases | Signed checksums, exact tags, and GitHub artifact attestations |
-| Reproducibility | CI builds each GoReleaser snapshot twice and compares checksums |
+| License | Apache-2.0, REUSE 3.3 metadata, & bundled BSD-3-Clause terms |
+| Contribution process | `CONTRIBUTING.md`, DCO sign-off, & independent review policy |
+| Security reporting | Private GitHub reporting, response targets, & safe harbor in `SECURITY.md` |
+| Build | Pinned Go modules, checksum verification, & `./scripts/build` |
+| Tests | Race-enabled tests & regression coverage through `./scripts/test` |
+| Statement coverage | `./scripts/coverage` enforces 90%; current result is 91.1% |
+| Branch coverage | `./scripts/branch-coverage` enforces 80%; current result is 881/1,100 (80.09%) |
+| Static analysis | `go vet` & CodeQL security-extended queries |
+| Dynamic analysis | Scheduled native Go fuzzing & race detection |
+| Dependency review | Dependabot, `go mod verify`, & `govulncheck` |
+| CI | Same-repository & fork pull requests run all required jobs |
+| Releases | Signed checksums, exact tags, & GitHub artifact attestations |
+| Reproducibility | CI builds each GoReleaser snapshot twice & compares checksums |
 | Portability | CI compiles every package for Windows AMD64 |
 | Two-factor authentication | The Xquik-dev organization requires 2FA |
 
@@ -47,22 +44,16 @@ go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 ## Branch Coverage Evidence
 
 The branch gate pins an exact FLOSS [`gocove`][gocove] version.
+It rebuilds & instruments every shipped Go package.
+Native Go coverage confirms each executed range.
+The verifier corrects nested-block associations from the beta reporter.
+Only the verifier package is excluded from shipped-code coverage.
 
-It rebuilds and instruments every shipped Go package.
-
-Native Go coverage confirms which target ranges executed.
-
-The local verifier corrects the beta reporter's nested-block associations.
-
-It excludes only the verifier package from the shipped-code denominator.
-
-The current result is 873 of 1,090 branches, or 80.09%.
+The current result is 881 of 1,100 branches, or 80.09%.
 
 ## Outstanding Gold Blockers
 
-These criteria need verifiable human or organizational evidence.
-
-They cannot be satisfied through repository automation alone.
+Repository automation cannot supply these human or organizational controls.
 
 | Gold Criterion | Current Evidence | Required Action |
 | --- | --- | --- |
@@ -74,16 +65,13 @@ They cannot be satisfied through repository automation alone.
 
 The repository must not claim Gold while any mandatory criterion remains unmet.
 
-The current remediation pull request also requires a different human reviewer.
+Gold eligibility still requires review by a different human.
 
 ## Maintenance
 
-CI runs licensing, tests, coverage, security, and reproducibility checks.
-
-Scheduled CodeQL, fuzzing, Scorecard, and dependency updates detect drift.
-
+CI runs licensing, tests, coverage, security, & reproducibility checks.
+Scheduled CodeQL, fuzzing, Scorecard, & dependency updates detect drift.
 Reassess this file before every major release.
-
 Update bestpractices.dev only with public, verifiable evidence.
 
 [badge]: https://www.bestpractices.dev/projects/13732
