@@ -1,16 +1,13 @@
 # Xquik CLI: Twitter Search, Followers & X Automation
 
-> Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
-
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13732/badge)](https://www.bestpractices.dev/projects/13732)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg?url=https%3A%2F%2Fgithub.com%2FXquik-dev%2Fx-twitter-scraper-cli)](https://deepwiki.com/Xquik-dev/x-twitter-scraper-cli)
 [![Skills.sh x-twitter-scraper Skill](https://skills.sh/b/xquik-dev/x-twitter-scraper)](https://skills.sh/xquik-dev/x-twitter-scraper)
 
 Use the Xquik CLI for Twitter search, profile tweets, user lookup, and follower exports.
 Download media, monitor X, manage webhooks, and run X automation from a terminal.
 It wraps the [Xquik REST API](https://xquik.com) as a command-line Twitter API alternative.
 
-It is generated with [Stainless](https://www.stainless.com/).
+[Stainless](https://www.stainless.com/) generates this CLI.
 
 <!-- x-release-please-start-version -->
 
@@ -39,13 +36,9 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 
 <!-- x-release-please-end -->
 
-### Running Locally
+### Run Locally
 
-Run the cloned source with:
-
-```sh
-./scripts/run args...
-```
+Run `./scripts/run args...` from the cloned repository.
 
 ## Usage
 
@@ -127,9 +120,8 @@ x-twitter-scraper <command> --username '\@abe'
 
 #### Explicit Encoding
 
-JSON endpoints detect text and binary files automatically.
-Use `@file://myfile.txt` for text or `@data://myfile.dat` for base64 data.
-Absolute paths use a third slash, such as `@file:///tmp/file.txt`.
+JSON endpoints detect text and binary files.
+Use `@file://` for text, `@data://` for base64, and 3 slashes for absolute paths.
 
 ```bash
 x-twitter-scraper <command> --arg @data://file.txt
@@ -137,16 +129,10 @@ x-twitter-scraper <command> --arg @data://file.txt
 
 ## Link Another Go SDK Version
 
-Use `./scripts/link` to test another Xquik Go SDK version.
-Pass a branch, tag, or commit:
+Use `./scripts/link` to test another Xquik Go SDK version:
 
 ```bash
 ./scripts/link github.com/org/repo@version
-```
-
-Pass a local SDK path:
-
-```bash
 ./scripts/link ../path/to/xtwitterscraper-go
 ```
 
