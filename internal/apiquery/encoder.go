@@ -84,32 +84,16 @@ func (e *encoder) encodeArray(key string, value reflect.Value) ([]Pair, error) {
 		}
 		return []Pair{{key, strings.Join(elements, ",")}}, nil
 
-	case ArrayQueryFormatRepeat:
+	case ArrayQueryFormatRepeat, ArrayQueryFormatIndices, ArrayQueryFormatBrackets:
 		var pairs []Pair
 		for i := 0; i < value.Len(); i++ {
-			subpairs, err := e.Encode(key, value.Index(i))
-			if err != nil {
-				return nil, err
+			itemKey := key
+			if e.settings.ArrayFormat == ArrayQueryFormatIndices {
+				itemKey = fmt.Sprintf("%s[%d]", key, i)
+			} else if e.settings.ArrayFormat == ArrayQueryFormatBrackets {
+				itemKey += "[]"
 			}
-			pairs = append(pairs, subpairs...)
-		}
-		return pairs, nil
-
-	case ArrayQueryFormatIndices:
-		var pairs []Pair
-		for i := 0; i < value.Len(); i++ {
-			subpairs, err := e.Encode(fmt.Sprintf("%s[%d]", key, i), value.Index(i))
-			if err != nil {
-				return nil, err
-			}
-			pairs = append(pairs, subpairs...)
-		}
-		return pairs, nil
-
-	case ArrayQueryFormatBrackets:
-		var pairs []Pair
-		for i := 0; i < value.Len(); i++ {
-			subpairs, err := e.Encode(key+"[]", value.Index(i))
+			subpairs, err := e.Encode(itemKey, value.Index(i))
 			if err != nil {
 				return nil, err
 			}
