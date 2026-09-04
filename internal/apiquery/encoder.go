@@ -112,10 +112,7 @@ func (e *encoder) encodePrimitive(key string, value reflect.Value) ([]Pair, erro
 		return []Pair{{key, value.String()}}, nil
 
 	case reflect.Bool:
-		if value.Bool() {
-			return []Pair{{key, "true"}}, nil
-		}
-		return []Pair{{key, "false"}}, nil
+		return []Pair{{key, strconv.FormatBool(value.Bool())}}, nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return []Pair{{key, strconv.FormatInt(value.Int(), 10)}}, nil
@@ -123,12 +120,8 @@ func (e *encoder) encodePrimitive(key string, value reflect.Value) ([]Pair, erro
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return []Pair{{key, strconv.FormatUint(value.Uint(), 10)}}, nil
 
-	case reflect.Float32:
-		return []Pair{{key, strconv.FormatFloat(value.Float(), 'f', -1, 32)}}, nil
-
-
-	case reflect.Float64:
-		return []Pair{{key, strconv.FormatFloat(value.Float(), 'f', -1, 64)}}, nil
+	case reflect.Float32, reflect.Float64:
+		return []Pair{{key, strconv.FormatFloat(value.Float(), 'f', -1, value.Type().Bits())}}, nil
 
 	default:
 		return nil, nil
