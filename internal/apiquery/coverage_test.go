@@ -19,7 +19,7 @@ func TestMarshalCoversPrimitiveWidthsAndPointers(t *testing.T) {
 	var nilValue *string
 	values, err := Marshal(map[string]any{
 		"false":       false,
-		"float32":     float32(1.25),
+		"float32":     float32(43.76),
 		"int8":        int8(-8),
 		"int16":       int16(-16),
 		"nil-pointer": nilValue,
@@ -29,7 +29,7 @@ func TestMarshalCoversPrimitiveWidthsAndPointers(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "false", values.Get("false"))
-	assert.Equal(t, "1.25", values.Get("float32"))
+	assert.Equal(t, "43.76", values.Get("float32"))
 	assert.Equal(t, "-8", values.Get("int8"))
 	assert.Equal(t, "-16", values.Get("int16"))
 	assert.Equal(t, "", values.Get("nil-pointer"))
