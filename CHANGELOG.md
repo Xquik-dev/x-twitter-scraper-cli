@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.4 (2026-08-24)
+
+Full Changelog: [v0.13.3...v0.13.4](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.3...v0.13.4)
+
+### Documentation
+
+* enforce source LOC reduction ([#55](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/55)) ([07be6a2](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/07be6a2d095c41fa0c3baa086daf226fe2ad91e4))
+
 ## 0.13.3 (2026-08-21)
 
 Full Changelog: [v0.13.2...v0.13.3](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.2...v0.13.3)
