@@ -91,7 +91,7 @@ Full Changelog: [v0.10.0...v0.11.0](https://github.com/Xquik-dev/x-twitter-scrap
 
 ### Documentation
 
-* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+* add Contributor Covenant 2.1 Code of Conduct ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
 * add DeepWiki badge ([a352c58](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/a352c586128dd5ed42e98bd3feb21bb92aff41b5))
 * add independence disclosure ([c6cd7ac](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c6cd7acdee87eb39db4c7997681e8a3d0365e30d))
 * clarify repository discovery ([5b30a9e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5b30a9e95a8228ad957de6465d35613a943d5bf5))
@@ -139,7 +139,7 @@ Full Changelog: [v0.9.1...v0.10.0](https://github.com/Xquik-dev/x-twitter-scrape
 
 ### Documentation
 
-* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+* add Contributor Covenant 2.1 Code of Conduct ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
 * add DeepWiki badge ([a352c58](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/a352c586128dd5ed42e98bd3feb21bb92aff41b5))
 * add independence disclosure ([c6cd7ac](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c6cd7acdee87eb39db4c7997681e8a3d0365e30d))
 * clarify repository discovery ([5b30a9e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5b30a9e95a8228ad957de6465d35613a943d5bf5))
@@ -192,7 +192,7 @@ Full Changelog: [v0.8.0...v0.9.0](https://github.com/Xquik-dev/x-twitter-scraper
 
 ### Documentation
 
-* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+* add Contributor Covenant 2.1 Code of Conduct ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
 * add DeepWiki badge ([a352c58](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/a352c586128dd5ed42e98bd3feb21bb92aff41b5))
 * add independence disclosure ([c6cd7ac](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c6cd7acdee87eb39db4c7997681e8a3d0365e30d))
 * clarify repository discovery ([5b30a9e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5b30a9e95a8228ad957de6465d35613a943d5bf5))
@@ -234,7 +234,7 @@ Full Changelog: [v0.7.0...v0.8.0](https://github.com/Xquik-dev/x-twitter-scraper
 
 ### Documentation
 
-* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+* add Contributor Covenant 2.1 Code of Conduct ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
 * add DeepWiki badge ([a352c58](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/a352c586128dd5ed42e98bd3feb21bb92aff41b5))
 * add independence disclosure ([c6cd7ac](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c6cd7acdee87eb39db4c7997681e8a3d0365e30d))
 * clarify repository discovery ([5b30a9e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5b30a9e95a8228ad957de6465d35613a943d5bf5))
@@ -279,7 +279,7 @@ Full Changelog: [v0.6.5...v0.7.0](https://github.com/Xquik-dev/x-twitter-scraper
 
 ### Documentation
 
-* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+* add Contributor Covenant 2.1 Code of Conduct ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
 * add DeepWiki badge ([a352c58](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/a352c586128dd5ed42e98bd3feb21bb92aff41b5))
 * add independence disclosure ([c6cd7ac](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c6cd7acdee87eb39db4c7997681e8a3d0365e30d))
 * clarify repository discovery ([5b30a9e](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/5b30a9e95a8228ad957de6465d35613a943d5bf5))
@@ -437,7 +437,7 @@ Full Changelog: [v0.3.0...v0.4.0](https://github.com/Xquik-dev/x-twitter-scraper
 
 ### Documentation
 
-* add Contributor Covenant 2.1 Code of Conduct ([#2192](https://github.com/Xquik-dev/x-twitter-scraper-cli/issues/2192)) ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
+* add Contributor Covenant 2.1 Code of Conduct ([c253bcb](https://github.com/Xquik-dev/x-twitter-scraper-cli/commit/c253bcbbef2f104a891f63807058763a505162a3))
 
 ## 0.3.0 (2026-04-08)
 
