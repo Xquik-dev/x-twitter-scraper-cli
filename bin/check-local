@@ -127,7 +127,7 @@ start_check "Lint" "Run ./scripts/format and go mod tidy, then fix the vet findi
 start_check "Tests and coverage" "Fix the failing test or add coverage, then rerun ./scripts/test."
 ./scripts/test
 
-start_check "Dependency audit" "Upgrade the vulnerable module with go get, then run go mod tidy."
+start_check "Dependency audit" "Run go get on each listed module, or raise the go line in go.mod for standard library findings."
 ./scripts/audit
 
 start_check "Release configuration" "Fix .goreleaser.yml or release-please-config.json so releases start as drafts."
