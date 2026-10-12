@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Publishes the version in .release-please-manifest.json from a maintainer machine.
+# GoReleaser uploads the assets into a draft release. The tag and release go live last.
+
+set -euo pipefail
+
+cd -- "$(dirname -- "$0")/.."
+
+readonly repo="Xquik-dev/x-twitter-scraper-cli"
+
+step() {
+  echo "==> $1"
+}
+
+fail() {
+  echo "Release stopped: $1" >&2
+  exit 1
+}
+
+for tool in git go jq gh; do
+  command -v "$tool" >/dev/null 2>&1 || fail "$tool is missing. Install it, then rerun bin/release-local."
+done
+
+notes_file="$(mktemp)"
+trap 'rm -f -- "$notes_file"' EXIT
+
+step "Checking that the tree is clean, on main, and equal to origin/main."
+git fetch --quiet --tags origin main
+tree_status="$(git status --porcelain)"
+[[ -z "$tree_status" ]] || fail "Commit or remove local changes first."
+branch="$(git symbolic-ref --quiet --short HEAD || true)"
+[[ "$branch" == "main" ]] || fail "Switch to main first."
+commit="$(git rev-parse HEAD)"
+[[ "$commit" == "$(git rev-parse origin/main)" ]] || fail "Pull or push until main equals origin/main."
+
+step "Reading the version from .release-please-manifest.json."
+version="$(jq -er '."."' .release-please-manifest.json)"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]] ||
+  fail "Version ${version} is not semantic. Fix .release-please-manifest.json."
+grep -Fq "const Version = \"${version}\"" pkg/cmd/version.go ||
+  fail "pkg/cmd/version.go does not match ${version}. Merge the release PR first."
+readonly tag="v${version}"
+awk -v heading="## ${version}" '
+  /^## / {
+    if (in_section) exit
+    if ($0 == heading || index($0, heading " ") == 1) in_section = 1
+    next
+  }
+  in_section { print }
+' CHANGELOG.md >"$notes_file"
+grep -q '[^[:space:]]' "$notes_file" ||
+  fail "CHANGELOG.md has no section for ${version}. Merge the release PR first."
+
+step "Checking that tag ${tag} is not on origin yet."
+remote_tag="$(git ls-remote --tags origin "refs/tags/${tag}")"
+[[ -z "$remote_tag" ]] || fail "Tag ${tag} already exists on origin. Bump the version first."
+
+step "Checking the GitHub CLI sign-in."
+gh auth status --hostname github.com >/dev/null 2>&1 || fail "Run gh auth login, then rerun bin/release-local."
+
+if ! command -v goreleaser >/dev/null 2>&1; then
+  step "Installing GoReleaser with Homebrew."
+  command -v brew >/dev/null 2>&1 || fail "Install Homebrew or GoReleaser, then rerun bin/release-local."
+  brew install goreleaser
+fi
+
+step "Running bin/check-local."
+./bin/check-local
+
+step "Auditing dependencies with go mod verify and govulncheck."
+./scripts/audit
+
+step "Creating the local annotated tag ${tag} at HEAD."
+if tag_commit="$(git rev-parse --verify --quiet "refs/tags/${tag}^{commit}")"; then
+  [[ "$tag_commit" == "$commit" && "$(git cat-file -t "refs/tags/${tag}")" == "tag" ]] ||
+    fail "Local tag ${tag} is not an annotated tag at HEAD. Delete it with git tag -d ${tag}."
+else
+  git tag -a "$tag" -m "Release ${tag}"
+fi
+
+step "Building release assets with GoReleaser."
+goreleaser release --clean --skip=publish
+./bin/check-release-debug-info
+
+step "Checking GitHub releases for ${tag}."
+releases="$(
+  gh api --paginate --slurp "repos/${repo}/releases?per_page=100" |
+    jq -c --arg tag "$tag" '[.[][] | select(.tag_name == $tag) | {draft, assets: [.assets[].name]}]'
+)"
+release_count="$(jq 'length' <<<"$releases")"
+((release_count <= 1)) || fail "Several releases use ${tag}. Delete the extra drafts on GitHub."
+if ((release_count == 1)) && [[ "$(jq '.[0].draft' <<<"$releases")" != "true" ]]; then
+  fail "Release ${tag} is already published. Bump the version first."
+fi
+missing_assets="$(
+  jq --argjson releases "$releases" '
+    [.[] | select(.type == "Archive" or .type == "Linux Package" or .type == "Checksum") | .name]
+    - ($releases[0].assets // [])
+    | length
+  ' dist/artifacts.json
+)"
+
+if ((missing_assets == 0)); then
+  echo "==> Draft release ${tag} already has every asset. Skipping the upload."
+else
+  if ((release_count == 0)); then
+    step "Creating draft release ${tag} with notes from CHANGELOG.md."
+    gh release create "$tag" --repo "$repo" --draft --title "$tag" --target "$commit" --notes-file "$notes_file"
+  fi
+  step "Uploading release assets to draft ${tag} with GoReleaser."
+  github_token="$(gh auth token --hostname github.com)"
+  GITHUB_TOKEN="$github_token" goreleaser release --clean
+  unset github_token
+fi
+
+step "Pushing the annotated tag ${tag} to origin."
+git push origin "refs/tags/${tag}"
+
+step "Publishing GitHub release ${tag} with notes from CHANGELOG.md."
+gh release edit "$tag" --repo "$repo" --draft=false --latest --verify-tag --notes-file "$notes_file"
+
+echo "Released ${tag}: https://github.com/${repo}/releases/tag/${tag}"

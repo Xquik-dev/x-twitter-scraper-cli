@@ -1,6 +1,8 @@
 .prism.log
 .stdy.log
 dist/
+/completions/
+/man/
 /x-twitter-scraper
 *.exe
 

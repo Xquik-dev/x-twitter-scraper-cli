@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Runs every repository check on a maintainer machine and stops at the first failure.
+# Posts the result as the xquik-local-checks commit status when HEAD is pushed and clean.
+# Pass --no-status to skip the commit status.
+# Fuzzing stays manual because it needs minutes to find anything:
+# go test ./internal/apiform -run '^$' -fuzz '^FuzzMarshalRoundTrip$' -fuzztime=2m
+
+set -euo pipefail
+
+cd -- "$(dirname -- "$0")/.."
+
+readonly repo="Xquik-dev/x-twitter-scraper-cli"
+readonly status_context="xquik-local-checks"
+readonly reuse_version="6.2.0"
+
+post_status=1
+for arg in "$@"; do
+  case "$arg" in
+    --no-status) post_status=0 ;;
+    *)
+      echo "Usage: bin/check-local [--no-status]" >&2
+      exit 2
+      ;;
+  esac
+done
+
+check_name="Setup"
+check_hint="Read the output above, fix the cause, then rerun bin/check-local."
+checks_run="lint, tests, coverage, audit & reproducible build"
+platform=""
+status_sha=""
+first_checksums=""
+
+post_commit_status() {
+  [[ -n "$status_sha" ]] || return 0
+  gh api "repos/${repo}/statuses/${status_sha}" \
+    -f state="$1" -f context="$status_context" -f description="$2" \
+    --silent >/dev/null 2>&1 ||
+    echo "==> Commit status not posted: GitHub rejected the request."
+}
+
+finish() {
+  local exit_code=$?
+  if [[ -n "$first_checksums" ]]; then
+    rm -f -- "$first_checksums"
+  fi
+  if ((exit_code == 0)); then
+    post_commit_status success "${checks_run} passed${platform}."
+  else
+    post_commit_status failure "${check_name} failed${platform}. Run bin/check-local to see why."
+  fi
+  exit "$exit_code"
+}
+
+trap 'echo "Check failed: ${check_name}. ${check_hint}" >&2' ERR
+trap finish EXIT
+
+start_check() {
+  check_name="$1"
+  check_hint="$2"
+  echo "==> ${check_name}"
+}
+
+require_tool() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    check_name="Required tools"
+    echo "Check failed: $1 is missing. $2" >&2
+    exit 1
+  fi
+}
+
+checksum_manifest() {
+  find dist -maxdepth 1 -type f -name '*_checksums.txt' -print -quit
+}
+
+choose_status_commit() {
+  if ((post_status == 0)); then
+    echo "==> Commit status not posted: --no-status was passed."
+  elif ! command -v gh >/dev/null 2>&1; then
+    echo "==> Commit status not posted: the GitHub CLI is missing."
+  elif [[ -n "$(git status --porcelain)" ]]; then
+    echo "==> Commit status not posted: the tree has uncommitted changes."
+  else
+    local sha
+    sha="$(git rev-parse HEAD)"
+    if gh api "repos/${repo}/commits/${sha}" --silent >/dev/null 2>&1; then
+      status_sha="$sha"
+    else
+      echo "==> Commit status not posted: commit ${sha:0:12} is not on GitHub."
+    fi
+  fi
+}
+
+require_tool go "Install Go from https://go.dev/dl/, then rerun bin/check-local."
+require_tool jq "Install jq with brew install jq, then rerun bin/check-local."
+require_tool objdump "Install the Xcode command line tools, then rerun bin/check-local."
+require_tool goreleaser "Install GoReleaser with brew install goreleaser, then rerun bin/check-local."
+
+platform=" on $(go env GOOS)/$(go env GOARCH) with $(go env GOVERSION)"
+first_checksums="$(mktemp)"
+choose_status_commit
+post_commit_status pending "Checks started${platform}."
+
+start_check "Module download and integrity" "Run go mod download, then rerun bin/check-local."
+./scripts/bootstrap
+
+if command -v reuse >/dev/null 2>&1; then
+  start_check "Licensing (REUSE)" "Add SPDX headers or update REUSE.toml."
+  reuse lint
+  checks_run="REUSE, ${checks_run}"
+elif command -v uvx >/dev/null 2>&1; then
+  start_check "Licensing (REUSE)" "Add SPDX headers or update REUSE.toml."
+  uvx --from "reuse==${reuse_version}" reuse lint
+  checks_run="REUSE, ${checks_run}"
+else
+  echo "==> Licensing (REUSE) skipped. Install reuse or uv to run it."
+fi
+
+start_check "Lint" "Run ./scripts/format and go mod tidy, then fix the vet findings."
+./scripts/lint
+
+start_check "Tests and coverage" "Fix the failing test or add coverage, then rerun ./scripts/test."
+./scripts/test
+
+start_check "Dependency audit" "Upgrade the vulnerable module with go get, then run go mod tidy."
+./scripts/audit
+
+start_check "Release configuration" "Fix .goreleaser.yml or release-please-config.json so releases start as drafts."
+goreleaser check
+jq -e '.draft == true' release-please-config.json >/dev/null
+grep -Eq '^[[:space:]]+draft: true$' .goreleaser.yml
+
+start_check "Reproducible snapshot build" "Remove the build input that changes between runs, such as a timestamp."
+goreleaser release --snapshot --clean
+cp -- "$(checksum_manifest)" "$first_checksums"
+goreleaser release --snapshot --clean
+cmp -- "$first_checksums" "$(checksum_manifest)"
+
+start_check "Release debug information" "Keep DWARF data: remove -s and -w from the .goreleaser.yml ldflags."
+./bin/check-release-debug-info
+
+echo "All local checks passed."

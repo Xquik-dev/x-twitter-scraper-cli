@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo "==> Verifying module checksums"
+go mod verify
+
+echo "==> Scanning reachable vulnerabilities"
+go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...

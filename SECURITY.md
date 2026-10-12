@@ -23,7 +23,7 @@ Security-sensitive areas include:
 - Request construction and redirects
 - Terminal output and local files
 - Dependencies and generated code
-- Release binaries, checksums, and provenance
+- Release binaries and checksums
 
 ## Safe Harbor
 

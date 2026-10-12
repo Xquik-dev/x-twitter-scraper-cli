@@ -22,24 +22,23 @@ No OpenSSF exclusion applies.
 | Tests | Race-enabled tests & regression coverage through `./scripts/test` |
 | Statement coverage | `./scripts/coverage` enforces 90%; current result is 91.2% |
 | Branch coverage | `./scripts/branch-coverage` enforces 80%; current result is 881/1,100 (80.09%) |
-| Static analysis | `go vet` & CodeQL security-extended queries |
-| Dynamic analysis | Scheduled native Go fuzzing & race detection |
-| Dependency review | Dependabot, `go mod verify`, & `govulncheck` |
-| CI | Same-repository & fork pull requests run all required jobs |
-| Releases | Signed checksums, exact tags, & GitHub artifact attestations |
-| Reproducibility | CI builds each GoReleaser snapshot twice & compares checksums |
-| Portability | CI compiles every package for Windows AMD64 |
+| Static analysis | `go vet` through `./scripts/lint` |
+| Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that maintainers run by hand |
+| Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit` |
+| Local checks | `bin/check-local` runs licensing, lint, test, audit, & build checks, then posts the `xquik-local-checks` status |
+| Releases | `bin/release-local` publishes checksums & an annotated tag from `main` |
+| Reproducibility | `bin/check-local` builds each GoReleaser snapshot twice & compares checksums |
+| Portability | `./scripts/test` compiles every package for Windows AMD64 |
 | Two-factor authentication | The Xquik-dev organization requires 2FA |
 
-Run the local evidence commands:
+Run every local evidence command at once:
 
 ```sh
-./scripts/bootstrap
-./scripts/lint
-./scripts/test
-uvx --from reuse==5.1.1 reuse lint
-go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+bin/check-local
 ```
+
+It runs `./scripts/bootstrap`, `reuse lint`, `./scripts/lint`, `./scripts/test`,
+`./scripts/audit`, & 2 GoReleaser snapshot builds.
 
 ## Branch Coverage Evidence
 
@@ -62,8 +61,9 @@ The repository must not claim Gold while any mandatory criterion remains unmet.
 
 ## Maintenance
 
-CI runs licensing, tests, coverage, security, & reproducibility checks.
-Scheduled CodeQL, fuzzing, Scorecard, & dependency updates detect drift.
+`bin/check-local` runs licensing, tests, coverage, security, & reproducibility checks.
+Run it before each merge. `bin/release-local` runs it again before each release.
+The repository runs no GitHub Actions workflows or Dependabot updates.
 Reassess this file before every major release.
 Update bestpractices.dev only with public, verifiable evidence.
 
