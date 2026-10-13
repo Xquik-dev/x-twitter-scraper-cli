@@ -1,4 +1,4 @@
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -45,7 +45,7 @@ func handleSupportAttachmentsDownload(ctx context.Context, cmd *cli.Command) err
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

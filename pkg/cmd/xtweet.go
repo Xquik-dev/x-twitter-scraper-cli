@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -1360,7 +1360,7 @@ func handleXTweetsCreate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1404,7 +1404,7 @@ func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1443,7 +1443,7 @@ func handleXTweetsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1487,7 +1487,7 @@ func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1536,7 +1536,7 @@ func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1585,7 +1585,7 @@ func handleXTweetsGetQuotes(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1634,7 +1634,7 @@ func handleXTweetsGetReplies(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1683,7 +1683,7 @@ func handleXTweetsGetRetweeters(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1732,7 +1732,7 @@ func handleXTweetsGetThread(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1778,7 +1778,7 @@ func handleXTweetsSearch(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

@@ -50,6 +50,18 @@ var (
 	}
 )
 
+// shellChoices lists the shells as a sentence in a stable order, such as
+// "bash, fish or zsh".
+func shellChoices(shells []CompletionStyle) string {
+	names := make([]string, 0, len(shells))
+	for _, shell := range shells {
+		names = append(names, string(shell))
+	}
+	slices.Sort(names)
+	last := len(names) - 1
+	return strings.Join(names[:last], ", ") + " or " + names[last]
+}
+
 func OutputCompletionScript(ctx context.Context, cmd *cli.Command) error {
 	shells := make([]CompletionStyle, 0, len(shellCompletions))
 	for k := range shellCompletions {
@@ -57,13 +69,13 @@ func OutputCompletionScript(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if cmd.Args().Len() == 0 {
-		return cli.Exit(fmt.Sprintf("Shell is missing. Choose one of: %+v", shells), 1)
+		return cli.Exit(fmt.Sprintf("Shell is missing. Choose %s.", shellChoices(shells)), 1)
 	}
 	s := CompletionStyle(cmd.Args().First())
 
 	renderCompletion, ok := shellCompletions[s]
 	if !ok {
-		return cli.Exit(fmt.Sprintf("Shell %q is unsupported. Choose one of: %+v", s, shells), 1)
+		return cli.Exit(fmt.Sprintf("Shell %q is unsupported. Choose %s.", s, shellChoices(shells)), 1)
 	}
 
 	completionScript, err := renderCompletion(cmd, cmd.Root().Name)

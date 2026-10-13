@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -34,7 +35,7 @@ func init() {
 func newCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "x-twitter-scraper",
-		Usage:     "CLI for the x-twitter-scraper API",
+		Usage:     "X API & Twitter API CLI by Xquik",
 		Suggest:   true,
 		Version:   Version,
 		ErrWriter: &CommandErrorBuffer,
@@ -53,22 +54,22 @@ func newCommand() *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:  "format",
-				Usage: "The format for displaying response data (one of: " + strings.Join(OutputFormats, ", ") + ")",
+				Usage: "Output format for response data. Choose " + formatChoices() + ".",
 				Value: "auto",
 				Validator: func(format string) error {
 					if !slices.Contains(OutputFormats, strings.ToLower(format)) {
-						return fmt.Errorf("format must be one of: %s", strings.Join(OutputFormats, ", "))
+						return errors.New("Choose " + formatChoices() + ".")
 					}
 					return nil
 				},
 			},
 			&cli.StringFlag{
 				Name:  "format-error",
-				Usage: "The format for displaying error data (one of: " + strings.Join(OutputFormats, ", ") + ")",
+				Usage: "Output format for error data. Choose " + formatChoices() + ".",
 				Value: "auto",
 				Validator: func(format string) error {
 					if !slices.Contains(OutputFormats, strings.ToLower(format)) {
-						return fmt.Errorf("format must be one of: %s", strings.Join(OutputFormats, ", "))
+						return errors.New("Choose " + formatChoices() + ".")
 					}
 					return nil
 				},
@@ -88,6 +89,7 @@ func newCommand() *cli.Command {
 			},
 			&requestflag.Flag[string]{
 				Name:    "api-key",
+				Usage:   "Xquik API key",
 				Sources: cli.EnvVars("X_TWITTER_SCRAPER_API_KEY"),
 			},
 			&requestflag.Flag[string]{
@@ -494,10 +496,9 @@ func newCommand() *cli.Command {
 						Value:   true,
 					},
 					&cli.BoolFlag{
-						Name:    "text",
-						Aliases: []string{"z"},
-						Usage:   "output uncompressed text files",
-						Value:   false,
+						Name:  "text",
+						Usage: "output uncompressed text files",
+						Value: false,
 					},
 				},
 			},

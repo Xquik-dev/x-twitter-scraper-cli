@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -152,7 +152,7 @@ func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -194,7 +194,7 @@ func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -240,7 +240,7 @@ func handleStylesList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -282,7 +282,7 @@ func handleStylesDelete(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -304,7 +304,7 @@ func handleStylesAnalyze(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -345,7 +345,7 @@ func handleStylesCompare(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -389,7 +389,7 @@ func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

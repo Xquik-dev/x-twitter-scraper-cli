@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -136,7 +136,7 @@ func handleXAccountsCreate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -180,7 +180,7 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -219,7 +219,7 @@ func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -261,7 +261,7 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -300,7 +300,7 @@ func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -342,7 +342,7 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

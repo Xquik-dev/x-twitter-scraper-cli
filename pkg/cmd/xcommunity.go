@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -169,7 +169,7 @@ var xCommunitiesRetrieveMembers = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Items per page (20-200, default 20). This is an upper bound for paid authenticated calls: remaining credits can reduce the returned page size, and zero affordable results returns 402 insufficient_credits.\n",
+			Usage:     "Items per page (20-200, default 20). This is an upper bound for paid authenticated calls. Remaining credits can reduce the returned page size, and zero affordable results returns 402 insufficient_credits.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
@@ -327,7 +327,7 @@ func handleXCommunitiesCreate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -371,7 +371,7 @@ func handleXCommunitiesDelete(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -420,7 +420,7 @@ func handleXCommunitiesRetrieveInfo(ctx context.Context, cmd *cli.Command) error
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -462,7 +462,7 @@ func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) er
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -511,7 +511,7 @@ func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command)
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -557,7 +557,7 @@ func handleXCommunitiesRetrieveSearch(ctx context.Context, cmd *cli.Command) err
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

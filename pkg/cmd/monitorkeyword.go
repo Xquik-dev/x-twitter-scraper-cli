@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -20,7 +20,7 @@ import (
 
 var monitorsKeywordsCreate = cli.Command{
 	Name:    "create",
-	Usage:   "Creates a keyword monitor. Keyword monitors are unlimited. Active monitors check\nevery 1 second and cost 21 credits per hour. Events and webhook deliveries are\nincluded. Creation requires available credits for the first hourly charge.",
+	Usage:   "Creates a keyword monitor. Keyword monitors are unlimited. Active monitors check\nevery 1 second and cost 30 credits per hour. Events and webhook deliveries are\nincluded. Creation requires available credits for the first hourly charge.",
 	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]string]{
@@ -108,7 +108,7 @@ func handleMonitorsKeywordsCreate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -152,7 +152,7 @@ func handleMonitorsKeywordsRetrieve(ctx context.Context, cmd *cli.Command) error
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -194,7 +194,7 @@ func handleMonitorsKeywordsUpdate(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -240,7 +240,7 @@ func handleMonitorsKeywordsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -282,7 +282,7 @@ func handleMonitorsKeywordsDeactivate(ctx context.Context, cmd *cli.Command) err
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
