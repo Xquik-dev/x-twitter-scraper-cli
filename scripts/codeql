@@ -7,7 +7,7 @@
 # Runs the CodeQL security-extended queries for Go on a copy of the source
 # files, so the build that CodeQL traces never touches the working tree. A
 # release build after the checks starts from the files that were reviewed.
-# Any result fails the run.
+# Any result fails the run, and so does any file that CodeQL could not read.
 #
 # The query pack is pinned and downloaded into this run's own folder. A
 # download that broke off earlier can leave an empty pack folder in the shared
@@ -22,6 +22,7 @@ cd -- "$(dirname -- "$0")/.."
 readonly pack_name="codeql/go-queries"
 readonly pack_version="1.6.12"
 readonly suite_path="codeql-suites/go-security-extended.qls"
+readonly extraction_diagnostic="go/diagnostics/extraction-errors"
 readonly download_limit="${CODEQL_DOWNLOAD_SECONDS:-300}"
 
 [[ "$download_limit" =~ ^[1-9][0-9]*$ ]] || {
@@ -132,6 +133,23 @@ codeql database analyze "$database" "$pack_name@$pack_version:$suite_path" \
   --format=sarif-latest \
   --output="$results" \
   --threads=0
+
+# CodeQL goes on after it fails to read a file and scans only the code it
+# could read. The extraction diagnostic of the pack names each such file. The
+# report lists every diagnostic query that ran, so a suite without that
+# diagnostic cannot pass.
+if ! jq -e --arg id "$extraction_diagnostic" \
+  'any(.runs[].tool["driver"].notifications[]?; .id == $id)' "$results" >/dev/null; then
+  echo "The CodeQL scan lacks $extraction_diagnostic, so it cannot show that it read every file. Make the suite in scripts/codeql run that diagnostic query." >&2
+  exit 1
+fi
+unread="$(jq -r --arg id "$extraction_diagnostic" \
+  '.runs[].invocations[]?.toolExecutionNotifications[]? | select(.descriptor.id == $id) | .message.text' "$results")"
+if [[ -n "$unread" ]]; then
+  printf '%s\n' "$unread" >&2
+  echo "CodeQL could not read the Go code named above, so the scan is incomplete. Fix that code so Go compiles it, then rerun." >&2
+  exit 1
+fi
 
 result_count="$(jq '[.runs[].results[]] | length' "$results")"
 if ((result_count > 0)); then
