@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.13.4 (2026-10-13)
+
+[Full changelog from v0.13.3 to v0.13.4](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.3...v0.13.4)
+
+### Security
+
+* Build with Go 1.27.2. Release 0.13.3 was built with Go 1.26.6, which has 9 advisories in net/http, crypto/tls & net/textproto.
+* The fixed advisories are GO-2026-6603, GO-2026-6605, GO-2026-6607, GO-2026-6608, GO-2026-6610, GO-2026-6611, GO-2026-6612, GO-2026-6613 & GO-2026-6617.
+* 7 of them affect only servers, and the CLI runs no server.
+* GO-2026-6611 lets a malicious HTTP/2 server waste the CLI's CPU, and GO-2026-6610 lets it send malformed headers. Both need a server you point the CLI at.
+
+### Bug fixes
+
+* 11 flags of `extractions estimate-cost`, `extractions run` & `x:media download` were defined twice. The second definition never received a value. Each flag keeps the field it filled in 0.13.3.
+* `@manpages --text` no longer claims the `-z` alias, which `--gzip` already owned.
+
+### Documentation
+
+* The help text says an active monitor costs 30 credits per hour.
+* The README title is now "X API & Twitter API CLI by Xquik".
+
+### Chores
+
+* Update every Go module to its latest release, including the Xquik Go SDK 0.18.1.
+* Release assets no longer include a provenance file, since releases now run from a maintainer's machine.
+
 ## 0.13.3 (2026-08-21)
 
 Full Changelog: [v0.13.2...v0.13.3](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.2...v0.13.3)
