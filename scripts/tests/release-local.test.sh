@@ -116,10 +116,24 @@ EOF
   fake gh <<'EOF'
 #!/bin/sh
 # Stands in for the GitHub CLI. FAKE_RELEASES holds the releases GitHub
-# lists. The draft's assets live in the logs folder, unless FAKE_VIEW_ASSETS
+# lists, and FAKE_PUBLISHED makes the tag endpoint return a published
+# release. GitHub's list can leave out a published release, so the tests
+# keep it out of FAKE_RELEASES. FAKE_TAG_LOOKUP_FAILS makes the tag endpoint
+# fail. The draft's assets live in the logs folder, unless FAKE_VIEW_ASSETS
 # or FAKE_DOWNLOADED_CHECKSUMS override what GitHub returns.
 echo "gh $*" >>"$FAKE_LOGS/order"
 case "$1 $2" in
+  "api repos/Xquik-dev/x-twitter-scraper-cli/releases/tags/"*)
+    if [ -n "${FAKE_TAG_LOOKUP_FAILS:-}" ]; then
+      echo "gh: Bad Gateway (HTTP 502)" >&2
+      exit 1
+    elif [ -n "${FAKE_PUBLISHED:-}" ]; then
+      echo '{"tag_name": "v1.2.3", "draft": false}'
+    else
+      echo "gh: Not Found (HTTP 404)" >&2
+      exit 1
+    fi
+    ;;
   "auth status") exit 0 ;;
   "auth token") echo "gho_test_token_for_release_local" ;;
   "api --paginate") echo "${FAKE_RELEASES:-[[]]}" ;;
@@ -187,6 +201,7 @@ GitHub release notes from CHANGELOG.md
   * keep every flag on the field it filled before" "stdout"
   assert_ends_with "$run_stdout" "Dry run finished. Nothing was published, tagged or released." "stdout"
   assert_equal "gh auth status --hostname github.com
+gh api repos/$repository/releases/tags/v1.2.3
 gh api --paginate --slurp repos/$repository/releases?per_page=100
 check-local --no-status
 audit
@@ -198,7 +213,7 @@ check-release-debug-info" "$(order_without_paths)" "the steps"
 
 test_a_dry_run_reports_a_release_that_github_already_published_and_goes_on() {
   prepare_release
-  run_env=('FAKE_RELEASES=[[{"tag_name": "v1.2.3", "draft": false, "assets": []}]]')
+  run_env=("FAKE_PUBLISHED=1")
 
   run_in_repo bin/release-local --dry-run
 
@@ -216,6 +231,7 @@ test_a_release_uploads_with_the_token_in_the_environment_then_tags_and_publishes
   assert_equal 0 "$run_status" "the exit code"
   assert_ends_with "$run_stdout" "Released v1.2.3 at https://github.com/$repository/releases/tag/v1.2.3" "stdout"
   assert_equal "gh auth status --hostname github.com
+gh api repos/$repository/releases/tags/v1.2.3
 gh api --paginate --slurp repos/$repository/releases?per_page=100
 check-local
 audit
@@ -261,13 +277,34 @@ test_a_release_skips_the_upload_when_the_draft_already_has_every_asset() {
 
 test_a_published_release_stops_a_real_run_before_the_checks() {
   prepare_release
-  run_env=('FAKE_RELEASES=[[{"tag_name": "v1.2.3", "draft": false, "assets": []}]]')
+  run_env=("FAKE_PUBLISHED=1")
 
   run_in_repo bin/release-local
 
   assert_equal 1 "$run_status" "the exit code"
   assert_equal "GitHub release v1.2.3 is already published. Bump the version, then rerun." "$run_stderr" "stderr"
   assert_not_contains "$(log_of order)" "check-local" "the steps"
+}
+
+test_a_failed_release_lookup_stops_the_run_before_the_checks() {
+  prepare_release
+  run_env=("FAKE_TAG_LOOKUP_FAILS=1")
+
+  run_in_repo bin/release-local --dry-run
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "GitHub did not answer for release v1.2.3. Check the network and gh auth status, then rerun." "$run_stderr" "stderr"
+  assert_not_contains "$(log_of order)" "check-local" "the steps"
+}
+
+test_two_drafts_for_the_tag_stop_the_run() {
+  prepare_release
+  run_env=('FAKE_RELEASES=[[{"tag_name": "v1.2.3", "draft": true, "assets": []}, {"tag_name": "v1.2.3", "draft": true, "assets": []}]]')
+
+  run_in_repo bin/release-local --dry-run
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "Several draft releases use v1.2.3. Delete the extra drafts on GitHub, then rerun." "$run_stderr" "stderr"
 }
 
 test_a_draft_missing_an_asset_after_the_upload_stops_before_the_tag() {
