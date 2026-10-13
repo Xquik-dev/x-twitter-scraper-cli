@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Fails when an entry of a built release archive belongs to a user or group
+# other than root. Archives that record the release machine's account differ
+# between machines and publish a maintainer's user name.
+
+set -euo pipefail
+
+cd -- "$(dirname -- "$0")/.."
+
+go run ./scripts/release_archives.go "${1:-dist/artifacts.json}"

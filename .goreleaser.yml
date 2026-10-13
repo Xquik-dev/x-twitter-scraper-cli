@@ -46,71 +46,110 @@ builds:
       - '-X main.version={{.Version}} -X main.commit={{.Commit}}'
 
 archives:
+  # Every entry names root as its owner and group. Without this, tar records
+  # the user and group that own each file on the release machine, which
+  # differ between machines and folders and name a maintainer's account.
   - id: linux-archive
     ids: [linux]
     name_template: '{{ .ProjectName }}_{{ .Version }}_linux_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     formats: [tar.gz]
     builds_info:
+      owner: root
+      group: root
       mtime: '{{ .CommitDate }}'
     files:
       - src: completions/*
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: man/*/*
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: LICENSE
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: LICENSES/BSD-3-Clause.txt
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: THIRD_PARTY_NOTICES.md
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
   - id: macos-archive
     ids: [macos]
     name_template: '{{ .ProjectName }}_{{ .Version }}_macos_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     formats: [zip]
     builds_info:
+      owner: root
+      group: root
       mtime: '{{ .CommitDate }}'
     files:
       - src: completions/*
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: man/*/*
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: LICENSE
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: LICENSES/BSD-3-Clause.txt
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: THIRD_PARTY_NOTICES.md
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
   - id: windows-archive
     ids: [windows]
     name_template: '{{ .ProjectName }}_{{ .Version }}_windows_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     formats: [zip]
     builds_info:
+      owner: root
+      group: root
       mtime: '{{ .CommitDate }}'
     files:
       - src: completions/*
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: man/*/*
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: LICENSE
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: LICENSES/BSD-3-Clause.txt
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
       - src: THIRD_PARTY_NOTICES.md
         info:
+          owner: root
+          group: root
           mtime: '{{ .CommitDate }}'
 
 snapshot:

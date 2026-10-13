@@ -15,8 +15,13 @@
 #
 # Pass --dry-run to run every check, build every release asset and print the
 # version, each asset with its size and checksum, the Linux package fields and
-# the release notes. A dry run posts no commit status and stops before the
-# tag, the upload and the GitHub release.
+# the release notes. A dry run posts no commit status and stops before it
+# pushes the tag, uploads and creates the GitHub release.
+#
+# Go stamps the module version into each binary from the Git tag on HEAD, and
+# without a tag it stamps a pseudo-version. So both modes build with the local
+# annotated tag in place, and a dry run's checksums equal the release's. A dry
+# run removes the tag it created when it ends.
 
 set -euo pipefail
 # Keep the token out of trace output, even under bash -x.
@@ -50,7 +55,15 @@ refuse() {
 
 temp_root="${TMPDIR:-/tmp}"
 workspace="$(mktemp -d "${temp_root%/}/xquik-cli-release.XXXXXX")"
-trap 'rm -rf -- "${workspace:?}"' EXIT
+remove_local_tag=false
+
+cleanup() {
+  rm -rf -- "${workspace:?}"
+  if [[ "$remove_local_tag" == true ]]; then
+    git tag --delete "$tag" >/dev/null
+  fi
+}
+trap cleanup EXIT
 
 step "Checking required tools"
 for tool in ar gh git go jq shasum tar; do
@@ -148,12 +161,24 @@ fi
 step "Auditing dependencies with govulncheck"
 ./scripts/audit
 
+if [[ "$local_tag" == true ]]; then
+  step "Reusing the local annotated tag $tag"
+elif [[ "$dry_run" == true ]]; then
+  step "Creating the local annotated tag $tag for the build. The dry run removes it when it ends."
+  git tag --annotate "$tag" --message "Release $tag"
+  remove_local_tag=true
+else
+  step "Creating the local annotated tag $tag"
+  git tag --annotate "$tag" --message "Release $tag"
+fi
+
 # The checks above end with GoReleaser snapshot builds. This build runs right
 # after them in the same tree, so a check that left files behind would show.
 step "Building the release assets for $tag with GoReleaser"
 GORELEASER_CURRENT_TAG="$tag" goreleaser release --clean --skip=publish,validate ||
   refuse "The GoReleaser build failed. Fix the errors above, then rerun."
 ./bin/check-release-debug-info
+./bin/check-release-archives
 [[ -z "$(git status --porcelain)" ]] ||
   refuse "The build changed tracked files. Fix the build so it leaves the tree alone, then rerun."
 
@@ -168,13 +193,6 @@ fi
 expected_assets="$(jq -c "[.[] | select($asset_types) | .name] | sort" dist/artifacts.json)"
 missing_assets="$(jq -n --argjson expected "$expected_assets" --argjson drafts "$drafts" \
   '$expected - ($drafts[0].assets // []) | length')"
-
-if [[ "$local_tag" == true ]]; then
-  step "Reusing the local annotated tag $tag"
-else
-  step "Creating the local annotated tag $tag"
-  git tag --annotate "$tag" --message "Release $tag"
-fi
 
 # The token reaches GoReleaser through its environment only. An argument
 # would show in the process list.

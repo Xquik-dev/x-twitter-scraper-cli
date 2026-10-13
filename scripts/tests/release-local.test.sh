@@ -38,6 +38,16 @@ EOF
 # Stands in for bin/check-release-debug-info.
 echo "check-release-debug-info" >>"$FAKE_LOGS/order"
 EOF
+  stub bin/check-release-archives <<'EOF'
+#!/usr/bin/env bash
+# Stands in for bin/check-release-archives. FAKE_LOCAL_OWNER makes it find an
+# archive entry that belongs to a local account.
+echo "check-release-archives" >>"$FAKE_LOGS/order"
+if [[ -n "${FAKE_LOCAL_OWNER:-}" ]]; then
+  echo "1 archive entries name a user or group other than root. Set owner and group to root for every archive entry in .goreleaser.yml, then rerun." >&2
+  exit 1
+fi
+EOF
   write_file .release-please-manifest.json <<EOF
 {".": "$version"}
 EOF
@@ -69,9 +79,10 @@ exit 0
 EOF
   fake goreleaser <<'EOF'
 #!/bin/sh
-# Stands in for GoReleaser. Each run builds 3 release assets in dist. A run
-# with publish rights records whether it got the token and uploads the assets
-# into the draft that the logs folder holds.
+# Stands in for GoReleaser. Each run builds 3 release assets in dist. Like Go,
+# it stamps the archive with the tag on HEAD, or with a pseudo-version when
+# HEAD has no tag. A run with publish rights records whether it got the token
+# and uploads the assets into the draft that the logs folder holds.
 {
   printf 'goreleaser %s' "$*"
   [ -n "${GORELEASER_CURRENT_TAG:-}" ] && printf ' with GORELEASER_CURRENT_TAG=%s' "$GORELEASER_CURRENT_TAG"
@@ -82,7 +93,8 @@ version="$(sed -n 's/^const Version = "\(.*\)"$/\1/p' pkg/cmd/version.go)"
 rm -rf dist
 mkdir -p dist/control
 prefix="x-twitter-scraper_${version}"
-printf 'archive %s\n' "$version" >"dist/${prefix}_linux_amd64.tar.gz"
+stamp="$(git describe --tags --exact-match HEAD 2>/dev/null || echo "pseudo-version of $(git rev-parse --short HEAD)")"
+printf 'archive %s built as %s\n' "$version" "$stamp" >"dist/${prefix}_linux_amd64.tar.gz"
 printf 'Package: x-twitter-scraper\nVersion: %s\nMaintainer: support@xquik.com\nHomepage: https://xquik.com\nDescription: %s\n' \
   "$version" "${FAKE_DESCRIPTION:-X API & Twitter API CLI by Xquik for tests. Not affiliated with X Corp.}" >dist/control/control
 # Fixed times keep the archive identical between builds, as GoReleaser's are.
@@ -206,9 +218,57 @@ gh api --paginate --slurp repos/$repository/releases?per_page=100
 check-local --no-status
 audit
 goreleaser release --clean --skip=publish,validate with GORELEASER_CURRENT_TAG=v1.2.3
-check-release-debug-info" "$(order_without_paths)" "the steps"
+check-release-debug-info
+check-release-archives" "$(order_without_paths)" "the steps"
   assert_equal "" "$(remote_tags)" "the tags on origin"
   assert_equal "" "$(sandbox_git tag)" "the local tags"
+}
+
+test_a_dry_run_lists_the_same_checksums_as_a_release_of_the_same_commit() {
+  local dry_run_checksums
+  prepare_release
+
+  run_in_repo bin/release-local --dry-run
+  dry_run_checksums="$(cat "$sandbox_repo/dist/x-twitter-scraper_1.2.3_checksums.txt")"
+  run_in_repo bin/release-local
+
+  assert_equal 0 "$run_status" "the exit code of the release"
+  assert_contains "$(cat "$sandbox_repo/dist/x-twitter-scraper_1.2.3_linux_amd64.tar.gz")" "built as v1.2.3" "the released archive"
+  assert_equal "$dry_run_checksums" "$(log_of uploaded-checksums)" "the uploaded checksums"
+}
+
+test_a_dry_run_keeps_a_local_tag_that_was_there_before() {
+  prepare_release
+  sandbox_git tag --annotate v1.2.3 --message "Release v1.2.3"
+
+  run_in_repo bin/release-local --dry-run
+
+  assert_equal 0 "$run_status" "the exit code"
+  assert_contains "$run_stdout" "==> Reusing the local annotated tag v1.2.3" "stdout"
+  assert_equal "tag" "$(sandbox_git cat-file -t v1.2.3)" "the local tag type"
+  assert_equal "" "$(remote_tags)" "the tags on origin"
+}
+
+test_a_failed_dry_run_removes_the_tag_it_created() {
+  prepare_release
+  run_env=("FAKE_LOCAL_OWNER=1")
+
+  run_in_repo bin/release-local --dry-run
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "" "$(sandbox_git tag)" "the local tags"
+}
+
+test_an_archive_entry_owned_by_a_local_account_stops_a_release_before_the_draft() {
+  prepare_release
+  run_env=("FAKE_LOCAL_OWNER=1")
+
+  run_in_repo bin/release-local
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "1 archive entries name a user or group other than root. Set owner and group to root for every archive entry in .goreleaser.yml, then rerun." "$run_stderr" "stderr"
+  assert_not_contains "$(log_of order)" "gh release create" "the steps"
+  assert_equal "" "$(remote_tags)" "the tags on origin"
 }
 
 test_a_dry_run_reports_a_release_that_github_already_published_and_goes_on() {
@@ -237,6 +297,7 @@ check-local
 audit
 goreleaser release --clean --skip=publish,validate with GORELEASER_CURRENT_TAG=v1.2.3
 check-release-debug-info
+check-release-archives
 gh release create v1.2.3 --repo $repository --draft --title v1.2.3 --target $(sandbox_git rev-parse HEAD) --notes-file NOTES
 gh auth token --hostname github.com
 goreleaser release --clean
@@ -256,7 +317,9 @@ test_a_release_skips_the_upload_when_the_draft_already_has_every_asset() {
   printf '%s\n' x-twitter-scraper_1.2.3_checksums.txt x-twitter-scraper_1.2.3_linux_amd64.deb \
     x-twitter-scraper_1.2.3_linux_amd64.tar.gz >"$sandbox_logs/uploaded"
   run_env=('FAKE_RELEASES=[[{"tag_name": "v1.2.3", "draft": true, "assets": [{"name": "x-twitter-scraper_1.2.3_checksums.txt"}, {"name": "x-twitter-scraper_1.2.3_linux_amd64.deb"}, {"name": "x-twitter-scraper_1.2.3_linux_amd64.tar.gz"}]}]]')
-  # The draft holds the assets of an earlier identical build.
+  # An earlier run created the local tag and left the assets of its identical
+  # build on the draft.
+  sandbox_git tag --annotate v1.2.3 --message "Release v1.2.3"
   mkdir -p "$sandbox/setup-logs"
   (
     cd "$sandbox_repo"
