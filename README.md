@@ -130,7 +130,7 @@ The script defaults to `../x-twitter-scraper-go`.
 ## Checks & Releases
 
 Run `bin/check-local` before you open a pull request.
-It runs lint, tests, coverage, `govulncheck`, & 2 reproducible builds.
+It runs lint, CodeQL, tests, coverage, `govulncheck`, & 2 reproducible builds.
 It posts the result as the `xquik-local-checks` commit status.
 Maintainers publish releases from `main` with `bin/release-local`.
 

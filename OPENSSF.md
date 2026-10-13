@@ -22,10 +22,10 @@ No OpenSSF exclusion applies.
 | Tests | Race-enabled tests & regression coverage through `./scripts/test` |
 | Statement coverage | `./scripts/coverage` enforces 90%; current result is 91.2% |
 | Branch coverage | `./scripts/branch-coverage` enforces 80%; current result is 881/1,100 (80.09%) |
-| Static analysis | `go vet` through `./scripts/lint` |
+| Static analysis | `go vet` & CodeQL security-extended queries through `bin/check-local` |
 | Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that maintainers run by hand |
-| Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit` |
-| Local checks | `bin/check-local` runs licensing, lint, test, audit, & build checks, then posts the `xquik-local-checks` status |
+| Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit`, with reviewed exceptions in `audit-exceptions.json` |
+| Local checks | `bin/check-local` runs licensing, lint, CodeQL, test, audit, & build checks, then posts the `xquik-local-checks` status |
 | Releases | `bin/release-local` publishes checksums & an annotated tag from `main` |
 | Reproducibility | `bin/check-local` builds each GoReleaser snapshot twice & compares checksums |
 | Portability | `./scripts/test` compiles every package for Windows AMD64 |
@@ -37,7 +37,7 @@ Run every local evidence command at once:
 bin/check-local
 ```
 
-It runs `./scripts/bootstrap`, `reuse lint`, `./scripts/lint`, `./scripts/test`,
+It runs `./scripts/bootstrap`, `reuse lint`, `./scripts/lint`, CodeQL, `./scripts/test`,
 `./scripts/audit`, & 2 GoReleaser snapshot builds.
 
 ## Branch Coverage Evidence
@@ -61,7 +61,7 @@ The repository must not claim Gold while any mandatory criterion remains unmet.
 
 ## Maintenance
 
-`bin/check-local` runs licensing, tests, coverage, security, & reproducibility checks.
+`bin/check-local` runs licensing, CodeQL, tests, coverage, security, & reproducibility checks.
 Run it before each merge. `bin/release-local` runs it again before each release.
 The repository runs no GitHub Actions workflows or Dependabot updates.
 Reassess this file before every major release.

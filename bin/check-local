@@ -6,6 +6,8 @@
 
 # Runs every repository check on a maintainer machine and stops at the first failure.
 # Posts the result as the xquik-local-checks commit status when HEAD is pushed and clean.
+# Posting uses the owner's gh login on the release machine.
+# The status names only the checks that ran. Success needs every mandatory check.
 # Pass --no-status to skip the commit status.
 # Fuzzing stays manual because it needs minutes to find anything:
 # go test ./internal/apiform -run '^$' -fuzz '^FuzzMarshalRoundTrip$' -fuzztime=2m
@@ -17,6 +19,8 @@ cd -- "$(dirname -- "$0")/.."
 readonly repo="Xquik-dev/x-twitter-scraper-cli"
 readonly status_context="xquik-local-checks"
 readonly reuse_version="6.2.0"
+readonly codeql_suite="codeql/go-queries:codeql-suites/go-security-extended.qls"
+readonly temp_root="${TMPDIR:-/tmp}"
 
 post_status=1
 for arg in "$@"; do
@@ -30,29 +34,39 @@ for arg in "$@"; do
 done
 
 check_name="Setup"
+check_label=""
 check_hint="Read the output above, fix the cause, then rerun bin/check-local."
-checks_run="lint, tests, coverage, audit & reproducible build"
+failure_reason=""
+passed_checks=""
+passed_count=0
+skipped_note=""
 platform=""
 status_sha=""
-first_checksums=""
+work_dir=""
 
 post_commit_status() {
   [[ -n "$status_sha" ]] || return 0
+  local description="${2:0:139}"
   gh api "repos/${repo}/statuses/${status_sha}" \
-    -f state="$1" -f context="$status_context" -f description="$2" \
+    -f state="$1" -f context="$status_context" -f description="$description" \
     --silent >/dev/null 2>&1 ||
     echo "==> Commit status not posted: GitHub rejected the request."
 }
 
 finish() {
   local exit_code=$?
-  if [[ -n "$first_checksums" ]]; then
-    rm -f -- "$first_checksums"
-  fi
+  case "$work_dir" in
+    "${temp_root%/}"/x-twitter-scraper-check.*) rm -rf -- "$work_dir" ;;
+  esac
   if ((exit_code == 0)); then
-    post_commit_status success "${checks_run} passed${platform}."
+    post_commit_status success "${passed_checks} passed${skipped_note}${platform}."
   else
-    post_commit_status failure "${check_name} failed${platform}. Run bin/check-local to see why."
+    local failure="${failure_reason:-${check_name} failed}"
+    local description="${failure}${passed_checks:+; ${passed_checks} passed}${platform}."
+    if ((${#description} > 139)); then
+      description="${failure} after ${passed_count} passing checks${platform}."
+    fi
+    post_commit_status failure "$description"
   fi
   exit "$exit_code"
 }
@@ -62,16 +76,24 @@ trap finish EXIT
 
 start_check() {
   check_name="$1"
-  check_hint="$2"
+  check_label="$2"
+  check_hint="$3"
   echo "==> ${check_name}"
 }
 
+end_check() {
+  passed_checks="${passed_checks:+${passed_checks}, }${check_label}"
+  passed_count=$((passed_count + 1))
+}
+
+fail_check() {
+  failure_reason="$1"
+  echo "Check failed: $1. $2" >&2
+  exit 1
+}
+
 require_tool() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    check_name="Required tools"
-    echo "Check failed: $1 is missing. $2" >&2
-    exit 1
-  fi
+  command -v "$1" >/dev/null 2>&1 || fail_check "$1 is missing" "$2"
 }
 
 checksum_manifest() {
@@ -96,52 +118,78 @@ choose_status_commit() {
   fi
 }
 
+choose_status_commit
+if command -v go >/dev/null 2>&1; then
+  platform=" on $(go env GOOS)/$(go env GOARCH) with $(go env GOVERSION)"
+fi
+post_commit_status pending "Checks started${platform}."
+
 require_tool go "Install Go from https://go.dev/dl/, then rerun bin/check-local."
 require_tool jq "Install jq with brew install jq, then rerun bin/check-local."
 require_tool objdump "Install the Xcode command line tools, then rerun bin/check-local."
 require_tool goreleaser "Install GoReleaser with brew install goreleaser, then rerun bin/check-local."
+require_tool codeql "Install CodeQL with brew install --cask codeql, then rerun bin/check-local."
 
-platform=" on $(go env GOOS)/$(go env GOARCH) with $(go env GOVERSION)"
-first_checksums="$(mktemp)"
-choose_status_commit
-post_commit_status pending "Checks started${platform}."
+work_dir="$(mktemp -d "${temp_root%/}/x-twitter-scraper-check.XXXXXX")"
 
-start_check "Module download and integrity" "Run go mod download, then rerun bin/check-local."
+start_check "Module download and integrity" "modules" "Run go mod download, then rerun bin/check-local."
 ./scripts/bootstrap
+end_check
 
 if command -v reuse >/dev/null 2>&1; then
-  start_check "Licensing (REUSE)" "Add SPDX headers or update REUSE.toml."
+  start_check "Licensing (REUSE)" "REUSE" "Add SPDX headers or update REUSE.toml."
   reuse lint
-  checks_run="REUSE, ${checks_run}"
+  end_check
 elif command -v uvx >/dev/null 2>&1; then
-  start_check "Licensing (REUSE)" "Add SPDX headers or update REUSE.toml."
+  start_check "Licensing (REUSE)" "REUSE" "Add SPDX headers or update REUSE.toml."
   uvx --from "reuse==${reuse_version}" reuse lint
-  checks_run="REUSE, ${checks_run}"
+  end_check
 else
+  skipped_note="; REUSE skipped"
   echo "==> Licensing (REUSE) skipped. Install reuse or uv to run it."
 fi
 
-start_check "Lint" "Run ./scripts/format and go mod tidy, then fix the vet findings."
+start_check "Lint" "lint" "Run ./scripts/format and go mod tidy, then fix the vet findings."
 ./scripts/lint
+end_check
 
-start_check "Tests and coverage" "Fix the failing test or add coverage, then rerun ./scripts/test."
+start_check "CodeQL security-extended" "CodeQL" "Fix each finding listed above, then rerun bin/check-local."
+codeql database create "${work_dir}/codeql-db" --language=go --build-mode=autobuild --source-root=. --quiet
+codeql database analyze "${work_dir}/codeql-db" "$codeql_suite" --download --quiet \
+  --format=sarif-latest --output="${work_dir}/codeql.sarif"
+codeql_findings="$(jq '[.runs[].results[]] | length' "${work_dir}/codeql.sarif")"
+if ((codeql_findings > 0)); then
+  jq -r '.runs[].results[]
+    | .locations[0].physicalLocation as $where
+    | "\(.ruleId) at \($where.artifactLocation.uri):\($where.region.startLine)"' \
+    "${work_dir}/codeql.sarif" >&2
+  fail_check "CodeQL found ${codeql_findings} issues" "$check_hint"
+fi
+end_check
+
+start_check "Tests and coverage" "tests & coverage" "Fix the failing test or add coverage, then rerun ./scripts/test."
 ./scripts/test
+end_check
 
-start_check "Dependency audit" "Run go get on each listed module, or raise the go line in go.mod for standard library findings."
+start_check "Dependency audit" "audit" "Run go get on each listed module, or raise the go line in go.mod for standard library findings."
 ./scripts/audit
+end_check
 
-start_check "Release configuration" "Fix .goreleaser.yml or release-please-config.json so releases start as drafts."
+start_check "Release configuration" "release config" "Fix .goreleaser.yml or release-please-config.json so releases start as drafts."
 goreleaser check
 jq -e '.draft == true' release-please-config.json >/dev/null
 grep -Eq '^[[:space:]]+draft: true$' .goreleaser.yml
+end_check
 
-start_check "Reproducible snapshot build" "Remove the build input that changes between runs, such as a timestamp."
+start_check "Reproducible snapshot build" "reproducible build" "Remove the build input that changes between runs, such as a timestamp."
 goreleaser release --snapshot --clean
-cp -- "$(checksum_manifest)" "$first_checksums"
+cp -- "$(checksum_manifest)" "${work_dir}/first-checksums.txt"
 goreleaser release --snapshot --clean
-cmp -- "$first_checksums" "$(checksum_manifest)"
+cmp -- "${work_dir}/first-checksums.txt" "$(checksum_manifest)"
+end_check
 
-start_check "Release debug information" "Keep DWARF data: remove -s and -w from the .goreleaser.yml ldflags."
+start_check "Release debug information" "DWARF" "Keep DWARF data: remove -s and -w from the .goreleaser.yml ldflags."
 ./bin/check-release-debug-info
+end_check
 
 echo "All local checks passed."

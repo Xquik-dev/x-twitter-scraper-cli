@@ -4,12 +4,83 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+# Verifies module checksums and scans reachable vulnerabilities with govulncheck.
+# Any finding in code the CLI ships blocks the audit.
+# A finding that only tests reach blocks when a fix exists or no exception lists it.
+# audit-exceptions.json holds reviewed exceptions, one object per finding:
+#   {"id": "GO-2026-0000", "package": "example.com/module/pkg",
+#    "reason": "build-time only", "recheck": "2026-11-12"}
+# The reason is "build-time only" or "peer dependency provided by the host".
+# An exception blocks again on its recheck date, which must be at most 30 days out.
+
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+readonly govulncheck="golang.org/x/vuln/cmd/govulncheck@v1.9.0"
+readonly exceptions_file="audit-exceptions.json"
+
+shipped_scan="$(mktemp)"
+test_scan="$(mktemp)"
+trap 'rm -f -- "$shipped_scan" "$test_scan"' EXIT
+
 echo "==> Verifying module checksums"
 go mod verify
 
-echo "==> Scanning reachable vulnerabilities"
-go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+echo "==> Checking ${exceptions_file}"
+if ! jq -e '
+  type == "array" and all(.[];
+    (.id | type == "string")
+    and (.package | type == "string")
+    and (.reason == "build-time only" or .reason == "peer dependency provided by the host")
+    and (.recheck | type == "string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")))
+' "$exceptions_file" >/dev/null; then
+  echo "${exceptions_file} is invalid. Give each entry an id, package, reason, and recheck date." >&2
+  exit 1
+fi
+
+echo "==> Scanning reachable vulnerabilities in shipped code and tests"
+go run "$govulncheck" -format json ./... >"$shipped_scan"
+go run "$govulncheck" -test -format json ./... >"$test_scan"
+
+verdicts="$(
+  jq -rn \
+    --slurpfile shipped "$shipped_scan" \
+    --slurpfile tested "$test_scan" \
+    --slurpfile exceptions "$exceptions_file" '
+    def called($scan):
+      [$scan[] | .finding? | select(.trace[0].function?)
+        | {id: .osv, package: (.trace[0].package // .trace[0].module), fixed: (.fixed_version // "")}]
+      | unique;
+    def finding_name: "\(.id) in \(.package)";
+
+    (now | strftime("%Y-%m-%d")) as $today
+    | ((now + 30 * 86400) | strftime("%Y-%m-%d")) as $latest_recheck
+    | called($shipped) as $runtime
+    | ($runtime[] | "blocked\t\(finding_name): shipped code" + (if .fixed == "" then "" else ", fixed in \(.fixed)" end)),
+      (called($tested)[]
+        | . as $finding
+        | select(any($runtime[]; .id == $finding.id and .package == $finding.package) | not)
+        | ([$exceptions[0][] | select(.id == $finding.id and .package == $finding.package)] | first) as $entry
+        | if .fixed != "" then "blocked\t\(finding_name): test-only, fixed in \(.fixed)"
+          elif $entry == null then "blocked\t\(finding_name): test-only, not in audit-exceptions.json"
+          elif $entry.recheck <= $today then "blocked\t\(finding_name): exception recheck date \($entry.recheck) has passed"
+          elif $entry.recheck > $latest_recheck then "blocked\t\(finding_name): exception recheck \($entry.recheck) is over 30 days out"
+          else "allowed\t\(finding_name): \($entry.reason) until \($entry.recheck)"
+          end)
+  '
+)"
+
+if [[ -z "$verdicts" ]]; then
+  echo "No reachable vulnerabilities."
+  exit 0
+fi
+
+while IFS=$'\t' read -r verdict detail; do
+  echo "${verdict}: ${detail}"
+done <<<"$verdicts"
+
+if grep -q '^blocked' <<<"$verdicts"; then
+  echo "Run go run ${govulncheck} -test ./... to see call traces." >&2
+  exit 1
+fi
