@@ -25,8 +25,11 @@ EOF
 #!/bin/sh
 # Stands in for the CodeQL CLI. FAKE_STALL makes the pack download hang,
 # FAKE_DOWNLOAD_FAILS makes it fail, FAKE_INCOMPLETE_PACK leaves out the
-# suite, FAKE_SKIPPED_FILE leaves a file out of the database and FAKE_RESULTS
-# adds 1 result to the report.
+# suite and FAKE_SKIPPED_FILE leaves a file out of the database. The report
+# has the shape CodeQL 2.27 writes. FAKE_RESULTS adds 1 result to it,
+# FAKE_UNREAD_FILE adds 1 extraction error for that file and
+# FAKE_NO_EXTRACTION_DIAGNOSTIC leaves the extraction diagnostic out of the
+# queries that ran.
 echo "$*" >>"$FAKE_LOGS/codeql"
 option() {
   name="$1"
@@ -65,11 +68,17 @@ case "$1 $2" in
     ;;
   "database analyze")
     output="$(option --output "$@")"
+    results=""
+    notifications=""
+    diagnostic="go/diagnostics/extraction-errors"
     if [ -n "${FAKE_RESULTS:-}" ]; then
-      echo '{"runs":[{"results":[{"ruleId":"go/sql-injection","locations":[{"physicalLocation":{"artifactLocation":{"uri":"pkg/lib.go"},"region":{"startLine":7}}}]}]}]}' >"$output"
-    else
-      echo '{"runs":[{"results":[]}]}' >"$output"
+      results='{"ruleId":"go/sql-injection","locations":[{"physicalLocation":{"artifactLocation":{"uri":"pkg/lib.go"},"region":{"startLine":7}}}]}'
     fi
+    if [ -n "${FAKE_UNREAD_FILE:-}" ]; then
+      notifications='{"message":{"text":"Extraction failed in '"$FAKE_UNREAD_FILE"' with error undefined: missingName"},"level":"error","descriptor":{"id":"go/diagnostics/extraction-errors"}}'
+    fi
+    [ -z "${FAKE_NO_EXTRACTION_DIAGNOSTIC:-}" ] || diagnostic="go/diagnostics/successfully-extracted-files"
+    echo '{"runs":[{"tool":{"driver":{"name":"CodeQL","notifications":[{"id":"'"$diagnostic"'"}]}},"invocations":[{"toolExecutionNotifications":['"$notifications"'],"executionSuccessful":true}],"results":['"$results"']}]}' >"$output"
     ;;
   *)
     echo "unexpected codeql $*" >&2
@@ -127,6 +136,27 @@ test_a_go_file_missing_from_the_database_fails_the_run() {
   assert_equal "pkg/lib.go
 CodeQL missed the Go files above. Fix the build so it compiles every package." "$run_stderr" "stderr"
   assert_not_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
+}
+
+test_a_go_file_that_codeql_could_not_read_fails_the_run_and_is_named() {
+  prepare_codeql
+  run_env=("FAKE_UNREAD_FILE=pkg/lib.go")
+
+  run_in_repo scripts/codeql
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "Extraction failed in pkg/lib.go with error undefined: missingName
+CodeQL could not read the Go code named above, so the scan is incomplete. Fix that code so Go compiles it, then rerun." "$run_stderr" "stderr"
+}
+
+test_a_scan_without_the_extraction_diagnostic_fails_the_run() {
+  prepare_codeql
+  run_env=("FAKE_NO_EXTRACTION_DIAGNOSTIC=1")
+
+  run_in_repo scripts/codeql
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "The CodeQL scan lacks go/diagnostics/extraction-errors, so it cannot show that it read every file. Make the suite in scripts/codeql run that diagnostic query." "$run_stderr" "stderr"
 }
 
 test_a_stalled_pack_download_stops_after_the_limit_and_ends_the_download() {
