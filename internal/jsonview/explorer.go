@@ -287,8 +287,10 @@ type JSONViewer struct {
 	help    help.Model
 }
 
-// ExploreJSON opens an interactive view for one JSON value.
-func ExploreJSON(title string, json gjson.Result) error {
+// ExploreJSON opens an interactive view for one JSON value. Without options
+// it reads keys from the terminal and draws on standard output. Options name
+// another input or output.
+func ExploreJSON(title string, json gjson.Result, options ...tea.ProgramOption) error {
 	view, err := newView("", json, false)
 	if err != nil {
 		return err
@@ -296,7 +298,7 @@ func ExploreJSON(title string, json gjson.Result) error {
 
 	viewer := &JSONViewer{stack: []JSONView{view}, root: title, rawMode: false, help: help.New()}
 
-	_, err = tea.NewProgram(viewer).Run()
+	_, err = tea.NewProgram(viewer, options...).Run()
 	if viewer.message != "" {
 		_, msgErr := fmt.Println("\n" + viewer.message)
 		err = errors.Join(err, msgErr)
@@ -308,8 +310,10 @@ type hasRawJSON interface {
 	RawJSON() string
 }
 
-// ExploreJSONStream opens an interactive view for streamed JSON.
-func ExploreJSONStream[T any](title string, it Iterator[T]) error {
+// ExploreJSONStream opens an interactive view for streamed JSON. Without
+// options it reads keys from the terminal and draws on standard output.
+// Options name another input or output.
+func ExploreJSONStream[T any](title string, it Iterator[T], options ...tea.ProgramOption) error {
 	anyIt := genericToAnyIterator(it)
 
 	preloadCount := 20
@@ -342,7 +346,7 @@ func ExploreJSONStream[T any](title string, it Iterator[T]) error {
 	}
 
 	viewer := &JSONViewer{stack: []JSONView{view}, root: title, rawMode: false, help: help.New()}
-	_, err = tea.NewProgram(viewer).Run()
+	_, err = tea.NewProgram(viewer, options...).Run()
 	if viewer.message != "" {
 		_, msgErr := fmt.Println("\n" + viewer.message)
 		err = errors.Join(err, msgErr)

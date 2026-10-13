@@ -19,9 +19,9 @@ No OpenSSF exclusion applies.
 | Contribution process | `CONTRIBUTING.md`, DCO sign-off, & `bin/check-local` before every merge |
 | Security reporting | Private GitHub reporting, response targets, & safe harbor in `SECURITY.md` |
 | Build | Pinned Go modules, checksum verification, & `./scripts/build` |
-| Tests | Race-enabled tests & regression coverage through `./scripts/test` |
-| Statement coverage | `./scripts/coverage` enforces 90%. The current result is 91.2%. |
-| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 879/1,096 (80.20%). |
+| Tests | Race-enabled tests, regression coverage & a second run of every package on a pseudo-terminal through `./scripts/test` |
+| Statement coverage | `./scripts/coverage` enforces 90%. The current result is 91.7%. |
+| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 883/1,098 (80.42%). |
 | Static analysis | `go vet`, `shellcheck` & CodeQL security-extended queries through `bin/check-local` |
 | Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that `bin/check-local` runs for 15 seconds |
 | Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit`, with reviewed exceptions in `audit-exceptions.json` |

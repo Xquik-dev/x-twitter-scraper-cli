@@ -5,9 +5,13 @@
 package jsonview
 
 import (
+	"bytes"
+	"context"
 	"errors"
+	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
@@ -250,7 +254,71 @@ func TestIteratorAdaptersAndEarlyExplorerErrors(t *testing.T) {
 
 	marshalIterator := &sliceAnyIterator{items: []any{make(chan int)}}
 	require.Error(t, ExploreJSONStream[any]("test", marshalIterator))
-	require.Error(t, ExploreJSON("test", gjson.Result{}))
+}
+
+// typedKeys returns options that give a viewer typed keys in place of a
+// terminal and collect what it draws. A viewer that never quits is stopped
+// after 10 seconds, so the test fails and does not wait for a person.
+func typedKeys(t *testing.T, typed string) ([]tea.ProgramOption, *bytes.Buffer) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	t.Cleanup(cancel)
+	screen := &bytes.Buffer{}
+	return []tea.ProgramOption{
+		tea.WithContext(ctx),
+		tea.WithInput(strings.NewReader(typed)),
+		tea.WithOutput(screen),
+	}, screen
+}
+
+func TestExploreJSONDrawsTheTitleAndQuitsOnQ(t *testing.T) {
+	t.Parallel()
+
+	options, screen := typedKeys(t, "q")
+
+	require.NoError(t, ExploreJSON("Account", gjson.Parse(`{"name":"xquik"}`), options...))
+	assert.Contains(t, screen.String(), "Account")
+}
+
+func TestExploreJSONPrintsTheSelectedValueOnP(t *testing.T) {
+	stdout := os.Stdout
+	printed, err := os.CreateTemp(t.TempDir(), "printed")
+	require.NoError(t, err)
+	os.Stdout = printed
+	t.Cleanup(func() { os.Stdout = stdout })
+	options, _ := typedKeys(t, "p")
+
+	require.NoError(t, ExploreJSON("Account", gjson.Parse(`{"name":"xquik"}`), options...))
+
+	content, err := os.ReadFile(printed.Name())
+	require.NoError(t, err)
+	assert.Equal(t, "\nxquik\n", string(content))
+}
+
+func TestExploreJSONStreamPrintsTheSelectedRowOnP(t *testing.T) {
+	stdout := os.Stdout
+	printed, err := os.CreateTemp(t.TempDir(), "printed")
+	require.NoError(t, err)
+	os.Stdout = printed
+	t.Cleanup(func() { os.Stdout = stdout })
+	options, _ := typedKeys(t, "p")
+	accounts := &sliceAnyIterator{items: []any{map[string]any{"name": "xquik"}}}
+
+	require.NoError(t, ExploreJSONStream[any]("Accounts", accounts, options...))
+
+	content, err := os.ReadFile(printed.Name())
+	require.NoError(t, err)
+	assert.Equal(t, "\n{\"name\":\"xquik\"}\n", string(content))
+}
+
+func TestExploreJSONStreamDrawsTheTitleAndQuitsOnQ(t *testing.T) {
+	t.Parallel()
+
+	options, screen := typedKeys(t, "q")
+	accounts := &sliceAnyIterator{items: []any{map[string]any{"name": "xquik"}}}
+
+	require.NoError(t, ExploreJSONStream[any]("Accounts", accounts, options...))
+	assert.Contains(t, screen.String(), "Accounts")
 }
 
 func TestTextViewUpdateUsesViewport(t *testing.T) {

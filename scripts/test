@@ -18,6 +18,8 @@ if [[ "$#" -eq 0 ]]; then
   echo "==> Enforcing statement coverage"
   ./scripts/coverage
   ./scripts/branch-coverage
+  echo "==> Running tests on a terminal"
+  ./scripts/test-on-terminal
 fi
 
 echo "==> Checking tests on Windows"
