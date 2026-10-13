@@ -8,7 +8,7 @@
 
 * Build with Go 1.27.2. Release 0.13.3 was built with Go 1.26.6, which has 9 advisories in net/http, crypto/tls & net/textproto.
 * The fixed advisories are GO-2026-6603, GO-2026-6605, GO-2026-6607, GO-2026-6608, GO-2026-6610, GO-2026-6611, GO-2026-6612, GO-2026-6613 & GO-2026-6617.
-* 7 of them affect only servers, and the CLI runs no server.
+* 7 of them cannot affect the CLI. 5 affect only servers, 1 needs a CONNECT request with a body, and 1 needs multipart parsing. The CLI does none of these.
 * GO-2026-6611 lets a malicious HTTP/2 server waste the CLI's CPU, and GO-2026-6610 lets it send malformed headers. Both need a server you point the CLI at.
 
 ### Bug fixes
