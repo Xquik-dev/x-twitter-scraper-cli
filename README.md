@@ -3,7 +3,7 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13732/badge)](https://www.bestpractices.dev/projects/13732)
 [![Skills.sh x-twitter-scraper Skill](https://skills.sh/b/xquik-dev/x-twitter-scraper)](https://skills.sh/xquik-dev/x-twitter-scraper)
 
-Use this X API & Twitter API CLI to work with X from a terminal.
+Use this Twitter CLI & X CLI to work with X from a terminal.
 It works as a Twitter scraper & tweet scraper for search, profiles, followers & lists.
 Scrape Twitter timelines, communities & trends into JSON, YAML or an interactive view.
 Download media, monitor accounts, manage webhooks & run X automation from scripts.
