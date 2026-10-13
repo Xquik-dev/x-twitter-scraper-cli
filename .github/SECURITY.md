@@ -17,7 +17,7 @@ We coordinate disclosure after confirming the issue.
 
 ## Scope
 
-Security-sensitive areas include:
+These areas are security-sensitive.
 
 - API key and token handling
 - Request construction and redirects

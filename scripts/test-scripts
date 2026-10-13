@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Runs the tests of the scripts in bin/ and scripts/. Each test runs a script
+# in a throwaway folder with fake commands, so no test reaches GitHub, the Go
+# module proxy, the CodeQL registry or the Keychain.
+
+set -euo pipefail
+
+cd -- "$(dirname -- "$0")/.."
+
+echo "==> Running script tests"
+failed_files=0
+for test_file in scripts/tests/*.test.sh; do
+  bash "$test_file" || failed_files=$((failed_files + 1))
+done
+if ((failed_files > 0)); then
+  echo "$failed_files script test files failed. Fix the tests marked not ok above." >&2
+  exit 1
+fi
+echo "Every script test passed."

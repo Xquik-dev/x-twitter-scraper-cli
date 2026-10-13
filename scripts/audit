@@ -4,83 +4,121 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Verifies module checksums and scans reachable vulnerabilities with govulncheck.
-# Any finding in code the CLI ships blocks the audit.
-# A finding that only tests reach blocks when a fix exists or no exception lists it.
-# audit-exceptions.json holds reviewed exceptions, one object per finding:
-#   {"id": "GO-2026-0000", "package": "example.com/module/pkg",
+# Verifies module checksums, runs govulncheck over every package and test,
+# then judges each finding at every severity. Every finding counts, whether
+# govulncheck traced a call to it or not.
+#
+# A finding in a module that ships always blocks. A module ships when the CLI
+# binary or a package that callers can import depends on it. The standard
+# library ships. A finding in a module that only tests or scripts use blocks
+# when a fix exists. Without a fix, it passes only while audit-exceptions.json
+# lists it, one object per finding.
+#
+#   {"id": "GO-2026-0000", "module": "example.com/module",
 #    "reason": "build-time only", "recheck": "2026-11-12"}
+#
 # The reason is "build-time only" or "peer dependency provided by the host".
-# An exception blocks again on its recheck date, which must be at most 30 days out.
+# The recheck date falls within 30 days, and the entry blocks again on that
+# date.
 
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+cd -- "$(dirname -- "$0")/.."
 
 readonly govulncheck="golang.org/x/vuln/cmd/govulncheck@v1.9.0"
 readonly exceptions_file="audit-exceptions.json"
 
-shipped_scan="$(mktemp)"
-test_scan="$(mktemp)"
-trap 'rm -f -- "$shipped_scan" "$test_scan"' EXIT
+report="$(mktemp "${TMPDIR:-/tmp}/xquik-cli-govulncheck.XXXXXX")"
+trap 'rm -f -- "$report"' EXIT
 
 echo "==> Verifying module checksums"
 go mod verify
 
-echo "==> Checking ${exceptions_file}"
-if ! jq -e '
-  type == "array" and all(.[];
-    (.id | type == "string")
-    and (.package | type == "string")
-    and (.reason == "build-time only" or .reason == "peer dependency provided by the host")
-    and (.recheck | type == "string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")))
-' "$exceptions_file" >/dev/null; then
-  echo "${exceptions_file} is invalid. Give each entry an id, package, reason, and recheck date." >&2
+echo "==> Finding the modules that ship"
+shipped_packages=()
+while read -r import_path name; do
+  if [[ "$name" == main || ("$import_path" != */internal/* && "$import_path" != */internal) ]]; then
+    shipped_packages+=("$import_path")
+  fi
+done < <(go list -f '{{.ImportPath}} {{.Name}}' ./...)
+if ((${#shipped_packages[@]} == 0)); then
+  echo "Found no package that ships. Run go list ./... to see why." >&2
   exit 1
 fi
+shipped_modules="$(go list -deps -f '{{with .Module}}{{.Path}}{{end}}' "${shipped_packages[@]}")"
 
-echo "==> Scanning reachable vulnerabilities in shipped code and tests"
-go run "$govulncheck" -format json ./... >"$shipped_scan"
-go run "$govulncheck" -test -format json ./... >"$test_scan"
+echo "==> Scanning every package and test with govulncheck"
+go run "$govulncheck" -format json -test ./... >"$report" || {
+  echo "govulncheck did not finish. Check the network and the Go toolchain, then rerun." >&2
+  exit 1
+}
 
 verdicts="$(
-  jq -rn \
-    --slurpfile shipped "$shipped_scan" \
-    --slurpfile tested "$test_scan" \
-    --slurpfile exceptions "$exceptions_file" '
-    def called($scan):
-      [$scan[] | .finding? | select(.trace[0].function?)
-        | {id: .osv, package: (.trace[0].package // .trace[0].module), fixed: (.fixed_version // "")}]
-      | unique;
-    def finding_name: "\(.id) in \(.package)";
-
-    (now | strftime("%Y-%m-%d")) as $today
-    | ((now + 30 * 86400) | strftime("%Y-%m-%d")) as $latest_recheck
-    | called($shipped) as $runtime
-    | ($runtime[] | "blocked\t\(finding_name): shipped code" + (if .fixed == "" then "" else ", fixed in \(.fixed)" end)),
-      (called($tested)[]
+  jq -nr --slurpfile exceptions "$exceptions_file" --arg shipped "$shipped_modules" '
+    def day($offset): now + $offset * 86400 | strftime("%Y-%m-%d");
+    day(0) as $today
+    | day(30) as $limit
+    | ["build-time only", "peer dependency provided by the host"] as $reasons
+    | ($shipped | split("\n") | map(select(. != "")) + ["stdlib"] | unique) as $ships
+    | $exceptions[0] as $listed
+    | ([inputs | .finding? | select(. != null)
+        | {id: .osv, module: .trace[0].module, fixed: (.fixed_version // "")}] | unique) as $findings
+    | def flaw:
+        if (.reason | IN($reasons[]) | not) then
+          "needs a reason of \"" + ($reasons | join("\" or \"")) + "\"."
+        elif (.recheck | type) != "string" or (.recheck | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}$") | not) then
+          "needs a recheck date such as \($limit)."
+        elif .recheck <= $today then
+          "expired on \(.recheck). Recheck the finding."
+        elif .recheck > $limit then
+          "rechecks on \(.recheck). Use \($limit) or earlier."
+        else
+          empty
+        end;
+    if ($listed | type) != "array"
+      or any($listed[]; type != "object" or (.id | type) != "string" or (.module | type) != "string")
+    then
+      "Blocked. audit-exceptions.json must hold an array of entries with id, module, reason and recheck."
+    else
+      ($listed[] | "Blocked. The exception for \(.id) in \(.module) " + flaw),
+      ($findings[]
         | . as $finding
-        | select(any($runtime[]; .id == $finding.id and .package == $finding.package) | not)
-        | ([$exceptions[0][] | select(.id == $finding.id and .package == $finding.package)] | first) as $entry
-        | if .fixed != "" then "blocked\t\(finding_name): test-only, fixed in \(.fixed)"
-          elif $entry == null then "blocked\t\(finding_name): test-only, not in audit-exceptions.json"
-          elif $entry.recheck <= $today then "blocked\t\(finding_name): exception recheck date \($entry.recheck) has passed"
-          elif $entry.recheck > $latest_recheck then "blocked\t\(finding_name): exception recheck \($entry.recheck) is over 30 days out"
-          else "allowed\t\(finding_name): \($entry.reason) until \($entry.recheck)"
-          end)
-  '
-)"
+        | [$listed[] | select(.id == $finding.id and .module == $finding.module)] as $entries
+        | if any($ships[]; . == $finding.module) then
+            "Blocked. \($finding.id) is in \($finding.module), which ships in the CLI. "
+            + (if $finding.fixed != "" then "Upgrade to \($finding.fixed)." else "It has no fix yet, so replace the module." end)
+            + (if ($entries | length) > 0 then " Remove its audit-exceptions.json entry." else "" end)
+          elif $finding.fixed != "" then
+            "Blocked. \($finding.id) in \($finding.module) is fixed in \($finding.fixed). Upgrade it."
+          elif ($entries | length) == 0 then
+            "Blocked. \($finding.id) in \($finding.module) has no fix. Review it and list it in audit-exceptions.json."
+          elif any($entries[]; [flaw] | length == 0) then
+            "Accepted the reviewed exception for \($finding.id) in \($finding.module)."
+          else
+            empty
+          end),
+      ($listed[]
+        | . as $entry
+        | select(any($findings[]; .id == $entry.id and .module == $entry.module and .fixed == "") | not)
+        | "audit-exceptions.json lists \(.id) for \(.module), which no longer applies. Remove it.")
+    end
+  ' "$report"
+)" || {
+  echo "audit-exceptions.json or the govulncheck report is not valid JSON. Fix the file, then rerun." >&2
+  exit 1
+}
 
-if [[ -z "$verdicts" ]]; then
-  echo "No reachable vulnerabilities."
-  exit 0
+if [[ -n "$verdicts" ]]; then
+  printf '%s\n' "$verdicts"
 fi
-
-while IFS=$'\t' read -r verdict detail; do
-  echo "${verdict}: ${detail}"
-done <<<"$verdicts"
-
-if grep -q '^blocked' <<<"$verdicts"; then
-  echo "Run go run ${govulncheck} -test ./... to see call traces." >&2
+blocked="$(grep -c '^Blocked\. ' <<<"$verdicts" || true)"
+if ((blocked > 0)); then
+  echo "The dependency audit blocked $blocked findings. For call traces, run go run $govulncheck -test ./..." >&2
   exit 1
 fi
+accepted="$(grep -c '^Accepted ' <<<"$verdicts" || true)"
+case "$accepted" in
+  0) echo "Dependency audit passed." ;;
+  1) echo "Dependency audit passed with 1 reviewed exception." ;;
+  *) echo "Dependency audit passed with $accepted reviewed exceptions." ;;
+esac

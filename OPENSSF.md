@@ -4,7 +4,7 @@ This file records the repository's Gold assessment.
 
 The official project is [bestpractices.dev project 13732][badge].
 
-Assessment date: 2026-07-23.
+The assessment date is 2026-07-23.
 
 ## Eligibility
 
@@ -16,29 +16,29 @@ No OpenSSF exclusion applies.
 | Area | Evidence |
 | --- | --- |
 | License | Apache-2.0, REUSE 3.3 metadata, & bundled BSD-3-Clause terms |
-| Contribution process | `CONTRIBUTING.md`, DCO sign-off, & independent review policy |
+| Contribution process | `CONTRIBUTING.md`, DCO sign-off, & `bin/check-local` before every merge |
 | Security reporting | Private GitHub reporting, response targets, & safe harbor in `SECURITY.md` |
 | Build | Pinned Go modules, checksum verification, & `./scripts/build` |
 | Tests | Race-enabled tests & regression coverage through `./scripts/test` |
-| Statement coverage | `./scripts/coverage` enforces 90%; current result is 91.2% |
-| Branch coverage | `./scripts/branch-coverage` enforces 80%; current result is 881/1,100 (80.09%) |
-| Static analysis | `go vet` & CodeQL security-extended queries through `bin/check-local` |
-| Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that maintainers run by hand |
+| Statement coverage | `./scripts/coverage` enforces 90%. The current result is 91.2%. |
+| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 879/1,096 (80.20%). |
+| Static analysis | `go vet`, `shellcheck` & CodeQL security-extended queries through `bin/check-local` |
+| Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that `bin/check-local` runs for 15 seconds |
 | Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit`, with reviewed exceptions in `audit-exceptions.json` |
-| Local checks | `bin/check-local` runs licensing, lint, CodeQL, test, audit, & build checks, then posts the `xquik-local-checks` status |
+| Local checks | `bin/check-local` runs licensing, lint, script, test, audit, build, fuzzing & CodeQL checks, then posts the `xquik-local-checks` status |
 | Releases | `bin/release-local` publishes checksums & an annotated tag from `main` |
 | Reproducibility | `bin/check-local` builds each GoReleaser snapshot twice & compares checksums |
 | Portability | `./scripts/test` compiles every package for Windows AMD64 |
 | Two-factor authentication | The Xquik-dev organization requires 2FA |
 
-Run every local evidence command at once:
+Run every local evidence command at once.
 
 ```sh
 bin/check-local
 ```
 
-It runs `./scripts/bootstrap`, `reuse lint`, `./scripts/lint`, CodeQL, `./scripts/test`,
-`./scripts/audit`, & 2 GoReleaser snapshot builds.
+It runs `./scripts/bootstrap`, `reuse lint`, `./scripts/lint`, `shellcheck`, `./scripts/test-scripts`,
+`./scripts/test`, `./scripts/audit`, 2 GoReleaser snapshot builds, fuzzing & `./scripts/codeql`.
 
 ## Branch Coverage Evidence
 
@@ -61,7 +61,7 @@ The repository must not claim Gold while any mandatory criterion remains unmet.
 
 ## Maintenance
 
-`bin/check-local` runs licensing, CodeQL, tests, coverage, security, & reproducibility checks.
+`bin/check-local` runs licensing, tests, coverage, security, reproducibility, fuzzing & CodeQL checks.
 Run it before each merge. `bin/release-local` runs it again before each release.
 The repository runs no GitHub Actions workflows or Dependabot updates.
 Reassess this file before every major release.

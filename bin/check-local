@@ -4,198 +4,205 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs every repository check on a maintainer machine and stops at the first failure.
-# Posts the result as the xquik-local-checks commit status when HEAD is pushed and clean.
-# Posting uses the owner's gh login on the release machine.
-# The status names only the checks that ran. Success needs every mandatory check.
-# Pass --no-status to skip the commit status.
-# Fuzzing stays manual because it needs minutes to find anything:
-# go test ./internal/apiform -run '^$' -fuzz '^FuzzMarshalRoundTrip$' -fuzztime=2m
+# Runs every repository check in the order the deleted CI ran them and stops
+# at the first failure with 1 line that names the check and the next step.
+# REUSE and CodeQL are required. REUSE runs at a pinned version through uv.
+# Posts the xquik-local-checks commit status for a clean, pushed HEAD through
+# the gh login of whoever runs it. On the release machine, that is the owner's
+# login. The success text lists only the checks that ran and passed, and it
+# comes only after every check passed.
+# Pass --no-status to skip the status.
+# FUZZ_TIME sets the fuzzing time, 15s by default. Use 2m for a full campaign.
 
 set -euo pipefail
 
 cd -- "$(dirname -- "$0")/.."
 
-readonly repo="Xquik-dev/x-twitter-scraper-cli"
+readonly repository="Xquik-dev/x-twitter-scraper-cli"
 readonly status_context="xquik-local-checks"
+readonly status_limit=139
 readonly reuse_version="6.2.0"
-readonly codeql_suite="codeql/go-queries:codeql-suites/go-security-extended.qls"
-readonly temp_root="${TMPDIR:-/tmp}"
 
-post_status=1
-for arg in "$@"; do
-  case "$arg" in
-    --no-status) post_status=0 ;;
+post_requested=true
+for argument in "$@"; do
+  case "$argument" in
+    --no-status) post_requested=false ;;
     *)
-      echo "Usage: bin/check-local [--no-status]" >&2
+      echo "Unknown option $argument. Run bin/check-local or bin/check-local --no-status." >&2
       exit 2
       ;;
   esac
 done
 
-check_name="Setup"
+readonly fuzz_time="${FUZZ_TIME:-15s}"
+temp_root="${TMPDIR:-/tmp}"
+check_name="Startup"
 check_label=""
-check_hint="Read the output above, fix the cause, then rerun bin/check-local."
-failure_reason=""
-passed_checks=""
-passed_count=0
-checks_complete=0
-skipped_note=""
-platform=""
+check_hint="Fix the error above, then rerun."
+passed_checks=()
 status_sha=""
-work_dir=""
+workspace="$(mktemp -d "${temp_root%/}/xquik-cli-check.XXXXXX")"
 
-post_commit_status() {
-  [[ -n "$status_sha" ]] || return 0
-  local description="${2:0:139}"
-  gh api "repos/${repo}/statuses/${status_sha}" \
-    -f state="$1" -f context="$status_context" -f description="$description" \
-    --silent >/dev/null 2>&1 ||
-    echo "==> Commit status not posted: GitHub rejected the request."
+post_status() {
+  if [[ -z "$status_sha" ]]; then
+    return 0
+  fi
+  local description="$2"
+  gh api --method POST "repos/$repository/statuses/$status_sha" \
+    -f state="$1" \
+    -f context="$status_context" \
+    -f description="${description:0:$status_limit}" >/dev/null ||
+    echo "Could not post the $1 commit status. Check gh auth status and push access." >&2
 }
 
 finish() {
-  local exit_code=$?
-  case "$work_dir" in
-    "${temp_root%/}"/x-twitter-scraper-check.*) rm -rf -- "$work_dir" ;;
-  esac
-  if ((exit_code == 0 && checks_complete == 1)); then
-    post_commit_status success "${passed_checks} passed${skipped_note}${platform}."
-  else
-    local failure="${failure_reason:-${check_name} failed}"
-    if ((exit_code == 0)); then
-      failure="Run stopped during ${check_name}"
-      exit_code=1
-    fi
-    local description="${failure}${passed_checks:+; ${passed_checks} passed}${platform}."
-    if ((${#description} > 139)); then
-      description="${failure} after ${passed_count} passing checks${platform}."
-    fi
-    post_commit_status failure "$description"
+  local status=$?
+  rm -rf -- "${workspace:?}"
+  if ((status != 0)); then
+    echo "Check failed at $check_name. $check_hint" >&2
+    post_status failure "Failed at $check_name."
   fi
-  exit "$exit_code"
 }
-
-trap 'echo "Check failed: ${check_name}. ${check_hint}" >&2' ERR
 trap finish EXIT
 
 start_check() {
   check_name="$1"
   check_label="$2"
   check_hint="$3"
-  echo "==> ${check_name}"
+  echo "==> $check_name"
 }
 
-end_check() {
-  passed_checks="${passed_checks:+${passed_checks}, }${check_label}"
-  passed_count=$((passed_count + 1))
-}
-
-fail_check() {
-  failure_reason="$1"
-  echo "Check failed: $1. $2" >&2
-  exit 1
-}
-
-require_tool() {
-  command -v "$1" >/dev/null 2>&1 || fail_check "$1 is missing" "$2"
-}
-
-checksum_manifest() {
-  find dist -maxdepth 1 -type f -name '*_checksums.txt' -print -quit
-}
-
-choose_status_commit() {
-  if ((post_status == 0)); then
-    echo "==> Commit status not posted: --no-status was passed."
-  elif ! command -v gh >/dev/null 2>&1; then
-    echo "==> Commit status not posted: the GitHub CLI is missing."
-  elif [[ -n "$(git status --porcelain)" ]]; then
-    echo "==> Commit status not posted: the tree has uncommitted changes."
-  else
-    local sha
-    sha="$(git rev-parse HEAD)"
-    if gh api "repos/${repo}/commits/${sha}" --silent >/dev/null 2>&1; then
-      status_sha="$sha"
-    else
-      echo "==> Commit status not posted: commit ${sha:0:12} is not on GitHub."
-    fi
+pass_check() {
+  if [[ -n "$check_label" ]]; then
+    passed_checks+=("$check_label")
   fi
 }
 
-choose_status_commit
-if command -v go >/dev/null 2>&1; then
-  platform=" on $(go env GOOS)/$(go env GOARCH) with $(go env GOVERSION)"
-fi
-post_commit_status pending "Checks started${platform}."
+tree_state="$(git status --porcelain)"
 
-require_tool go "Install Go from https://go.dev/dl/, then rerun bin/check-local."
-require_tool jq "Install jq with brew install jq, then rerun bin/check-local."
-require_tool objdump "Install the Xcode command line tools, then rerun bin/check-local."
-require_tool goreleaser "Install GoReleaser with brew install goreleaser, then rerun bin/check-local."
-require_tool codeql "Install CodeQL with brew install --cask codeql, then rerun bin/check-local."
-
-work_dir="$(mktemp -d "${temp_root%/}/x-twitter-scraper-check.XXXXXX")"
-
-start_check "Module download and integrity" "modules" "Run go mod download, then rerun bin/check-local."
-./scripts/bootstrap
-end_check
-
-if command -v reuse >/dev/null 2>&1; then
-  start_check "Licensing (REUSE)" "REUSE" "Add SPDX headers or update REUSE.toml."
-  reuse lint
-  end_check
-elif command -v uvx >/dev/null 2>&1; then
-  start_check "Licensing (REUSE)" "REUSE" "Add SPDX headers or update REUSE.toml."
-  uvx --from "reuse==${reuse_version}" reuse lint
-  end_check
+echo "==> Commit status"
+if [[ "$post_requested" == false ]]; then
+  echo "Commit status not posted because --no-status was passed."
+elif ! command -v gh >/dev/null 2>&1; then
+  echo "Commit status not posted because gh is not installed."
+elif [[ -n "$tree_state" ]]; then
+  echo "Commit status not posted because the working tree has changes."
 else
-  skipped_note="; REUSE skipped"
-  echo "==> Licensing (REUSE) skipped. Install reuse or uv to run it."
+  head_sha="$(git rev-parse HEAD)"
+  if gh api "repos/$repository/commits/$head_sha" >/dev/null 2>&1; then
+    status_sha="$head_sha"
+    post_status pending "Local checks are running."
+    echo "Posting $status_context for $head_sha."
+  else
+    echo "Commit status not posted because GitHub has no commit $head_sha. Push it, or run gh auth login."
+  fi
 fi
 
-start_check "Lint" "lint" "Run ./scripts/format and go mod tidy, then fix the vet findings."
+start_check "Required tools" "" "Install the missing tool, then rerun."
+for tool in cmp codeql git go goreleaser jq objdump pgrep shellcheck tar unzip uvx; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    case "$tool" in
+      codeql) check_hint="Install the CodeQL CLI with brew install --cask codeql, then rerun." ;;
+      go) check_hint="Install Go from https://go.dev/dl/, then rerun." ;;
+      goreleaser) check_hint="Install GoReleaser with brew install goreleaser, then rerun." ;;
+      objdump) check_hint="Install the Xcode command line tools with xcode-select --install, then rerun." ;;
+      shellcheck) check_hint="Install ShellCheck with brew install shellcheck, then rerun." ;;
+      uvx) check_hint="Install uv with brew install uv, then rerun." ;;
+      *) check_hint="Install $tool, then rerun." ;;
+    esac
+    exit 1
+  fi
+done
+
+start_check "Module download and integrity" "modules" "Run go clean -modcache, then rerun."
+./scripts/bootstrap
+pass_check
+
+start_check "REUSE licensing" "REUSE" "Add the missing license notice or REUSE.toml entry, then rerun."
+uvx --from "reuse==$reuse_version" reuse lint
+pass_check
+
+start_check "Lint" "lint" "Run ./scripts/format and go mod tidy, fix the go vet findings above, then rerun."
 ./scripts/lint
-end_check
+pass_check
 
-start_check "CodeQL security-extended" "CodeQL" "Fix each finding listed above, then rerun bin/check-local."
-codeql database create "${work_dir}/codeql-db" --language=go --build-mode=autobuild --source-root=. --quiet
-codeql database analyze "${work_dir}/codeql-db" "$codeql_suite" --download --quiet \
-  --format=sarif-latest --output="${work_dir}/codeql.sarif"
-codeql_findings="$(jq '[.runs[].results[]] | length' "${work_dir}/codeql.sarif")"
-if ((codeql_findings > 0)); then
-  jq -r '.runs[].results[]
-    | .locations[0].physicalLocation as $where
-    | "\(.ruleId) at \($where.artifactLocation.uri):\($where.region.startLine)"' \
-    "${work_dir}/codeql.sarif" >&2
-  fail_check "CodeQL found ${codeql_findings} issues" "$check_hint"
-fi
-end_check
+start_check "Shell scripts" "shellcheck" "Fix the shellcheck findings above, then rerun."
+shell_scripts=()
+for script in bin/* scripts/* scripts/tests/*; do
+  if [[ -f "$script" && "$(head -n 1 "$script")" == "#!/usr/bin/env bash" ]]; then
+    shell_scripts+=("$script")
+  fi
+done
+shellcheck --external-sources "${shell_scripts[@]}"
+pass_check
 
-start_check "Tests and coverage" "tests & coverage" "Fix the failing test or add coverage, then rerun ./scripts/test."
+start_check "Script tests" "script tests" "Fix the failing script tests above, then rerun."
+./scripts/test-scripts
+pass_check
+
+start_check "Go tests and coverage" "Go tests" "Fix the failing test or add coverage, then rerun."
 ./scripts/test
-end_check
+pass_check
 
-start_check "Dependency audit" "audit" "Run go get on each listed module, or raise the go line in go.mod for standard library findings."
-./scripts/audit
-end_check
+start_check "Dependency audit" "audit" "Upgrade each blocked module above, or raise the go line in go.mod for standard library findings."
+./scripts/audit | tee "$workspace/audit.log"
+exceptions="$(sed -nE 's/^Dependency audit passed with ([0-9]+) reviewed exceptions?\.$/\1/p' "$workspace/audit.log")"
+case "$exceptions" in
+  "") ;;
+  1) check_label="audit with 1 reviewed exception" ;;
+  *) check_label="audit with $exceptions reviewed exceptions" ;;
+esac
+pass_check
 
-start_check "Release configuration" "release config" "Fix .goreleaser.yml or release-please-config.json so releases start as drafts."
+start_check "Release configuration" "" "Fix .goreleaser.yml or release-please-config.json so releases start as drafts."
 goreleaser check
 jq -e '.draft == true' release-please-config.json >/dev/null
 grep -Eq '^[[:space:]]+draft: true$' .goreleaser.yml
-end_check
 
-start_check "Reproducible snapshot build" "reproducible build" "Remove the build input that changes between runs, such as a timestamp."
+start_check "Reproducible snapshot build" "" "Remove the build input that changes between builds, such as a timestamp."
 goreleaser release --snapshot --clean
-cp -- "$(checksum_manifest)" "${work_dir}/first-checksums.txt"
+first_manifest="$(find dist -maxdepth 1 -type f -name '*_checksums.txt' -print -quit)"
+cp -- "$first_manifest" "$workspace/first-checksums.txt"
 goreleaser release --snapshot --clean
-cmp -- "${work_dir}/first-checksums.txt" "$(checksum_manifest)"
-end_check
+second_manifest="$(find dist -maxdepth 1 -type f -name '*_checksums.txt' -print -quit)"
+cmp -- "$workspace/first-checksums.txt" "$second_manifest"
 
-start_check "Release debug information" "DWARF" "Keep DWARF data: remove -s and -w from the .goreleaser.yml ldflags."
+start_check "Release debug information" "reproducible build" "Keep DWARF data. Remove -s and -w from the .goreleaser.yml ldflags."
 ./bin/check-release-debug-info
-end_check
+pass_check
 
-checks_complete=1
-echo "All local checks passed."
+start_check "Fuzzing" "fuzzing" "Fix the crash. Go saved its input under internal/apiform/testdata/fuzz."
+go test ./internal/apiform -run '^$' -fuzz '^FuzzMarshalRoundTrip$' -fuzztime="$fuzz_time"
+pass_check
+
+start_check "CodeQL security-extended queries" "CodeQL" "Fix the CodeQL error or results above, then rerun."
+./scripts/codeql
+pass_check
+
+if [[ -z "$tree_state" ]]; then
+  start_check "Unchanged working tree" "" "A check changed or added the files above. Fix that check so it leaves the tree alone, then rerun."
+  tree_changes="$(git status --porcelain)"
+  if [[ -n "$tree_changes" ]]; then
+    echo "$tree_changes"
+    exit 1
+  fi
+fi
+
+check_name="Commit status"
+summary=""
+last_index=$((${#passed_checks[@]} - 1))
+for index in "${!passed_checks[@]}"; do
+  if ((index == 0)); then
+    summary="${passed_checks[$index]}"
+  elif ((index == last_index)); then
+    summary="$summary and ${passed_checks[$index]}"
+  else
+    summary="$summary, ${passed_checks[$index]}"
+  fi
+done
+summary="Passed $summary."
+if ((${#summary} > status_limit)); then
+  summary="Passed all ${#passed_checks[@]} checks. Run bin/check-local to list them."
+fi
+post_status success "$summary"
+echo "$summary"
