@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -27,11 +27,6 @@ var xMediaDownload = cli.Command{
 			Name:     "tweet-id",
 			Usage:    "Numeric tweet ID alias for tweetInput",
 			BodyPath: "tweetId",
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "tweet-id",
-			Usage:    "Array of tweet URLs or IDs (bulk, max 50 string items)",
-			BodyPath: "tweetIds",
 		},
 		&requestflag.Flag[string]{
 			Name:     "tweet-input",
@@ -80,7 +75,7 @@ func handleXMediaDownload(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -121,7 +116,7 @@ func handleXMediaUpload(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

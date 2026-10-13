@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -31,7 +31,7 @@ var guestWalletsCreate = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "currency",
-			Usage:    `Allowed values: "usd".`,
+			Usage:    `Use "usd".`,
 			Default:  "usd",
 			Const:    true,
 			BodyPath: "currency",
@@ -68,7 +68,7 @@ var guestWalletsTopup = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "currency",
-			Usage:    `Allowed values: "usd".`,
+			Usage:    `Use "usd".`,
 			Default:  "usd",
 			Const:    true,
 			BodyPath: "currency",
@@ -88,7 +88,7 @@ func handleGuestWalletsCreate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -129,7 +129,7 @@ func handleGuestWalletsRetrieveStatus(ctx context.Context, cmd *cli.Command) err
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -168,7 +168,7 @@ func handleGuestWalletsTopup(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

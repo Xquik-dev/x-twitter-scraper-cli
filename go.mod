@@ -1,9 +1,9 @@
 module github.com/Xquik-dev/x-twitter-scraper-cli
 
-go 1.26.6
+go 1.27.2
 
 require (
-	github.com/Xquik-dev/x-twitter-scraper-go v0.16.0
+	github.com/Xquik-dev/x-twitter-scraper-go v0.18.1
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
@@ -11,18 +11,18 @@ require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/itchyny/json2yaml v0.1.5
 	github.com/muesli/reflow v0.3.0
-	github.com/stretchr/testify v1.12.0
-	github.com/tidwall/gjson v1.19.0
-	github.com/tidwall/pretty v1.2.1
+	github.com/stretchr/testify v1.12.1
+	github.com/tidwall/gjson v1.20.0
+	github.com/tidwall/pretty v1.2.2
 	github.com/urfave/cli-docs/v3 v3.1.0
-	github.com/urfave/cli/v3 v3.11.0
-	golang.org/x/sys v0.47.0
+	github.com/urfave/cli/v3 v3.14.0
+	golang.org/x/sys v0.49.0
 )
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
-	github.com/charmbracelet/x/ansi v0.11.8 // indirect
+	github.com/charmbracelet/x/ansi v0.11.9 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
@@ -31,7 +31,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
-	github.com/mattn/go-runewidth v0.0.28 // indirect
+	github.com/mattn/go-runewidth v0.0.31 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
-	github.com/xo/terminfo v1.0.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	github.com/xo/terminfo v1.2.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	golang.org/x/text v0.43.0 // indirect
 )

@@ -123,6 +123,9 @@ release:
 nfpms:
   - license: Apache-2.0
     maintainer: support@xquik.com
+    vendor: Xquik
+    homepage: https://xquik.com
+    description: X API & Twitter API CLI by Xquik for tweets, profiles & followers. Not affiliated with X Corp.
     bindir: /usr
     mtime: '{{ .CommitDate }}'
     formats:

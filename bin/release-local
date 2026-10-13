@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Releases the version in .release-please-manifest.json from a maintainer's
+# machine. A release is the annotated tag v<version> plus a GitHub release
+# that holds the GoReleaser archives, Linux packages and checksums file.
+# GoReleaser signs nothing and pushes to no package tap, so this script reads
+# no Keychain item. The GitHub CLI login of whoever runs it creates the
+# release, and GoReleaser gets that login's token through GITHUB_TOKEN in its
+# environment, never through an argument. On the release machine, that is the
+# owner's gh login.
+#
+# Pass --dry-run to run every check, build every release asset and print the
+# version, each asset with its size and checksum, the Linux package fields and
+# the release notes. A dry run posts no commit status and stops before the
+# tag, the upload and the GitHub release.
+
+set -euo pipefail
+# Keep the token out of trace output, even under bash -x.
+set +o xtrace
+
+cd -- "$(dirname -- "$0")/.."
+
+readonly repository="Xquik-dev/x-twitter-scraper-cli"
+readonly version_pattern='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$'
+readonly asset_types='.type == "Archive" or .type == "Linux Package" or .type == "Checksum"'
+
+dry_run=false
+for argument in "$@"; do
+  case "$argument" in
+    --dry-run) dry_run=true ;;
+    *)
+      echo "Unknown option $argument. Run bin/release-local or bin/release-local --dry-run." >&2
+      exit 2
+      ;;
+  esac
+done
+
+step() {
+  echo "==> $1"
+}
+
+refuse() {
+  echo "$1" >&2
+  exit 1
+}
+
+temp_root="${TMPDIR:-/tmp}"
+workspace="$(mktemp -d "${temp_root%/}/xquik-cli-release.XXXXXX")"
+trap 'rm -rf -- "${workspace:?}"' EXIT
+
+step "Checking required tools"
+for tool in ar gh git go jq shasum tar; do
+  command -v "$tool" >/dev/null 2>&1 || refuse "$tool is not installed. Install it, then rerun."
+done
+if ! command -v goreleaser >/dev/null 2>&1; then
+  command -v brew >/dev/null 2>&1 || refuse "GoReleaser is not installed. Install it with Homebrew, then rerun."
+  step "Installing GoReleaser with Homebrew"
+  brew install goreleaser
+fi
+
+step "Checking that the working tree is clean"
+[[ -z "$(git status --porcelain)" ]] ||
+  refuse "The working tree has changes. Commit or remove them, then rerun."
+
+step "Checking that main is checked out"
+[[ "$(git symbolic-ref --quiet --short HEAD || true)" == main ]] ||
+  refuse "The current branch is not main. Switch to main, then rerun."
+
+step "Checking that main matches origin/main"
+git fetch --quiet origin main ||
+  refuse "git could not fetch origin. Check the network, then rerun."
+commit="$(git rev-parse HEAD)"
+[[ "$commit" == "$(git rev-parse origin/main)" ]] ||
+  refuse "main differs from origin/main. Pull or push main, then rerun."
+
+step "Reading the version from .release-please-manifest.json"
+version="$(jq -er '."."' .release-please-manifest.json)" ||
+  refuse ".release-please-manifest.json has no version. Fix it, then rerun."
+[[ "$version" =~ $version_pattern ]] ||
+  refuse "Version $version is not a semantic version. Fix .release-please-manifest.json, then rerun."
+grep -Fq "const Version = \"$version\"" pkg/cmd/version.go ||
+  refuse "pkg/cmd/version.go does not say $version. Merge the release pull request first."
+readonly version
+readonly tag="v$version"
+
+step "Checking that tag $tag is not on origin yet"
+remote_tag="$(git ls-remote --tags origin "refs/tags/$tag")" ||
+  refuse "git could not read the tags of origin. Check the network, then rerun."
+[[ -z "$remote_tag" ]] || refuse "Tag $tag already exists on origin. Bump the version, then rerun."
+local_tag=false
+if git rev-parse --quiet --verify "refs/tags/$tag" >/dev/null; then
+  [[ "$(git cat-file -t "refs/tags/$tag")" == tag && "$(git rev-parse "refs/tags/$tag^{commit}")" == "$commit" ]] ||
+    refuse "Local tag $tag is not an annotated tag on HEAD. Delete it with git tag -d $tag, then rerun."
+  local_tag=true
+fi
+
+step "Reading the release notes for $version from CHANGELOG.md"
+notes_file="$workspace/notes.md"
+awk -v heading="## $version" '
+  /^## / {
+    if (found) exit
+    found = ($0 == heading || index($0, heading " ") == 1)
+    next
+  }
+  found { print }
+' CHANGELOG.md >"$notes_file"
+grep -q '[^[:space:]]' "$notes_file" ||
+  refuse "CHANGELOG.md has no section for $version. Merge the release pull request first."
+
+step "Checking GitHub CLI access"
+gh auth status --hostname github.com >/dev/null 2>&1 ||
+  refuse "The GitHub CLI is not signed in. Run gh auth login, then rerun."
+
+step "Checking GitHub releases for $tag"
+# GitHub's release list can leave out a published release, so the tag
+# endpoint answers whether one is published. It never returns drafts, so
+# drafts come from the list.
+published=false
+if lookup="$(gh api "repos/$repository/releases/tags/$tag" 2>&1)"; then
+  [[ "$(jq -r '.draft' <<<"$lookup")" == true ]] || published=true
+elif [[ "$lookup" != *"HTTP 404"* ]]; then
+  refuse "GitHub did not answer for release $tag. Check the network and gh auth status, then rerun."
+fi
+drafts="$(
+  gh api --paginate --slurp "repos/$repository/releases?per_page=100" |
+    jq -c --arg tag "$tag" '[.[][] | select(.tag_name == $tag and .draft) | {assets: [.assets[].name]}]'
+)" || refuse "GitHub did not list the releases. Check the network and gh auth status, then rerun."
+draft_count="$(jq 'length' <<<"$drafts")"
+((draft_count <= 1)) || refuse "Several draft releases use $tag. Delete the extra drafts on GitHub, then rerun."
+if [[ "$published" == true ]]; then
+  if [[ "$dry_run" == false ]]; then
+    refuse "GitHub release $tag is already published. Bump the version, then rerun."
+  fi
+  echo "GitHub release $tag is already published. A real release would stop here."
+fi
+
+step "Running bin/check-local"
+if [[ "$dry_run" == true ]]; then
+  bin/check-local --no-status
+else
+  bin/check-local
+fi
+
+step "Auditing dependencies with govulncheck"
+./scripts/audit
+
+# The checks above end with GoReleaser snapshot builds. This build runs right
+# after them in the same tree, so a check that left files behind would show.
+step "Building the release assets for $tag with GoReleaser"
+GORELEASER_CURRENT_TAG="$tag" goreleaser release --clean --skip=publish,validate ||
+  refuse "The GoReleaser build failed. Fix the errors above, then rerun."
+./bin/check-release-debug-info
+[[ -z "$(git status --porcelain)" ]] ||
+  refuse "The build changed tracked files. Fix the build so it leaves the tree alone, then rerun."
+
+step "Listing the release"
+./scripts/release-listing "$version" "$notes_file"
+
+if [[ "$dry_run" == true ]]; then
+  echo "Dry run finished. Nothing was published, tagged or released."
+  exit 0
+fi
+
+expected_assets="$(jq -c "[.[] | select($asset_types) | .name] | sort" dist/artifacts.json)"
+missing_assets="$(jq -n --argjson expected "$expected_assets" --argjson drafts "$drafts" \
+  '$expected - ($drafts[0].assets // []) | length')"
+
+if [[ "$local_tag" == true ]]; then
+  step "Reusing the local annotated tag $tag"
+else
+  step "Creating the local annotated tag $tag"
+  git tag --annotate "$tag" --message "Release $tag"
+fi
+
+# The token reaches GoReleaser through its environment only. An argument
+# would show in the process list.
+upload_assets() {
+  local github_token
+  github_token="$(gh auth token --hostname github.com)" ||
+    refuse "gh auth token failed. Run gh auth login, then rerun."
+  GITHUB_TOKEN="$github_token" goreleaser release --clean ||
+    refuse "The GoReleaser upload failed. Fix the errors above, then rerun to reuse the draft."
+}
+
+if ((missing_assets == 0)); then
+  step "Skipping the upload because draft release $tag already has every asset"
+else
+  if ((draft_count == 0)); then
+    step "Creating draft release $tag with notes from CHANGELOG.md"
+    gh release create "$tag" --repo "$repository" --draft --title "$tag" \
+      --target "$commit" --notes-file "$notes_file" ||
+      refuse "GitHub did not create draft release $tag. Check gh auth status, then rerun."
+  fi
+  step "Uploading the release assets to draft $tag with GoReleaser"
+  upload_assets
+fi
+
+step "Checking that draft $tag holds every asset"
+uploaded_assets="$(gh release view "$tag" --repo "$repository" --json assets --jq '[.assets[].name] | sort')" ||
+  refuse "GitHub did not show draft release $tag. Check gh auth status, then rerun."
+[[ "$(jq -c '.' <<<"$uploaded_assets")" == "$expected_assets" ]] ||
+  refuse "Draft release $tag does not hold exactly the built assets. Fix the draft on GitHub, then rerun."
+checksums_name="x-twitter-scraper_${version}_checksums.txt"
+uploaded_checksums="$(gh release download "$tag" --repo "$repository" --pattern "$checksums_name" --output -)" ||
+  refuse "GitHub did not return $checksums_name from draft $tag. Retry later."
+[[ "$uploaded_checksums" == "$(cat "dist/$checksums_name")" ]] ||
+  refuse "The checksums on draft $tag differ from this build. Delete the draft assets, then rerun."
+
+step "Pushing tag $tag to origin"
+git push --quiet origin "refs/tags/$tag"
+
+if [[ "$version" == *-* ]]; then
+  release_flags=(--prerelease --latest=false)
+else
+  release_flags=(--latest)
+fi
+
+step "Publishing GitHub release $tag with notes from CHANGELOG.md"
+gh release edit "$tag" --repo "$repository" --draft=false --verify-tag \
+  --title "$tag" --notes-file "$notes_file" "${release_flags[@]}" ||
+  refuse "Tag $tag is pushed. Publish its draft release on GitHub with notes from CHANGELOG.md."
+
+echo "Released $tag at https://github.com/$repository/releases/tag/$tag"

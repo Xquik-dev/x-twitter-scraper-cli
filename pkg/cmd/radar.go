@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -53,7 +53,7 @@ var radarRetrieveTrendingTopics = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:      "source",
-			Usage:     "Source filter. One of: github, google_trends, hacker_news, polymarket, reddit, trustmrr, wikipedia",
+			Usage:     "Source filter. Choose github, google_trends, hacker_news, polymarket, reddit, trustmrr or wikipedia.",
 			QueryPath: "source",
 		},
 	},
@@ -66,7 +66,7 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Prints what a release would publish, from the GoReleaser output in dist. It
+# lists each release asset with its size and SHA-256 checksum, checks each
+# checksum against the file, prints the fields that Linux package managers
+# show, and prints the GitHub release notes.
+#
+# Usage: scripts/release-listing <version> <notes file>
+
+set -euo pipefail
+
+cd -- "$(dirname -- "$0")/.."
+
+refuse() {
+  echo "$1" >&2
+  exit 1
+}
+
+[[ "$#" -eq 2 ]] || refuse "Run scripts/release-listing <version> <notes file>."
+readonly version="$1"
+readonly notes_file="$2"
+readonly manifest="dist/artifacts.json"
+readonly checksums="dist/x-twitter-scraper_${version}_checksums.txt"
+readonly description_start="X API & Twitter API"
+readonly description_end="Not affiliated with X Corp."
+
+[[ -f "$manifest" ]] || refuse "$manifest is missing. Build the release assets first."
+[[ -f "$checksums" ]] || refuse "$checksums is missing. Build the release assets for $version first."
+[[ -f "$notes_file" ]] || refuse "The release notes file $notes_file is missing."
+
+assets="$(
+  jq -r '[.[] | select(.type == "Archive" or .type == "Linux Package" or .type == "Checksum") | .path]
+    | sort | .[]' "$manifest"
+)"
+[[ -n "$assets" ]] || refuse "$manifest lists no release assets. Check the GoReleaser build."
+
+echo "Version  $version"
+echo "Tag  v$version"
+echo "Release assets"
+count=0
+while IFS= read -r path; do
+  [[ -f "$path" ]] || refuse "$path is missing from dist. Rebuild the release assets."
+  name="$(basename -- "$path")"
+  size="$(wc -c <"$path" | tr -d '[:space:]')"
+  actual="$(shasum -a 256 "$path" | cut -d ' ' -f 1)"
+  if [[ "$path" != "$checksums" ]]; then
+    listed="$(awk -v name="$name" '$2 == name { print $1 }' "$checksums")"
+    [[ "$listed" == "$actual" ]] ||
+      refuse "$name does not match its line in the checksums file. Rebuild the release assets."
+  fi
+  printf '  %s  %s bytes  sha256 %s\n' "$name" "$size" "$actual"
+  count=$((count + 1))
+done <<<"$assets"
+echo "Asset count  $count"
+
+deb="$(jq -r '[.[] | select(.type == "Linux Package" and .goarch == "amd64" and (.path | endswith(".deb"))) | .path][0] // empty' "$manifest")"
+[[ -n "$deb" && -f "$deb" ]] || refuse "The amd64 Debian package is missing from dist. Check the nfpms section of .goreleaser.yml."
+control="$(ar -p "$deb" control.tar.gz | tar -xzOf - ./control)" ||
+  refuse "Could not read the control file of $deb."
+echo "Linux package fields"
+for field in Package Version Maintainer Homepage Description; do
+  value="$(sed -n "s/^$field: //p" <<<"$control" | head -n 1)"
+  printf '  %s  %s\n' "$field" "$value"
+  if [[ "$field" == Description ]]; then
+    [[ "$value" == "$description_start"* && "$value" == *"$description_end" ]] ||
+      refuse "The package description must start with \"$description_start\" and end with \"$description_end\" Fix the nfpms section of .goreleaser.yml."
+  fi
+done
+
+echo "GitHub release title  v$version"
+echo "GitHub release notes from CHANGELOG.md"
+sed 's/^\(.\)/  \1/' "$notes_file"
