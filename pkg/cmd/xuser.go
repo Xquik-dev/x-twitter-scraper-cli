@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -162,7 +162,7 @@ var xUsersRetrieveFollowers = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum user profiles: automatic 300; standard 200. Sources return fewer profiles. Continue with has_next_page.\n",
+			Usage:     "Maximum user profiles per page. Automatic mode allows 300 and standard mode allows 200. Sources return fewer profiles. Continue with has_next_page.\n",
 			Default:   200,
 			QueryPath: "pageSize",
 		},
@@ -369,7 +369,7 @@ var xUsersRetrieveFollowing = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum user profiles: automatic 300; standard 200. Sources return fewer profiles. Continue with has_next_page.\n",
+			Usage:     "Maximum user profiles per page. Automatic mode allows 300 and standard mode allows 200. Sources return fewer profiles. Continue with has_next_page.\n",
 			Default:   200,
 			QueryPath: "pageSize",
 		},
@@ -1829,7 +1829,7 @@ var xUsersRetrieveVerifiedFollowers = cli.Command{
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-size",
-			Usage:     "Maximum user profiles: automatic 300; standard 200. Sources return fewer profiles. Continue with has_next_page.\n",
+			Usage:     "Maximum user profiles per page. Automatic mode allows 300 and standard mode allows 200. Sources return fewer profiles. Continue with has_next_page.\n",
 			Default:   200,
 			QueryPath: "pageSize",
 		},
@@ -1861,7 +1861,7 @@ func handleXUsersRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1903,7 +1903,7 @@ func handleXUsersRemoveFollower(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1949,7 +1949,7 @@ func handleXUsersRetrieveBatch(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1993,7 +1993,7 @@ func handleXUsersRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2042,7 +2042,7 @@ func handleXUsersRetrieveFollowersYouKnow(ctx context.Context, cmd *cli.Command)
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2091,7 +2091,7 @@ func handleXUsersRetrieveFollowing(ctx context.Context, cmd *cli.Command) error 
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2140,7 +2140,7 @@ func handleXUsersRetrieveLikes(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2189,7 +2189,7 @@ func handleXUsersRetrieveMedia(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2238,7 +2238,7 @@ func handleXUsersRetrieveMentions(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2287,7 +2287,7 @@ func handleXUsersRetrieveReplies(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2333,7 +2333,7 @@ func handleXUsersRetrieveSearch(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2377,7 +2377,7 @@ func handleXUsersRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -2426,7 +2426,7 @@ func handleXUsersRetrieveVerifiedFollowers(ctx context.Context, cmd *cli.Command
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

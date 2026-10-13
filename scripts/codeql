@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Runs the CodeQL security-extended queries for Go on a copy of the source
+# files, so the build that CodeQL traces never touches the working tree. A
+# release build after the checks starts from the files that were reviewed.
+# Any result fails the run.
+#
+# The query pack is pinned and downloaded into this run's own folder. A
+# download that broke off earlier can leave an empty pack folder in the shared
+# CodeQL cache, and an unpinned pack name then resolves to that folder. This
+# script never reads the shared cache. A download that stalls stops after
+# CODEQL_DOWNLOAD_SECONDS, 300 by default, with 1 line that says what to do.
+
+set -euo pipefail
+
+cd -- "$(dirname -- "$0")/.."
+
+readonly pack_name="codeql/go-queries"
+readonly pack_version="1.6.12"
+readonly suite_path="codeql-suites/go-security-extended.qls"
+readonly download_limit="${CODEQL_DOWNLOAD_SECONDS:-300}"
+
+[[ "$download_limit" =~ ^[1-9][0-9]*$ ]] || {
+  echo "CODEQL_DOWNLOAD_SECONDS must be a whole number of seconds, such as 300." >&2
+  exit 2
+}
+
+temp_root="${TMPDIR:-/tmp}"
+workspace="$(mktemp -d "${temp_root%/}/xquik-cli-codeql.XXXXXX")"
+trap 'rm -rf -- "${workspace:?}"' EXIT
+# CodeQL and Go report physical paths, so the workspace path is physical too.
+workspace="$(cd -- "$workspace" && pwd -P)"
+readonly source_root="$workspace/source"
+readonly packs="$workspace/packs"
+readonly caches="$workspace/caches"
+readonly database="$workspace/database"
+readonly results="$workspace/results.sarif"
+
+# Stops a process and every process it started. The codeql launcher is a
+# shell script that runs Java as its child.
+stop_tree() {
+  local child
+  for child in $(pgrep -P "$1" 2>/dev/null || true); do
+    stop_tree "$child"
+  done
+  kill "$1" 2>/dev/null || true
+}
+
+# Runs a command and stops it after a number of seconds. Returns 124 when the
+# time runs out, or else the command's exit code.
+run_with_limit() {
+  local limit="$1" waited=0 status=0 pid
+  shift
+  "$@" &
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    if ((waited >= limit)); then
+      stop_tree "$pid"
+      wait "$pid" 2>/dev/null || true
+      return 124
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  wait "$pid" || status=$?
+  return "$status"
+}
+
+echo "==> Using CodeQL $(codeql version --format=terse)"
+
+echo "==> Downloading $pack_name $pack_version"
+status=0
+run_with_limit "$download_limit" codeql pack download "$pack_name@$pack_version" \
+  --dir="$packs" --common-caches="$caches" || status=$?
+if ((status == 124)); then
+  echo "The CodeQL pack download stalled for $download_limit seconds. Check the network, then rerun." >&2
+  exit 1
+elif ((status != 0)); then
+  echo "CodeQL could not download $pack_name $pack_version. Check the network and GitHub access, then rerun." >&2
+  exit 1
+fi
+readonly pack_dir="$packs/$pack_name/$pack_version"
+if ! grep -qx "version: $pack_version" "$pack_dir/qlpack.yml" 2>/dev/null ||
+  [[ ! -f "$pack_dir/$suite_path" ]]; then
+  echo "The downloaded $pack_name pack is incomplete. Rerun to download it again." >&2
+  exit 1
+fi
+
+echo "==> Copying the source files for CodeQL"
+mkdir -p -- "$source_root"
+git ls-files --cached --others --exclude-standard -z |
+  tar --null -T - -cf - |
+  tar -xf - -C "$source_root"
+
+echo "==> Building the CodeQL database"
+codeql database create "$database" \
+  --language=go \
+  --build-mode=autobuild \
+  --source-root="$source_root" \
+  --common-caches="$caches" \
+  --threads=0
+
+# Every Go file that the build compiles must reach the database, or CodeQL
+# would pass code it never read. Go prints absolute paths, and src.zip holds
+# the same paths without the leading slash.
+expected="$(
+  cd -- "$source_root"
+  go list -json ./... | jq -r '.Dir as $dir | (.GoFiles // [])[] | "\($dir)/\(.)"' |
+    sed "s|^.*${source_root#/}/||" | LC_ALL=C sort -u
+)"
+scanned="$(
+  unzip -Z1 "$database/src.zip" |
+    grep -E '\.go$' |
+    sed "s|^.*${source_root#/}/||" | LC_ALL=C sort -u
+)"
+missing="$(LC_ALL=C comm -23 <(printf '%s\n' "$expected") <(printf '%s\n' "$scanned"))"
+expected_count="$(grep -c . <<<"$expected" || true)"
+if ((expected_count == 0)) || [[ -n "$missing" ]]; then
+  printf '%s\n' "$missing" >&2
+  echo "CodeQL missed the Go files above. Fix the build so it compiles every package." >&2
+  exit 1
+fi
+
+echo "==> Running the CodeQL security-extended queries"
+codeql database analyze "$database" "$pack_name@$pack_version:$suite_path" \
+  --additional-packs="$packs" \
+  --common-caches="$caches" \
+  --format=sarif-latest \
+  --output="$results" \
+  --threads=0
+
+result_count="$(jq '[.runs[].results[]] | length' "$results")"
+if ((result_count > 0)); then
+  jq -r '.runs[].results[]
+    | .locations[0].physicalLocation as $where
+    | "\(.ruleId) at \($where.artifactLocation.uri):\($where.region.startLine)"' "$results" >&2
+  echo "CodeQL found $result_count results. Fix each one above, then rerun." >&2
+  exit 1
+fi
+
+echo "CodeQL read all $expected_count Go files and found no results."

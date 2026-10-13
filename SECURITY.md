@@ -17,13 +17,13 @@ Maintainers coordinate disclosure after confirming the issue.
 
 ## Scope
 
-Security-sensitive areas include:
+These areas are security-sensitive.
 
 - API key and token handling
 - Request construction and redirects
 - Terminal output and local files
 - Dependencies and generated code
-- Release binaries, checksums, and provenance
+- Release binaries and checksums
 
 ## Safe Harbor
 

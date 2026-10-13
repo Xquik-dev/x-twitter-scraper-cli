@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+// File generated from our OpenAPI spec.
 
 package cmd
 
@@ -472,11 +472,6 @@ var extractionsEstimateCost = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Search queries processed as one collection job.",
 			BodyPath: "searchQueries",
 		},
-		&requestflag.Flag[string]{
-			Name:     "search-query",
-			Usage:    "Required for tweet_search_extractor & community_search.",
-			BodyPath: "searchQuery",
-		},
 		&requestflag.Flag[any]{
 			Name:     "since-date",
 			Usage:    "Start date YYYY-MM-DD (tweet_search_extractor)",
@@ -513,20 +508,10 @@ var extractionsEstimateCost = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Required for community_post_extractor & community_search.",
 			BodyPath: "targetCommunityId",
 		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-community-id",
-			Usage:    "Community IDs processed as one collection job.",
-			BodyPath: "targetCommunityIds",
-		},
 		&requestflag.Flag[string]{
 			Name:     "target-list-id",
 			Usage:    "Required for list_follower_explorer, list_member_extractor & list_post_extractor.",
 			BodyPath: "targetListId",
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-list-id",
-			Usage:    "List IDs processed as one collection job.",
-			BodyPath: "targetListIds",
 		},
 		&requestflag.Flag[[]any]{
 			Name:     "target",
@@ -542,19 +527,9 @@ var extractionsEstimateCost = requestflag.WithInnerFlags(cli.Command{
 			Name:     "target-tweet-id",
 			BodyPath: "targetTweetId",
 		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-tweet-id",
-			Usage:    "Tweet IDs processed as one collection job.",
-			BodyPath: "targetTweetIds",
-		},
 		&requestflag.Flag[string]{
 			Name:     "target-username",
 			BodyPath: "targetUsername",
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-username",
-			Usage:    "Usernames processed as one collection job.",
-			BodyPath: "targetUsernames",
 		},
 		&requestflag.Flag[string]{
 			Name:     "to-user",
@@ -608,7 +583,7 @@ var extractionsEstimateCost = requestflag.WithInnerFlags(cli.Command{
 	"relation-target": {
 		&requestflag.InnerFlag[string]{
 			Name:       "relation-target.relation",
-			Usage:      `Allowed values: "community_members", "followers", "following", "list_followers", "list_members", "verified_followers".`,
+			Usage:      `Choose "community_members", "followers", "following", "list_followers", "list_members" or "verified_followers".`,
 			InnerField: "relation",
 		},
 		&requestflag.InnerFlag[string]{
@@ -1112,11 +1087,6 @@ var extractionsRun = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Search queries processed as one collection job.",
 			BodyPath: "searchQueries",
 		},
-		&requestflag.Flag[string]{
-			Name:     "search-query",
-			Usage:    "Required for tweet_search_extractor & community_search.",
-			BodyPath: "searchQuery",
-		},
 		&requestflag.Flag[any]{
 			Name:     "since-date",
 			Usage:    "Start date YYYY-MM-DD (tweet_search_extractor)",
@@ -1153,20 +1123,10 @@ var extractionsRun = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Required for community_post_extractor & community_search.",
 			BodyPath: "targetCommunityId",
 		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-community-id",
-			Usage:    "Community IDs processed as one collection job.",
-			BodyPath: "targetCommunityIds",
-		},
 		&requestflag.Flag[string]{
 			Name:     "target-list-id",
 			Usage:    "Required for list_follower_explorer, list_member_extractor & list_post_extractor.",
 			BodyPath: "targetListId",
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-list-id",
-			Usage:    "List IDs processed as one collection job.",
-			BodyPath: "targetListIds",
 		},
 		&requestflag.Flag[[]any]{
 			Name:     "target",
@@ -1182,19 +1142,9 @@ var extractionsRun = requestflag.WithInnerFlags(cli.Command{
 			Name:     "target-tweet-id",
 			BodyPath: "targetTweetId",
 		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-tweet-id",
-			Usage:    "Tweet IDs processed as one collection job.",
-			BodyPath: "targetTweetIds",
-		},
 		&requestflag.Flag[string]{
 			Name:     "target-username",
 			BodyPath: "targetUsername",
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "target-username",
-			Usage:    "Usernames processed as one collection job.",
-			BodyPath: "targetUsernames",
 		},
 		&requestflag.Flag[string]{
 			Name:     "to-user",
@@ -1248,7 +1198,7 @@ var extractionsRun = requestflag.WithInnerFlags(cli.Command{
 	"relation-target": {
 		&requestflag.InnerFlag[string]{
 			Name:       "relation-target.relation",
-			Usage:      `Allowed values: "community_members", "followers", "following", "list_followers", "list_members", "verified_followers".`,
+			Usage:      `Choose "community_members", "followers", "following", "list_followers", "list_members" or "verified_followers".`,
 			InnerField: "relation",
 		},
 		&requestflag.InnerFlag[string]{
@@ -1266,7 +1216,7 @@ func handleExtractionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1312,7 +1262,7 @@ func handleExtractionsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1353,7 +1303,7 @@ func handleExtractionsEstimateCost(ctx context.Context, cmd *cli.Command) error 
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1397,7 +1347,7 @@ func handleExtractionsExportResults(ctx context.Context, cmd *cli.Command) error
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1434,7 +1384,7 @@ func handleExtractionsRun(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
 	}
 
 	options, err := flagOptions(

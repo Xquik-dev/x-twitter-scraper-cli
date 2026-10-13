@@ -33,6 +33,12 @@ import (
 
 var OutputFormats = []string{"auto", "explore", "json", "jsonl", "pretty", "raw", "yaml"}
 
+// formatChoices lists OutputFormats as a sentence, such as "auto, json or yaml".
+func formatChoices() string {
+	last := len(OutputFormats) - 1
+	return strings.Join(OutputFormats[:last], ", ") + " or " + OutputFormats[last]
+}
+
 // ValidateBaseURL requires an HTTP or HTTPS scheme.
 func ValidateBaseURL(value, source string) error {
 	if value != "" && !strings.HasPrefix(value, "http://") && !strings.HasPrefix(value, "https://") {
@@ -336,7 +342,7 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 		_, err := opts.Stdout.Write([]byte(yaml.String()))
 		return nil, err
 	default:
-		return nil, fmt.Errorf("format %q is invalid. Choose one of: %s", opts.Format, strings.Join(OutputFormats, ", "))
+		return nil, fmt.Errorf("Format %q is unknown. Choose %s.", opts.Format, formatChoices())
 	}
 }
 
