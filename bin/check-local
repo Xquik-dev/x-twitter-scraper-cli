@@ -167,6 +167,9 @@ goreleaser release --snapshot --clean
 second_manifest="$(find dist -maxdepth 1 -type f -name '*_checksums.txt' -print -quit)"
 cmp -- "$workspace/first-checksums.txt" "$second_manifest"
 
+start_check "Release archive owners" "" "Set owner and group to root for every archive entry in .goreleaser.yml, then rerun."
+./bin/check-release-archives
+
 start_check "Release debug information" "reproducible build" "Keep DWARF data. Remove -s and -w from the .goreleaser.yml ldflags."
 ./bin/check-release-debug-info
 pass_check

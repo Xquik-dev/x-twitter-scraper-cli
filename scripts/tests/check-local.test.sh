@@ -23,6 +23,7 @@ audit
 goreleaser check
 goreleaser release --snapshot --clean
 goreleaser release --snapshot --clean
+check-release-archives
 check-release-debug-info
 go test fuzz
 codeql"
@@ -51,6 +52,11 @@ case "${FAKE_EXCEPTIONS:-0}" in
   1) echo "Dependency audit passed with 1 reviewed exception." ;;
   *) echo "Dependency audit passed with $FAKE_EXCEPTIONS reviewed exceptions." ;;
 esac
+EOF
+  stub bin/check-release-archives <<'EOF'
+#!/usr/bin/env bash
+# Stands in for bin/check-release-archives.
+echo "check-release-archives" >>"$FAKE_LOGS/order"
 EOF
   stub bin/check-release-debug-info <<'EOF'
 #!/usr/bin/env bash
@@ -190,7 +196,7 @@ EOF
   run_in_repo bin/check-local --no-status
 
   assert_equal 0 "$run_status" "the exit code"
-  assert_equal "--external-sources bin/check-local bin/check-release-debug-info scripts/audit scripts/bootstrap scripts/codeql scripts/lint scripts/test scripts/test-scripts scripts/tests/sample.test.sh" \
+  assert_equal "--external-sources bin/check-local bin/check-release-archives bin/check-release-debug-info scripts/audit scripts/bootstrap scripts/codeql scripts/lint scripts/test scripts/test-scripts scripts/tests/sample.test.sh" \
     "$(log_of shellcheck)" "the shellcheck call"
 }
 
