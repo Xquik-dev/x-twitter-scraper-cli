@@ -155,6 +155,17 @@ test_a_passing_run_lists_the_checks_in_order_and_runs_reuse_through_uvx() {
   assert_equal "" "$(log_of gh)" "the posted statuses"
 }
 
+test_a_run_from_a_terminal_passes_the_same_checks_in_the_same_order() {
+  prepare_checks
+  copy_file scripts/on-terminal
+
+  run_in_repo scripts/on-terminal bin/check-local --no-status
+
+  assert_equal 0 "$run_status" "the exit code"
+  assert_ends_with "${run_stdout//$'\r'/}" "$passed_line" "the terminal output"
+  assert_equal "$check_order" "$(log_of order)" "the order of the checks"
+}
+
 test_fuzzing_runs_for_15_seconds_unless_fuzz_time_says_otherwise() {
   prepare_checks
 

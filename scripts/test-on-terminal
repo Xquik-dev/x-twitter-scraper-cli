@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Runs every package's tests on a pseudo-terminal, the way a release from a
+# maintainer's terminal runs them. go test gives tests a pipe, so it hides a
+# test that colors text, opens a pager or waits for a key once a terminal is
+# there. This check fails when a test fails, runs longer than 2 minutes or
+# writes terminal control codes.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+readonly escape=$'\033'
+terminal_workspace="$(mktemp -d)"
+
+cleanup() {
+  rm -rf -- "$terminal_workspace"
+}
+trap cleanup EXIT
+
+package_index=0
+while IFS= read -r package_path; do
+  package_index=$((package_index + 1))
+  test_binary="$terminal_workspace/package-$package_index.test"
+  test_output="$terminal_workspace/package-$package_index.out"
+
+  go test -c -o "$test_binary" "$package_path"
+  if [[ ! -x "$test_binary" ]]; then
+    continue
+  fi
+
+  # screen-256color is a terminal with colors that answers no queries, so the
+  # terminal libraries send none and every control code comes from a test.
+  test_status=0
+  ./scripts/on-terminal env -u NO_COLOR TERM=screen-256color \
+    "$test_binary" -test.count=1 -test.timeout=2m >"$test_output" 2>&1 || test_status=$?
+  if ((test_status != 0)); then
+    cat "$test_output" >&2
+    echo "The tests of $package_path fail on a terminal. Give the code its colors, input and output as values, or call terminaltest.Run from TestMain." >&2
+    exit 1
+  fi
+  if LC_ALL=C grep -q "$escape" "$test_output"; then
+    cat -v "$test_output" >&2
+    echo "The tests of $package_path write terminal control codes. Give the code its colors, input and output as values, or call terminaltest.Run from TestMain." >&2
+    exit 1
+  fi
+done < <(go list ./...)
+
+echo "Every package passes on a terminal."
