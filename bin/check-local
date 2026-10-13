@@ -39,6 +39,7 @@ check_hint="Read the output above, fix the cause, then rerun bin/check-local."
 failure_reason=""
 passed_checks=""
 passed_count=0
+checks_complete=0
 skipped_note=""
 platform=""
 status_sha=""
@@ -58,10 +59,14 @@ finish() {
   case "$work_dir" in
     "${temp_root%/}"/x-twitter-scraper-check.*) rm -rf -- "$work_dir" ;;
   esac
-  if ((exit_code == 0)); then
+  if ((exit_code == 0 && checks_complete == 1)); then
     post_commit_status success "${passed_checks} passed${skipped_note}${platform}."
   else
     local failure="${failure_reason:-${check_name} failed}"
+    if ((exit_code == 0)); then
+      failure="Run stopped during ${check_name}"
+      exit_code=1
+    fi
     local description="${failure}${passed_checks:+; ${passed_checks} passed}${platform}."
     if ((${#description} > 139)); then
       description="${failure} after ${passed_count} passing checks${platform}."
@@ -192,4 +197,5 @@ start_check "Release debug information" "DWARF" "Keep DWARF data: remove -s and 
 ./bin/check-release-debug-info
 end_check
 
+checks_complete=1
 echo "All local checks passed."
