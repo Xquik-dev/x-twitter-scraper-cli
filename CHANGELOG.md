@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.13.5 (2026-10-14)
+
+[Full changelog from v0.13.4 to v0.13.5](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.4...v0.13.5)
+
+The commands and their behavior are the same as in 0.13.4.
+
+### Documentation
+
+* A README sample introduces its YAML input with a full sentence.
+
+### Chores
+
+* Every entry in the Linux release archives names root as its owner and group. Any machine now builds archives with the same checksums.
+* A release dry run builds the same checksums as the release of the same commit.
+
 ## 0.13.4 (2026-10-13)
 
 [Full changelog from v0.13.3 to v0.13.4](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.3...v0.13.4)
