@@ -138,48 +138,6 @@ func TestGetCompletions_ShortFlagCompletion(t *testing.T) {
 	assert.Equal(t, "-v", result.Completions[0].Name)
 }
 
-func TestGetCompletions_FileFlagBehavior(t *testing.T) {
-	t.Parallel()
-
-	root := &cli.Command{
-		Commands: []*cli.Command{
-			{
-				Name:  "generate",
-				Usage: "Generate SDK",
-				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "config", Aliases: []string{"c"}, Usage: "Config file", TakesFile: true},
-				},
-			},
-		},
-	}
-
-	result := GetCompletions(CompletionStyleBash, root, []string{"generate", "--config", ""})
-
-	assert.EqualValues(t, ShellCompletionBehaviorFile, result.Behavior)
-	assert.Empty(t, result.Completions)
-}
-
-func TestGetCompletions_NonBoolFlagValue(t *testing.T) {
-	t.Parallel()
-
-	root := &cli.Command{
-		Commands: []*cli.Command{
-			{
-				Name:  "generate",
-				Usage: "Generate SDK",
-				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "format", Usage: "Output format"},
-				},
-			},
-		},
-	}
-
-	result := GetCompletions(CompletionStyleBash, root, []string{"generate", "--format", ""})
-
-	assert.EqualValues(t, ShellCompletionBehaviorNoComplete, result.Behavior)
-	assert.Empty(t, result.Completions)
-}
-
 func TestGetCompletions_BoolFlagDoesNotBlockCompletion(t *testing.T) {
 	t.Parallel()
 

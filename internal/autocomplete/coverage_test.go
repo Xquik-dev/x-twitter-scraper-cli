@@ -78,10 +78,16 @@ func runDynamicCompletion(t *testing.T, style string, args ...string) (string, e
 				Name:    "tweets:search",
 				Usage:   "Search tweets",
 				Aliases: []string{"search"},
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "output", TakesFile: true},
+					&cli.StringFlag{Name: "format"},
+					&cli.BoolFlag{Name: "raw"},
+				},
 			},
 			{
-				Name:   "__complete",
-				Action: ExecuteShellCompletion,
+				Name:            "__complete",
+				SkipFlagParsing: true,
+				Action:          ExecuteShellCompletion,
 			},
 		},
 	}
@@ -102,6 +108,30 @@ func TestExecuteShellCompletion(t *testing.T) {
 		output, err := runDynamicCompletion(t, style, "tweets", ":", "s")
 		require.Error(t, err)
 		assert.Contains(t, output, "search")
+	}
+}
+
+func TestExecuteShellCompletionExitCodeTellsTheShellWhatToComplete(t *testing.T) {
+	tests := []struct {
+		name     string
+		args     []string
+		output   string
+		exitCode int
+	}{
+		{name: "matching flags", args: []string{"tweets:search", "--r"}, output: "--raw\n", exitCode: 0},
+		{name: "file names for a file flag", args: []string{"tweets:search", "--output", ""}, output: "", exitCode: 10},
+		{name: "nothing for another flag value", args: []string{"tweets:search", "--format", ""}, output: "", exitCode: 11},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for _, style := range []string{"bash", "zsh", "pwsh", "fish"} {
+				output, err := runDynamicCompletion(t, style, test.args...)
+				var exitErr cli.ExitCoder
+				require.ErrorAs(t, err, &exitErr)
+				assert.Equal(t, test.exitCode, exitErr.ExitCode(), style)
+				assert.Equal(t, test.output, output, style)
+			}
+		})
 	}
 }
 
