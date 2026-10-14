@@ -26,11 +26,11 @@ func TestIsUTF8TextFile(t *testing.T) {
 		{[]byte(`{"key": "value"}`), true},
 		{[]byte(`<?xml version="1.0"?><root/>`), true},
 		{[]byte(`function test() {}`), true},
-		{[]byte{0xFF, 0xD8, 0xFF, 0xE0}, false}, // JPEG header
-		{[]byte{0x00, 0x01, 0xFF, 0xFE}, false}, // binary
-		{[]byte("Hello \xFF\xFE"), false},       // invalid UTF-8
-		{[]byte("Hello ☺️"), true},              // emoji
-		{[]byte{}, true},                        // empty
+		{[]byte{0xFF, 0xD8, 0xFF, 0xE0}, false},
+		{[]byte{0x00, 0x01, 0xFF, 0xFE}, false},
+		{[]byte("Hello \xFF\xFE"), false},
+		{[]byte("Hello ☺️"), true},
+		{[]byte{}, true},
 	}
 
 	for _, tt := range tests {
@@ -41,10 +41,8 @@ func TestIsUTF8TextFile(t *testing.T) {
 func TestEmbedFiles(t *testing.T) {
 	t.Parallel()
 
-	// Create temporary directory for test files
 	tmpDir := t.TempDir()
 
-	// Create test files
 	configContent := "host=localhost\nport=8080"
 	templateContent := "<html><body>Hello</body></html>"
 	dataContent := `{"key": "value"}`
@@ -336,8 +334,6 @@ func TestEmbedFilesStdin(t *testing.T) {
 	})
 }
 
-// TestEmbedFilesUploadMetadata verifies that EmbedIOReader mode wraps file readers with filename and
-// content-type metadata so the multipart encoder populates `Content-Disposition` and `Content-Type` headers.
 func TestEmbedFilesUploadMetadata(t *testing.T) {
 	t.Parallel()
 

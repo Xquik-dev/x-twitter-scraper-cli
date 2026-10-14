@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -27,7 +25,6 @@ func TestXCommunitiesCreate(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
 			"name: Example Name\n" +
@@ -57,7 +54,6 @@ func TestXCommunitiesDelete(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
 			"community_name: Tesla Fans\n")

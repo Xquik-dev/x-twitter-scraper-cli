@@ -16,7 +16,6 @@ import (
 	"strings"
 )
 
-// Marshal encodes a value as multipart form data.
 func Marshal(value any, writer *multipart.Writer) error {
 	e := &encoder{
 		format: FormatRepeat,
@@ -24,7 +23,6 @@ func Marshal(value any, writer *multipart.Writer) error {
 	return e.marshal(value, writer)
 }
 
-// MarshalWithSettings encodes a value with a custom array format.
 func MarshalWithSettings(value any, writer *multipart.Writer, arrayFormat FormFormat) error {
 	e := &encoder{
 		format: arrayFormat,
@@ -106,7 +104,6 @@ func (e *encoder) encodeArray(key string, val reflect.Value, writer *multipart.W
 		for i := 0; i < val.Len(); i++ {
 			item := val.Index(i)
 			if (item.Kind() == reflect.Pointer || item.Kind() == reflect.Interface) && item.IsNil() {
-				// Send null as an empty field.
 				values = append(values, "")
 				continue
 			}
@@ -211,7 +208,6 @@ func (e *encoder) encodeMap(key string, val reflect.Value, writer *multipart.Wri
 		key = key + "."
 	}
 
-	// Sort map entries for deterministic output.
 	pairs := []mapPair{}
 	iter := val.MapRange()
 	for iter.Next() {

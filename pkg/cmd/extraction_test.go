@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -153,10 +151,8 @@ func TestExtractionsEstimateCost(t *testing.T) {
 	})
 
 	t.Run("inner flags", func(t *testing.T) {
-		// Check that inner flags have been set up correctly
 		requestflag.CheckInnerFlags(extractionsEstimateCost)
 
-		// Alternative argument passing style using inner flags
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
@@ -263,7 +259,6 @@ func TestExtractionsEstimateCost(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"toolType: follower_explorer\n" +
 			"advancedQuery: min_faves:100\n" +
@@ -518,10 +513,8 @@ func TestExtractionsRun(t *testing.T) {
 	})
 
 	t.Run("inner flags", func(t *testing.T) {
-		// Check that inner flags have been set up correctly
 		requestflag.CheckInnerFlags(extractionsRun)
 
-		// Alternative argument passing style using inner flags
 		mocktest.TestRunMockTestWithFlags(
 			t,
 			"--api-key", "string",
@@ -629,7 +622,6 @@ func TestExtractionsRun(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"toolType: follower_explorer\n" +
 			"advancedQuery: min_faves:100\n" +

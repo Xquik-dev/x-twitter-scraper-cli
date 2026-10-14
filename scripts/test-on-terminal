@@ -4,12 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs every package's tests on a pseudo-terminal, the way a release from a
-# maintainer's terminal runs them. go test gives tests a pipe, so it hides a
-# test that colors text, opens a pager or waits for a key once a terminal is
-# there. This check fails when a test fails, runs longer than 2 minutes or
-# writes terminal control codes.
-
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -33,8 +27,6 @@ while IFS= read -r package_path; do
     continue
   fi
 
-  # screen-256color is a terminal with colors that answers no queries, so the
-  # terminal libraries send none and every control code comes from a test.
   test_status=0
   ./scripts/on-terminal env -u NO_COLOR TERM=screen-256color \
     "$test_binary" -test.count=1 -test.timeout=2m >"$test_output" 2>&1 || test_status=$?

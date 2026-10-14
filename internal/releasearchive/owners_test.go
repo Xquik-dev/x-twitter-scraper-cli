@@ -22,8 +22,6 @@ type entry struct {
 	uid, gid           int
 }
 
-// release writes dist/artifacts.json and the named archives under a new
-// folder, the way GoReleaser lays them out, and returns the manifest path.
 func release(t *testing.T, archives map[string]func(path string)) string {
 	t.Helper()
 	root := t.TempDir()
@@ -116,7 +114,6 @@ func TestATarEntryWithRootNamesButOtherIDsIsReported(t *testing.T) {
 }
 
 func TestAZipEntryWithAUnixOwnerFieldIsReported(t *testing.T) {
-	// A 0x7875 field holding uid 501 and gid 20, after a 0x5455 time field.
 	timeField := []byte{0x55, 0x54, 0x05, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00}
 	ownerField := []byte{0x75, 0x78, 0x0b, 0x00, 0x01, 0x04, 0xf5, 0x01, 0x00, 0x00, 0x04, 0x14, 0x00, 0x00, 0x00}
 	manifest := release(t, map[string]func(string){

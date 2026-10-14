@@ -3,7 +3,6 @@
 // Copyright the Xquik contributors.
 // SPDX-License-Identifier: Apache-2.0
 
-// branch_coverage corrects gocove's cover-profile join before enforcing a gate.
 package main
 
 import (

@@ -11,7 +11,6 @@ ____APPNAME___bash_autocomplete() {
 
     local last_token="$cur"
 
-    # Rejoin colon-delimited tokens split by Bash.
     if [[ $COMP_CWORD -ge 2 ]]; then
       local prev2="${COMP_WORDS[COMP_CWORD - 2]}"
       local prev1="${COMP_WORDS[COMP_CWORD - 1]}"
@@ -20,7 +19,6 @@ ____APPNAME___bash_autocomplete() {
       fi
     fi
 
-    # Detect embedded file references.
     local prefix=""
     local file_part="$cur"
     local force_file_completion=false
@@ -46,9 +44,9 @@ ____APPNAME___bash_autocomplete() {
       mapfile -t COMPREPLY < <(compgen -f -- "$file_part" | sed "s|^|$prefix|")
     else
       case $exit_code in
-      10) mapfile -t COMPREPLY < <(compgen -f -- "$cur") ;; # Complete files.
-      11) COMPREPLY=() ;;                                   # Disable completion.
-      0) mapfile -t COMPREPLY <<<"$completions" ;;          # Use command completions.
+      10) mapfile -t COMPREPLY < <(compgen -f -- "$cur") ;;
+      11) COMPREPLY=() ;;
+      0) mapfile -t COMPREPLY <<<"$completions" ;;
       esac
     fi
     return 0

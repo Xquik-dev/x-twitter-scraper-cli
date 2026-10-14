@@ -12,7 +12,6 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// InnerFlag sets nested values. For example, --foo.baz sets foo.baz.
 type InnerFlag[
 	T []any | []map[string]any | []DateTimeValue | []DateValue | []TimeValue | []string |
 		[]float64 | []int64 | []bool | any | map[string]any | DateTimeValue | DateValue | TimeValue |
@@ -29,16 +28,13 @@ type InnerFlag[
 	InnerField  string
 	DataAliases []string
 
-	// OuterIsArrayOfObjects selects a list seed for untyped nullable schemas.
 	OuterIsArrayOfObjects bool
 }
 
-// GetDataAliases returns the aliases recognized when parsing inner field keys from piped or flag YAML.
 func (f *InnerFlag[T]) GetDataAliases() []string {
 	return f.DataAliases
 }
 
-// GetInnerField returns the canonical API field name.
 func (f *InnerFlag[T]) GetInnerField() string {
 	return f.InnerField
 }
@@ -199,7 +195,6 @@ func (f *InnerFlag[T]) IsBoolFlag() bool {
 	return isBool
 }
 
-// WithInnerFlags attaches nested flags to their outer flags.
 func WithInnerFlags(cmd cli.Command, innerFlagMap map[string][]HasOuterFlag) cli.Command {
 	if len(innerFlagMap) == 0 {
 		return cmd
@@ -228,7 +223,6 @@ func WithInnerFlags(cmd cli.Command, innerFlagMap map[string][]HasOuterFlag) cli
 		}
 	}
 
-	// A missing outer flag indicates invalid generated wiring.
 	if len(unusedInnerFlagKeys) > 0 {
 		unusedKeys := make([]string, 0, len(unusedInnerFlagKeys))
 		for key := range unusedInnerFlagKeys {
@@ -242,7 +236,6 @@ func WithInnerFlags(cmd cli.Command, innerFlagMap map[string][]HasOuterFlag) cli
 	return result
 }
 
-// CheckInnerFlags validates outer references and --foo.baz prefixes.
 func CheckInnerFlags(cmd cli.Command) error {
 	var errors []string
 	for _, flag := range cmd.Flags {

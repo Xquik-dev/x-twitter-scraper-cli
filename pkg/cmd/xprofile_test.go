@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -29,7 +27,6 @@ func TestXProfileUpdate(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
 			"description: description_value\n" +
@@ -60,7 +57,6 @@ func TestXProfileUpdateAvatar(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
 			"url: https://example.com/avatar.png\n")
@@ -88,7 +84,6 @@ func TestXProfileUpdateBanner(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"account: '@elonmusk'\n" +
 			"url: https://example.com/banner.png\n")

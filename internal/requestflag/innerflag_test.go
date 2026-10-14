@@ -105,11 +105,9 @@ func TestInnerFlagValidator(t *testing.T) {
 		},
 	}
 
-	// Valid case
 	err := innerFlag.Set(innerFlag.Name, "42")
 	assert.NoError(t, err, "Expected no error for valid value, got: %v", err)
 
-	// Should trigger validator error
 	err = innerFlag.Set(innerFlag.Name, "-5")
 	assert.Error(t, err, "Expected error for invalid value, got none")
 }
@@ -130,7 +128,6 @@ func TestWithInnerFlags(t *testing.T) {
 		"outer": {innerFlag},
 	})
 
-	// Verify that the command now has both the original flag and inner flag
 	assert.Len(t, cmd.Flags, 2, "Expected 2 flags, got %d", len(cmd.Flags))
 	assert.Equal(t, outerFlag, cmd.Flags[0], "First flag should be outerFlag")
 	assert.Equal(t, innerFlag, cmd.Flags[1], "Second flag should be innerFlag")
@@ -168,7 +165,6 @@ func TestInnerFlagTypeNames(t *testing.T) {
 func TestInnerYamlHandling(t *testing.T) {
 	t.Parallel()
 
-	// Test with map value
 	t.Run("Parse YAML to map", func(t *testing.T) {
 		t.Parallel()
 
@@ -182,7 +178,6 @@ func TestInnerYamlHandling(t *testing.T) {
 		err := innerFlag.Set(innerFlag.Name, "{name: test, value: 42}")
 		assert.NoError(t, err)
 
-		// Retrieve and check the parsed YAML map
 		result, ok := outerFlag.Get().(map[string]any)
 		assert.True(t, ok, "Expected map[string]any from outerFlag.Get()")
 		yamlField, ok := result["baz"].(map[string]any)
@@ -194,7 +189,6 @@ func TestInnerYamlHandling(t *testing.T) {
 		}
 	})
 
-	// Test with invalid YAML
 	t.Run("Parse invalid YAML", func(t *testing.T) {
 		t.Parallel()
 
@@ -210,13 +204,11 @@ func TestInnerYamlHandling(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	// Test setting inner flags on a map multiple times
 	t.Run("Set inner flags on map multiple times", func(t *testing.T) {
 		t.Parallel()
 
 		outerFlag := &Flag[map[string]any]{Name: "outer"}
 
-		// Set first inner flag
 		firstInnerFlag := &InnerFlag[string]{
 			Name:       "outer.first-flag",
 			OuterFlag:  outerFlag,
@@ -226,7 +218,6 @@ func TestInnerYamlHandling(t *testing.T) {
 		err := firstInnerFlag.Set(firstInnerFlag.Name, "first-value")
 		assert.NoError(t, err)
 
-		// Set second inner flag
 		secondInnerFlag := &InnerFlag[int64]{
 			Name:       "outer.second-flag",
 			OuterFlag:  outerFlag,
@@ -236,22 +227,18 @@ func TestInnerYamlHandling(t *testing.T) {
 		err = secondInnerFlag.Set(secondInnerFlag.Name, "42")
 		assert.NoError(t, err)
 
-		// Verify both fields are set correctly
 		result := outerFlag.Get().(map[string]any)
 		assert.Equal(t, map[string]any{"first_field": "first-value", "second_field": int64(42)}, result)
 	})
 
-	// Test setting YAML and then an inner flag
 	t.Run("Set YAML and then inner flag", func(t *testing.T) {
 		t.Parallel()
 
 		outerFlag := &Flag[map[string]any]{Name: "outer"}
 
-		// First set the outer flag with YAML
 		err := outerFlag.Set(outerFlag.Name, `{existing: value, another: field}`)
 		assert.NoError(t, err)
 
-		// Then set an inner flag
 		innerFlag := &InnerFlag[string]{
 			Name:       "outer.inner-flag",
 			OuterFlag:  outerFlag,
@@ -261,7 +248,6 @@ func TestInnerYamlHandling(t *testing.T) {
 		err = innerFlag.Set(innerFlag.Name, "inner-value")
 		assert.NoError(t, err)
 
-		// Verify both the YAML content and inner flag value
 		result := outerFlag.Get().(map[string]any)
 		assert.Equal(t, map[string]any{
 			"existing":  "value",
@@ -279,7 +265,6 @@ func TestInnerFlagWithSliceType(t *testing.T) {
 
 		outerFlag := &Flag[[]map[string]any]{Name: "outer"}
 
-		// Set first inner flag (should create first item)
 		firstInnerFlag := &InnerFlag[string]{
 			Name:       "outer.name-flag",
 			OuterFlag:  outerFlag,
@@ -289,7 +274,6 @@ func TestInnerFlagWithSliceType(t *testing.T) {
 		err := firstInnerFlag.Set(firstInnerFlag.Name, "item1")
 		assert.NoError(t, err)
 
-		// Set second inner flag (should modify first item)
 		secondInnerFlag := &InnerFlag[int64]{
 			Name:       "outer.count-flag",
 			OuterFlag:  outerFlag,
@@ -299,11 +283,9 @@ func TestInnerFlagWithSliceType(t *testing.T) {
 		err = secondInnerFlag.Set(secondInnerFlag.Name, "42")
 		assert.NoError(t, err)
 
-		// Set name flag again (should create second item)
 		err = firstInnerFlag.Set(firstInnerFlag.Name, "item2")
 		assert.NoError(t, err)
 
-		// Verify the slice has two items with correct values
 		result := outerFlag.Get().([]map[string]any)
 
 		assert.Equal(t, []map[string]any{
@@ -316,12 +298,10 @@ func TestInnerFlagWithSliceType(t *testing.T) {
 	t.Run("Appending to existing slice", func(t *testing.T) {
 		t.Parallel()
 
-		// Initialize with existing items
 		outerFlag := &Flag[[]map[string]any]{Name: "outer"}
 		err := outerFlag.Set(outerFlag.Name, `{name: initial}`)
 		assert.NoError(t, err)
 
-		// Set inner flag to modify existing item
 		modifyFlag := &InnerFlag[string]{
 			Name:       "outer.value-flag",
 			OuterFlag:  outerFlag,
@@ -331,7 +311,6 @@ func TestInnerFlagWithSliceType(t *testing.T) {
 		err = modifyFlag.Set(modifyFlag.Name, "updated")
 		assert.NoError(t, err)
 
-		// Set inner flag to create new item
 		newItemFlag := &InnerFlag[string]{
 			Name:       "outer.name-flag",
 			OuterFlag:  outerFlag,
@@ -341,7 +320,6 @@ func TestInnerFlagWithSliceType(t *testing.T) {
 		err = newItemFlag.Set(newItemFlag.Name, "second")
 		assert.NoError(t, err)
 
-		// Verify both items
 		result := outerFlag.Get().([]map[string]any)
 		assert.Equal(t, []map[string]any{
 			{"name": "initial", "value": "updated"},

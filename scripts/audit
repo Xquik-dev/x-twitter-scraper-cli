@@ -4,23 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Verifies module checksums, runs govulncheck over every package and test,
-# then judges each finding at every severity. Every finding counts, whether
-# govulncheck traced a call to it or not.
-#
-# A finding in a module that ships always blocks. A module ships when the CLI
-# binary or a package that callers can import depends on it. The standard
-# library ships. A finding in a module that only tests or scripts use blocks
-# when a fix exists. Without a fix, it passes only while audit-exceptions.json
-# lists it, one object per finding.
-#
-#   {"id": "GO-2026-0000", "module": "example.com/module",
-#    "reason": "build-time only", "recheck": "2026-11-12"}
-#
-# The reason is "build-time only" or "peer dependency provided by the host".
-# The recheck date falls within 30 days, and the entry blocks again on that
-# date.
-
 set -euo pipefail
 
 cd -- "$(dirname -- "$0")/.."

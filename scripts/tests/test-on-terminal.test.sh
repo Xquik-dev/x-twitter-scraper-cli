@@ -4,11 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs scripts/test-on-terminal and scripts/on-terminal in a throwaway
-# repository. A fake go lists 2 packages and writes a fake test binary for
-# each, so no test compiles Go code. The fake test binary misbehaves only
-# when its standard output is a terminal, as the real tests once did.
-
 set -euo pipefail
 
 # shellcheck source=scripts/tests/support.sh
@@ -16,15 +11,11 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/support.sh"
 
 readonly advice="Give the code its colors, input and output as values, or call terminaltest.Run from TestMain."
 
-# FAKE_ON_TERMINAL picks what the tests of the second package do on a
-# terminal. They pass when it is unset.
 prepare_packages() {
   copy_file scripts/on-terminal
   copy_file scripts/test-on-terminal
   fake go <<'EOF_GO'
 #!/bin/sh
-# Stands in for go. "go list" prints 2 packages. "go test -c -o <binary>
-# <package>" writes a test binary that records where it runs.
 case "$1" in
   list) printf 'example.com/cli/first\nexample.com/cli/second\n' ;;
   test)

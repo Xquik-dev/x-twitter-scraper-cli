@@ -16,7 +16,6 @@ import (
 func TestNavigateForward_EmptyRowData(t *testing.T) {
 	t.Parallel()
 
-	// An empty JSON array produces a TableView with no rows.
 	emptyArray := gjson.Parse("[]")
 	view, err := newTableView("", emptyArray, false)
 	require.NoError(t, err)
@@ -27,16 +26,13 @@ func TestNavigateForward_EmptyRowData(t *testing.T) {
 		help:  help.New(),
 	}
 
-	// Should return without panicking despite the empty data set.
 	model, cmd := viewer.navigateForward()
 	require.Equal(t, model, viewer, "expected same viewer model returned")
 	require.Nil(t, cmd)
 
-	// Stack should remain unchanged (no new view pushed).
 	require.Equal(t, 1, len(viewer.stack), "expected stack length 1, got %d", len(viewer.stack))
 }
 
-// rawJSONItem implements HasRawJSON, returning pre-built JSON.
 type rawJSONItem struct {
 	raw string
 }

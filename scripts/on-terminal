@@ -4,10 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs a command on a new pseudo-terminal with nothing to read, and exits
-# with the command's exit code. Use it to see what a script or a test does
-# when a maintainer starts it from a terminal.
-
 set -euo pipefail
 
 if [[ "$#" -eq 0 ]]; then
@@ -15,8 +11,6 @@ if [[ "$#" -eq 0 ]]; then
   exit 2
 fi
 
-# The script tool takes its command in 2 ways. BSD and macOS read it as
-# arguments, and util-linux reads it as 1 string.
 if script -q /dev/null true >/dev/null 2>&1 </dev/null; then
   script -q /dev/null "$@" </dev/null
 else

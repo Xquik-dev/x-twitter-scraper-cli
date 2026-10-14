@@ -15,11 +15,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// A prose colon ends a word and comes before a space or the end of the text.
-// Colons inside command names, URLs, times and header syntax stay.
 var proseColon = regexp.MustCompile(`[A-Za-z0-9)\]'"]:(\s|$)`)
 
-// Header syntax that the API documentation spells with a colon.
 var allowedColons = []string{"Authorization: Bearer"}
 
 func punctuationProblem(text string) string {
@@ -90,8 +87,6 @@ func TestUserFacingErrorsSayWhatToDoWithoutAColon(t *testing.T) {
 	}
 }
 
-// A shell completion error exits the process, so these cases run the CLI in
-// a child process.
 func TestShellCompletionErrorsListTheShells(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -118,8 +113,6 @@ func TestShellCompletionErrorsListTheShells(t *testing.T) {
 	}
 }
 
-// The CLI framework puts its own prefix before a flag validation error, so
-// these tests check the sentence that the CLI adds.
 func TestUnknownFormatsListTheChoices(t *testing.T) {
 	for _, flag := range []string{"--format", "--format-error"} {
 		t.Run(flag, func(t *testing.T) {

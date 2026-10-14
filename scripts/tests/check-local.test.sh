@@ -4,10 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs bin/check-local in a throwaway repository. Stubs stand in for the check
-# scripts. Fake commands stand in for the GitHub CLI, uv, GoReleaser, Go, the
-# CodeQL CLI and shellcheck, so no test reaches GitHub or runs a real check.
-
 set -euo pipefail
 
 # shellcheck source=scripts/tests/support.sh
@@ -30,21 +26,18 @@ codeql"
 readonly passed_line="Passed modules, REUSE, lint, shellcheck, script tests, Go tests, audit, reproducible build, fuzzing and CodeQL."
 readonly status_endpoint="repos/Xquik-dev/x-twitter-scraper-cli/statuses"
 
-# Builds a repository whose checks all pass, on a machine with every tool.
 prepare_checks() {
   local name
   copy_file bin/check-local
   for name in bootstrap lint test-scripts test codeql; do
     stub "scripts/$name" <<EOF
 #!/usr/bin/env bash
-# Stands in for scripts/$name. It fails when FAKE_FAILING_CHECK names it.
 echo "$name" >>"\$FAKE_LOGS/order"
 [[ "\${FAKE_FAILING_CHECK:-}" != "$name" ]]
 EOF
   done
   stub scripts/audit <<'EOF'
 #!/usr/bin/env bash
-# Stands in for scripts/audit. FAKE_EXCEPTIONS sets the accepted exceptions.
 echo "audit" >>"$FAKE_LOGS/order"
 [[ "${FAKE_FAILING_CHECK:-}" != "audit" ]]
 case "${FAKE_EXCEPTIONS:-0}" in
@@ -55,19 +48,14 @@ esac
 EOF
   stub bin/check-release-archives <<'EOF'
 #!/usr/bin/env bash
-# Stands in for bin/check-release-archives.
 echo "check-release-archives" >>"$FAKE_LOGS/order"
 EOF
   stub bin/check-release-debug-info <<'EOF'
 #!/usr/bin/env bash
-# Stands in for bin/check-release-debug-info.
 echo "check-release-debug-info" >>"$FAKE_LOGS/order"
 EOF
   stub scripts/notes.txt <<'EOF'
 Not a script.
-EOF
-  write_file release-please-config.json <<'EOF'
-{"draft": true}
 EOF
   write_file .goreleaser.yml <<'EOF'
 release:
@@ -78,9 +66,6 @@ dist/
 EOF
   fake goreleaser <<'EOF'
 #!/bin/sh
-# Stands in for GoReleaser. A snapshot build writes a checksums file. It
-# differs between builds when FAKE_UNREPRODUCIBLE is set, and a build adds a
-# tracked-looking file when FAKE_DIRTY_BUILD is set.
 echo "goreleaser $*" >>"$FAKE_LOGS/order"
 case "$1" in
   check) exit 0 ;;
@@ -100,32 +85,26 @@ esac
 EOF
   fake go <<'EOF'
 #!/bin/sh
-# Stands in for go. It records the fuzzing call.
 echo "go test fuzz" >>"$FAKE_LOGS/order"
 echo "$*" >>"$FAKE_LOGS/go"
 [ "${FAKE_FAILING_CHECK:-}" != "fuzz" ]
 EOF
   fake shellcheck <<'EOF'
 #!/bin/sh
-# Stands in for shellcheck. It records the scripts it is asked to check.
 echo "shellcheck" >>"$FAKE_LOGS/order"
 echo "$*" >>"$FAKE_LOGS/shellcheck"
 EOF
   fake uvx <<'EOF'
 #!/bin/sh
-# Stands in for uvx. It records its arguments.
 echo "uvx" >>"$FAKE_LOGS/order"
 echo "$*" >>"$FAKE_LOGS/uvx"
 EOF
   fake codeql <<'EOF'
 #!/bin/sh
-# Stands in for the CodeQL CLI. bin/check-local only checks that it exists.
 exit 0
 EOF
   fake gh <<'EOF'
 #!/bin/sh
-# Stands in for the GitHub CLI. It knows every commit unless
-# FAKE_GH_UNKNOWN_COMMIT is set, and records each status it is asked to post.
 case "$*" in
   "api repos/Xquik-dev/x-twitter-scraper-cli/commits/"*)
     [ -z "${FAKE_GH_UNKNOWN_COMMIT:-}" ]

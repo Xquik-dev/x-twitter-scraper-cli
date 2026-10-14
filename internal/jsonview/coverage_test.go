@@ -256,9 +256,6 @@ func TestIteratorAdaptersAndEarlyExplorerErrors(t *testing.T) {
 	require.Error(t, ExploreJSONStream[any]("test", marshalIterator))
 }
 
-// typedKeys returns options that give a viewer typed keys in place of a
-// terminal and collect what it draws. A viewer that never quits is stopped
-// after 10 seconds, so the test fails and does not wait for a person.
 func typedKeys(t *testing.T, typed string) ([]tea.ProgramOption, *bytes.Buffer) {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

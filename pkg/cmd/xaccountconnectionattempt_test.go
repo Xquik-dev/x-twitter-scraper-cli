@@ -1,5 +1,3 @@
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (

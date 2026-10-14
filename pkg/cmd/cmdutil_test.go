@@ -79,7 +79,6 @@ func TestCreateDownloadFile(t *testing.T) {
 		defer file.Close()
 		assert.Equal(t, "test.txt", filepath.Base(file.Name()))
 
-		// Create a second file with the same name to ensure it doesn't clobber the first
 		resp2 := &http.Response{
 			Header: http.Header{
 				"Content-Disposition": []string{`attachment; filename="test.txt"`},
@@ -192,7 +191,6 @@ func TestFormatJSON(t *testing.T) {
 		res := gjson.Parse(`{"id":"abc123"}`)
 		formatted, err := formatJSON(res, ShowJSONOpts{Format: "raw", Stdout: os.Stdout, Transform: "missing"})
 		require.NoError(t, err)
-		// Transform path doesn't exist, so original result is returned
 		require.Equal(t, `{"id":"abc123"}`+"\n", string(formatted))
 	})
 
@@ -208,7 +206,6 @@ func TestFormatJSON(t *testing.T) {
 	t.Run("RawOutputNonString", func(t *testing.T) {
 		t.Parallel()
 
-		// --raw-output has no effect on non-string values
 		res := gjson.Parse(`{"count":42}`)
 		formatted, err := formatJSON(res, ShowJSONOpts{Format: "raw", Stdout: os.Stdout, Transform: "count", RawOutput: true})
 		require.NoError(t, err)
@@ -218,7 +215,6 @@ func TestFormatJSON(t *testing.T) {
 	t.Run("RawOutputObject", func(t *testing.T) {
 		t.Parallel()
 
-		// --raw-output has no effect on objects
 		res := gjson.Parse(`{"nested":{"a":1}}`)
 		formatted, err := formatJSON(res, ShowJSONOpts{Format: "raw", Stdout: os.Stdout, Transform: "nested", RawOutput: true})
 		require.NoError(t, err)
@@ -270,7 +266,6 @@ func TestExploreFallback(t *testing.T) {
 	t.Run("ShowJSONFallsBackToJsonOnNonTTY", func(t *testing.T) {
 		t.Parallel()
 
-		// os.Pipe() produces a *os.File that isn't a terminal, so explore should fall back.
 		r, w, err := os.Pipe()
 		require.NoError(t, err)
 		defer r.Close()
@@ -347,7 +342,6 @@ func TestExploreFallback(t *testing.T) {
 	})
 }
 
-// sliceIterator is a simple iterator over a slice for testing.
 type sliceIterator[T any] struct {
 	index int
 	items []T
@@ -368,7 +362,6 @@ func (it *sliceIterator[T]) Err() error {
 
 var _ jsonview.Iterator[any] = (*sliceIterator[any])(nil)
 
-// captureShowJSONIterator runs ShowJSONIterator and captures the output written to a file.
 func captureShowJSONIterator[T any](t *testing.T, iter jsonview.Iterator[T], format, transform string, itemsToDisplay int64) string {
 	t.Helper()
 

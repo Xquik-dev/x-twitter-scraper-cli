@@ -3,10 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Fails when an entry of a built release archive belongs to a user or group
-# other than root. Archives that record the release machine's account differ
-# between machines and publish a maintainer's user name.
-
 set -euo pipefail
 
 cd -- "$(dirname -- "$0")/.."

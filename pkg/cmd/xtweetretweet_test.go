@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -26,7 +24,6 @@ func TestXTweetsRetweetCreate(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
@@ -53,7 +50,6 @@ func TestXTweetsRetweetDelete(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("account: '@elonmusk'")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,

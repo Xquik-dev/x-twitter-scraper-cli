@@ -33,13 +33,11 @@ import (
 
 var OutputFormats = []string{"auto", "explore", "json", "jsonl", "pretty", "raw", "yaml"}
 
-// formatChoices lists OutputFormats as a sentence, such as "auto, json or yaml".
 func formatChoices() string {
 	last := len(OutputFormats) - 1
 	return strings.Join(OutputFormats[:last], ", ") + " or " + OutputFormats[last]
 }
 
-// ValidateBaseURL requires an HTTP or HTTPS scheme.
 func ValidateBaseURL(value, source string) error {
 	if value != "" && !strings.HasPrefix(value, "http://") && !strings.HasPrefix(value, "https://") {
 		return fmt.Errorf("%s %q is missing a scheme (expected http:// or https://)", source, value)
@@ -90,7 +88,6 @@ var debugMiddlewareOption = option.WithMiddleware(
 	},
 )
 
-// isInputPiped reports whether stdin has readable data.
 func isInputPiped() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
@@ -99,12 +96,10 @@ func isInputPiped() bool {
 
 	mode := stat.Mode()
 
-	// Empty regular files include Windows NUL and contain no input.
 	if mode.IsRegular() && stat.Size() > 0 {
 		return true
 	}
 
-	// Some terminals connect an empty pipe, so poll before reading.
 	if mode&(os.ModeNamedPipe|os.ModeSocket) != 0 {
 		return isPipedDataAvailableOSSpecific()
 	}
@@ -126,7 +121,6 @@ func streamOutput(label string, generateOutput func(w *os.File) error) error {
 		return streamToStdout(generateOutput)
 	}
 
-	// Unix sockets reduce pagination; Windows and failures use pipes.
 	return streamOutputOSSpecific(label, generateOutput)
 }
 
@@ -164,7 +158,6 @@ func streamToPagerWithPipe(label string, generateOutput func(w *os.File) error) 
 		return err
 	}
 
-	// Preserve terminal colors inside the pager.
 	if isTerminal(os.Stdout) && os.Getenv("FORCE_COLOR") == "" {
 		os.Setenv("FORCE_COLOR", "1")
 	}
@@ -186,7 +179,6 @@ func streamToStdout(generateOutput func(w *os.File) error) error {
 	return err
 }
 
-// writeBinaryResponse writes bytes to stdout or a file.
 func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile string) (string, error) {
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
@@ -198,13 +190,11 @@ func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile stri
 		_, err := stdout.Write(body)
 		return "", err
 	case "":
-		// Print text and piped output directly.
 		if !isTerminal(os.Stdout) || isUTF8TextFile(body) {
 			_, err := stdout.Write(body)
 			return "", err
 		}
 
-		// Otherwise, use the response filename or a unique fallback.
 		file, err := createDownloadFile(response, body)
 		if err != nil {
 			return "", err
@@ -222,14 +212,12 @@ func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile stri
 	}
 }
 
-// createDownloadFile uses response metadata or detected MIME type.
 func createDownloadFile(response *http.Response, data []byte) (*os.File, error) {
 	filename := "file"
 	disp := response.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(disp)
 	if err == nil {
 		if dispFilename, ok := params["filename"]; ok {
-			// Strip directories to prevent traversal.
 			filename = filepath.Base(dispFilename)
 			file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
 			if err == nil {
@@ -249,7 +237,6 @@ func createDownloadFile(response *http.Response, data []byte) (*os.File, error) 
 func guessExtension(data []byte) string {
 	ct := http.DetectContentType(data)
 
-	// Prefer common extensions.
 	switch ct {
 	case "application/gzip":
 		return ".gz"
@@ -303,7 +290,6 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 			res = transformed
 		}
 	}
-	// Match jq -r by printing strings without JSON quotes.
 	if opts.RawOutput && res.Type == gjson.String {
 		return []byte(res.Str + "\n"), nil
 	}
@@ -323,7 +309,6 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 			return prettyJSON, nil
 		}
 	case "jsonl":
-		// @ugly removes whitespace for JSON Lines.
 		oneLineJSON := res.Get("@ugly").Raw
 		if shouldUseColors(opts.Stdout) {
 			bytes := append(pretty.Color([]byte(oneLineJSON), pretty.TerminalStyle), '\n')
@@ -348,15 +333,14 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 
 const warningExploreNotSupported = "Explore format requires a terminal. Using JSON instead.\n"
 
-// ShowJSONOpts configures how JSON output is displayed.
 type ShowJSONOpts struct {
-	ExplicitFormat bool      // true if the user explicitly passed --format
-	Format         string    // output format (auto, explore, json, jsonl, pretty, raw, yaml)
-	RawOutput      bool      // like jq -r: print strings without JSON quotes
-	Stderr         io.Writer // stderr for warnings; injectable for testing; defaults to os.Stderr
-	Stdout         *os.File  // stdout (or pager); injectable for testing; defaults to os.Stdout
-	Title          string    // display title
-	Transform      string    // GJSON path to extract before displaying
+	ExplicitFormat bool
+	Format         string
+	RawOutput      bool
+	Stderr         io.Writer
+	Stdout         *os.File
+	Title          string
+	Transform      string
 }
 
 func (o *ShowJSONOpts) setDefaults() {
@@ -368,7 +352,6 @@ func (o *ShowJSONOpts) setDefaults() {
 	}
 }
 
-// ShowJSON displays a single JSON result to the user.
 func ShowJSON(res gjson.Result, opts ShowJSONOpts) error {
 	opts.setDefaults()
 
@@ -404,7 +387,6 @@ func ShowJSON(res gjson.Result, opts ShowJSONOpts) error {
 	}
 }
 
-// countTerminalLines returns the rendered terminal height.
 func countTerminalLines(data []byte, terminalWidth int) int {
 	return bytes.Count([]byte(wrap.String(string(data), terminalWidth)), []byte("\n"))
 }
@@ -413,7 +395,6 @@ type hasRawJSON interface {
 	RawJSON() string
 }
 
-// ShowJSONIterator displays streamed values. Use -1 for no limit.
 func ShowJSONIterator[T any](iter jsonview.Iterator[T], itemsToDisplay int64, opts ShowJSONOpts) error {
 	opts.setDefaults()
 
@@ -433,7 +414,6 @@ func ShowJSONIterator[T any](iter jsonview.Iterator[T], itemsToDisplay int64, op
 		terminalHeight = 40
 	}
 
-	// Page output that exceeds the terminal.
 	usePager := false
 	output := []byte{}
 	numberOfNewlines := 0
