@@ -21,7 +21,7 @@ predicate proven(Comment comment) {
 }
 
 predicate directive(Comment comment) {
-  comment.getText().regexpMatch("(?s)(go:[a-z]+|\\+build|nolint|line )\\b.*|\\s*(Deprecated: .*|indirect\\s*)")
+  comment.getText().regexpMatch("(?s)(go:[a-z]+|\\+build|nolint|line )\\b.*|\\s*(Deprecated: .*|(//\\s*)?indirect\\s*)")
 }
 
 from Comment comment
