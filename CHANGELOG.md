@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.13.6 (2026-10-14)
+
+[Full changelog from v0.13.5 to v0.13.6](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.5...v0.13.6)
+
+### Bug fixes
+
+* Shell completion suggests nothing after a flag that takes a value, such as `--format`. It suggested file names before.
+
+### Documentation
+
+* The README links the other Xquik repositories by name.
+
+### Chores
+
+* The source has no code comments, and CodeQL fails on a new one.
+
 ## 0.13.5 (2026-10-14)
 
 [Full changelog from v0.13.4 to v0.13.5](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.4...v0.13.5)
