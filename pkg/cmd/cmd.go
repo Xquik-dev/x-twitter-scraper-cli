@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -527,7 +525,6 @@ func generateManpages(ctx context.Context, c *cli.Command) error {
 	dir := c.String("output")
 	err = os.MkdirAll(filepath.Join(dir, "man1"), 0755)
 	if err != nil {
-		// handle error
 	}
 	if c.Bool("text") {
 		file, err := os.Create(filepath.Join(dir, "man1", "x-twitter-scraper.1"))

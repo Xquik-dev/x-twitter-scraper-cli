@@ -19,8 +19,6 @@ func TestMain(m *testing.M) {
 	Run(m)
 }
 
-// useStandardStreams gives the test its own standard input and output files
-// and puts the real ones back when the test ends.
 func useStandardStreams(t *testing.T) (output *os.File) {
 	t.Helper()
 	stdin, stdout := os.Stdin, os.Stdout

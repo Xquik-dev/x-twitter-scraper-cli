@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -27,7 +25,6 @@ func TestXAccountsCreate(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"email: account@example.invalid\n" +
 			"password: <ACCOUNT_PASSWORD>\n" +
@@ -103,7 +100,6 @@ func TestXAccountsReauth(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"password: <ACCOUNT_PASSWORD>\n" +
 			"email: account@example.invalid\n" +

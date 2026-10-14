@@ -4,16 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs every repository check in the order the deleted CI ran them and stops
-# at the first failure with 1 line that names the check and the next step.
-# REUSE and CodeQL are required. REUSE runs at a pinned version through uv.
-# Posts the xquik-local-checks commit status for a clean, pushed HEAD through
-# the gh login of whoever runs it. On the release machine, that is the owner's
-# login. The success text lists only the checks that ran and passed, and it
-# comes only after every check passed.
-# Pass --no-status to skip the status.
-# FUZZ_TIME sets the fuzzing time, 15s by default. Use 2m for a full campaign.
-
 set -euo pipefail
 
 cd -- "$(dirname -- "$0")/.."
@@ -154,9 +144,8 @@ case "$exceptions" in
 esac
 pass_check
 
-start_check "Release configuration" "" "Fix .goreleaser.yml or release-please-config.json so releases start as drafts."
+start_check "Release configuration" "" "Fix .goreleaser.yml so releases start as drafts."
 goreleaser check
-jq -e '.draft == true' release-please-config.json >/dev/null
 grep -Eq '^[[:space:]]+draft: true$' .goreleaser.yml
 
 start_check "Reproducible snapshot build" "" "Remove the build input that changes between builds, such as a timestamp."

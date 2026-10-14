@@ -11,10 +11,7 @@ import (
 
 const stdinGlyph = "-"
 
-// FileOrStdin opens a path or returns stdin for "-".
-// The caller closes files and reserves stdin when the boolean is true.
 func FileOrStdin(stdin io.ReadCloser, path string) (io.ReadCloser, bool, error) {
-	// Support both portable "-" and Unix stdin paths.
 	switch path {
 	case "", stdinGlyph, "/dev/fd/0", "/dev/stdin":
 		return stdin, true, nil

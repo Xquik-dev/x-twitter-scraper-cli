@@ -4,13 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Prints what a release would publish, from the GoReleaser output in dist. It
-# lists each release asset with its size and SHA-256 checksum, checks each
-# checksum against the file, prints the fields that Linux package managers
-# show, and prints the GitHub release notes.
-#
-# Usage: scripts/release-listing <version> <notes file>
-
 set -euo pipefail
 
 cd -- "$(dirname -- "$0")/.."

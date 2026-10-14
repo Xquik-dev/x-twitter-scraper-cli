@@ -15,8 +15,6 @@ Xquik charges only for delivered, unique, filter-matching results and never pads
 > Xquik is an independent third-party service. Not affiliated with X Corp.
 > "Twitter" and "X" are trademarks of X Corp.
 
-<!-- x-release-please-start-version -->
-
 ## Installation
 
 ### Install with Go
@@ -33,8 +31,6 @@ If the command is unavailable, add that directory to `PATH`.
 ```sh
 export PATH="$PATH:$(go env GOPATH)/bin"
 ```
-
-<!-- x-release-please-end -->
 
 ### Download a release
 

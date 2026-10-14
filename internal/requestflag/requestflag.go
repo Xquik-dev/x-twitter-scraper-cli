@@ -17,8 +17,6 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// formatForFlagSet prepares piped values for flag.Set.
-// Strings stay raw, scalars use %v, and complex values use JSON.
 func formatForFlagSet(val any) (string, error) {
 	switch v := val.(type) {
 	case string:
@@ -34,8 +32,6 @@ func formatForFlagSet(val any) (string, error) {
 	}
 }
 
-// Flag implements urfave/cli flags and maps values into HTTP requests.
-// Pointer types preserve unset, null, and concrete values.
 type Flag[
 	T []any | []map[string]any | []DateTimeValue | []DateValue | []TimeValue | []string |
 		[]float64 | []int64 | []bool | any | map[string]any | DateTimeValue | DateValue | TimeValue |
@@ -60,13 +56,10 @@ type Flag[
 	BodyRoot   bool
 	PathParam  string
 
-	// Const always includes Default but still permits overrides.
 	Const bool
 
-	// FileInput treats values as paths without an @ prefix.
 	FileInput bool
 
-	// DataAliases maps piped input names to the canonical API name.
 	DataAliases []string
 
 	count      int
@@ -77,7 +70,6 @@ type Flag[
 
 var _ cli.CategorizableFlag = (*Flag[any])(nil)
 
-// InRequest exposes a flag's HTTP request location.
 type InRequest interface {
 	GetQueryPath() string
 	GetHeaderPath() string
@@ -116,15 +108,12 @@ func (f Flag[T]) GetDataAliases() []string {
 	return f.DataAliases
 }
 
-// RequestContents stores values by HTTP request location.
 type RequestContents struct {
 	Queries map[string]any
 	Headers map[string]any
 	Body    any
 }
 
-// ApplyStdinDataToFlags maps piped data to unset path, query, and header flags.
-// Body flags use the separate body merge. Nested flags read their outer map.
 func ApplyStdinDataToFlags(cmd *cli.Command, data map[string]any) error {
 	for _, flag := range cmd.Flags {
 		if flag.IsSet() {
@@ -170,7 +159,6 @@ func ApplyStdinDataToFlags(cmd *cli.Command, data map[string]any) error {
 			continue
 		}
 
-		// Body parameters use the body merge instead.
 		for _, path := range []string{inReq.GetQueryPath(), inReq.GetHeaderPath(), inReq.GetPathParam()} {
 			if path == "" {
 				continue
@@ -270,7 +258,6 @@ func (f *Flag[T]) PreParse() error {
 	newVal := f.Default
 	f.value = &cliValue[T]{newVal}
 
-	// Validate defaults and external values.
 	if f.Validator != nil {
 		if err := f.Validator(f.value.Get().(T)); err != nil {
 			return err
@@ -317,7 +304,6 @@ func (f *Flag[T]) Set(name string, val string) error {
 
 	f.count++
 
-	// Do not append the first explicit value to a default slice.
 	if f.count == 1 && f.value != nil {
 		typ := reflect.TypeOf(f.Default)
 		if typ != nil && typ.Kind() == reflect.Slice {
@@ -376,11 +362,9 @@ func (f *Flag[T]) SetCategory(c string) {
 var _ cli.RequiredFlag = (*Flag[any])(nil)
 
 func (f *Flag[T]) IsRequired() bool {
-	// Const flags never require user input.
 	if f.Const {
 		return false
 	}
-	// Stdin may satisfy required request flags.
 	if f.BodyPath != "" || f.BodyRoot || f.PathParam != "" || f.QueryPath != "" || f.HeaderPath != "" {
 		return false
 	}
@@ -392,7 +376,6 @@ type RequiredFlagOrStdin interface {
 }
 
 func (f *Flag[T]) IsRequiredAsFlagOrStdin() bool {
-	// Const flags never require user input.
 	if f.Const {
 		return false
 	}
@@ -421,7 +404,6 @@ func (f *Flag[T]) GetDefaultText() string {
 	return f.DefaultText
 }
 
-// GetEnvVars returns the flag's environment variables.
 func (f *Flag[T]) GetEnvVars() []string {
 	return f.Sources.EnvKeys()
 }
@@ -435,7 +417,6 @@ func (f *Flag[T]) TypeName() string {
 	if ty == nil {
 		return ""
 	}
-	// Show the pointee type in help output.
 	if ty.Kind() == reflect.Pointer {
 		ty = ty.Elem()
 	}
@@ -492,7 +473,6 @@ func (f *Flag[T]) IsMultiValueFlag() bool {
 }
 
 func (f *Flag[T]) IsBoolFlag() bool {
-	// Pointer booleans need an explicit value to preserve 3 states.
 	_, isBool := any(f.Default).(bool)
 	return isBool
 }
@@ -506,11 +486,9 @@ func (f *Flag[T]) Count() int {
 var _ cli.LocalFlag = (*Flag[any])(nil)
 
 func (f Flag[T]) IsLocal() bool {
-	// Request flags work at any command level.
 	return true
 }
 
-// cliValue implements cli.Value for supported request types.
 type cliValue[
 	T []any | []map[string]any | []DateTimeValue | []DateValue | []TimeValue | []string | []float64 |
 		[]int64 | []bool | any | map[string]any | DateTimeValue | DateValue | TimeValue | string |
@@ -520,7 +498,6 @@ type cliValue[
 	value T
 }
 
-// parseCLIArg converts one argument into type T.
 func parseCLIArg[
 	T []any | []map[string]any | []DateTimeValue | []DateValue | []TimeValue | []string | []float64 |
 		[]int64 | []bool | any | map[string]any | DateTimeValue | DateValue | TimeValue | string |
@@ -534,10 +511,8 @@ func parseCLIArg[
 
 	if value == "null" {
 		switch any(empty).(type) {
-		// Pointer flags preserve unset, null, and concrete values.
 		case *string, *int64, *float64, *bool, *DateValue, *DateTimeValue, *TimeValue:
 			return empty, nil
-		// Nil maps already marshal as JSON null.
 		case map[string]any:
 			return empty, nil
 		}
@@ -573,7 +548,6 @@ func parseCLIArg[
 			parsedValue = t
 		}
 
-	// Non-null pointer flags parse their pointee value.
 	case *string:
 		v := value
 		parsedValue = &v
@@ -616,7 +590,6 @@ func parseCLIArg[
 
 	default:
 		if strings.HasPrefix(value, "@") {
-			// Preserve @file references for later expansion.
 			parsedValue = value
 		} else {
 			var yamlValue T
@@ -632,7 +605,6 @@ func parseCLIArg[
 		}
 	}
 
-	// Preserve YAML null through the type assertion.
 	if parsedValue == nil {
 		parsedValue = (*struct{})(nil)
 	}
@@ -649,13 +621,10 @@ func parseCLIArg[
 
 }
 
-// Ptr returns a pointer for nullable flag defaults.
 func Ptr[T any](v T) *T {
 	return &v
 }
 
-// allowAsLiteralString accepts identifier-like values after YAML parsing fails.
-// It rejects punctuation that may indicate malformed YAML.
 func allowAsLiteralString(s string) bool {
 	for _, c := range s {
 		if !unicode.IsLetter(c) && !unicode.IsDigit(c) &&
@@ -666,10 +635,8 @@ func allowAsLiteralString(s string) bool {
 	return true
 }
 
-// Set parses a CLI value.
 func (c *cliValue[T]) Set(value string) error {
 	valueType := reflect.TypeOf(c.value)
-	// Repeated flags append to slices.
 	if valueType != nil && valueType.Kind() == reflect.Slice {
 		elemType := valueType.Elem()
 
@@ -736,7 +703,6 @@ func (c *cliValue[T]) String() string {
 		return fmt.Sprintf("%v", v)
 
 	case *string, *int64, *float64, *bool, *DateTimeValue, *DateValue, *TimeValue:
-		// Render nil pointers as the CLI null literal.
 		rv := reflect.ValueOf(v)
 		if rv.IsNil() {
 			return "null"
@@ -773,7 +739,6 @@ func (t TimeValue) String() string {
 	return string(t)
 }
 
-// parseTimeWithFormats returns the first successful parse.
 func parseTimeWithFormats(s string, formats []string) (time.Time, error) {
 	var lastErr error
 	for _, format := range formats {
@@ -843,12 +808,10 @@ func (t *TimeValue) Parse(s string) error {
 	return nil
 }
 
-// SettableInnerField accepts nested flag values.
 type SettableInnerField interface {
 	SetInnerField(string, any)
 }
 
-// InnerFieldSeeder initializes untyped nullable containers before assignment.
 type InnerFieldSeeder interface {
 	SeedInnerCollection(isArrayOfObjects bool)
 }
@@ -866,7 +829,6 @@ func (f *Flag[T]) SetInnerField(field string, val any) {
 	}
 }
 
-// SeedInnerCollection seeds an untyped flag with a map or list.
 func (f *Flag[T]) SeedInnerCollection(isArrayOfObjects bool) {
 	if f.value == nil {
 		f.value = &cliValue[T]{}

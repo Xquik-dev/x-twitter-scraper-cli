@@ -4,27 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Releases the version in .release-please-manifest.json from a maintainer's
-# machine. A release is the annotated tag v<version> plus a GitHub release
-# that holds the GoReleaser archives, Linux packages and checksums file.
-# GoReleaser signs nothing and pushes to no package tap, so this script reads
-# no Keychain item. The GitHub CLI login of whoever runs it creates the
-# release, and GoReleaser gets that login's token through GITHUB_TOKEN in its
-# environment, never through an argument. On the release machine, that is the
-# owner's gh login.
-#
-# Pass --dry-run to run every check, build every release asset and print the
-# version, each asset with its size and checksum, the Linux package fields and
-# the release notes. A dry run posts no commit status and stops before it
-# pushes the tag, uploads and creates the GitHub release.
-#
-# Go stamps the module version into each binary from the Git tag on HEAD, and
-# without a tag it stamps a pseudo-version. So both modes build with the local
-# annotated tag in place, and a dry run's checksums equal the release's. A dry
-# run removes the tag it created when it ends.
-
 set -euo pipefail
-# Keep the token out of trace output, even under bash -x.
 set +o xtrace
 
 cd -- "$(dirname -- "$0")/.."
@@ -129,9 +109,6 @@ gh auth status --hostname github.com >/dev/null 2>&1 ||
   refuse "The GitHub CLI is not signed in. Run gh auth login, then rerun."
 
 step "Checking GitHub releases for $tag"
-# GitHub's release list can leave out a published release, so the tag
-# endpoint answers whether one is published. It never returns drafts, so
-# drafts come from the list.
 published=false
 if lookup="$(gh api "repos/$repository/releases/tags/$tag" 2>&1)"; then
   [[ "$(jq -r '.draft' <<<"$lookup")" == true ]] || published=true
@@ -172,8 +149,6 @@ else
   git tag --annotate "$tag" --message "Release $tag"
 fi
 
-# The checks above end with GoReleaser snapshot builds. This build runs right
-# after them in the same tree, so a check that left files behind would show.
 step "Building the release assets for $tag with GoReleaser"
 GORELEASER_CURRENT_TAG="$tag" goreleaser release --clean --skip=publish,validate ||
   refuse "The GoReleaser build failed. Fix the errors above, then rerun."
@@ -194,8 +169,6 @@ expected_assets="$(jq -c "[.[] | select($asset_types) | .name] | sort" dist/arti
 missing_assets="$(jq -n --argjson expected "$expected_assets" --argjson drafts "$drafts" \
   '$expected - ($drafts[0].assets // []) | length')"
 
-# The token reaches GoReleaser through its environment only. An argument
-# would show in the process list.
 upload_assets() {
   local github_token
   github_token="$(gh auth token --hostname github.com)" ||

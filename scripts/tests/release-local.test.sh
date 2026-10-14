@@ -4,12 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs bin/release-local in a throwaway repository whose origin is a local
-# bare repository. Stubs stand in for bin/check-local and the audit. A fake
-# GoReleaser builds small release assets, including a real Debian archive, and
-# a fake GitHub CLI keeps the draft release in the logs folder. No test reaches
-# GitHub or reads the Keychain.
-
 set -euo pipefail
 
 # shellcheck source=scripts/tests/support.sh
@@ -18,30 +12,24 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/support.sh"
 readonly test_token="gho_test_token_for_release_local"
 readonly repository="Xquik-dev/x-twitter-scraper-cli"
 
-# Builds a releasable repository at the given version, 1.2.3 by default.
 prepare_release() {
   local version="${1:-1.2.3}"
   copy_file bin/release-local
   copy_file scripts/release-listing
   stub bin/check-local <<'EOF'
 #!/usr/bin/env bash
-# Stands in for bin/check-local. It records its arguments.
 echo "check-local${*:+ $*}" >>"$FAKE_LOGS/order"
 EOF
   stub scripts/audit <<'EOF'
 #!/usr/bin/env bash
-# Stands in for scripts/audit.
 echo "audit" >>"$FAKE_LOGS/order"
 EOF
   stub bin/check-release-debug-info <<'EOF'
 #!/usr/bin/env bash
-# Stands in for bin/check-release-debug-info.
 echo "check-release-debug-info" >>"$FAKE_LOGS/order"
 EOF
   stub bin/check-release-archives <<'EOF'
 #!/usr/bin/env bash
-# Stands in for bin/check-release-archives. FAKE_LOCAL_OWNER makes it find an
-# archive entry that belongs to a local account.
 echo "check-release-archives" >>"$FAKE_LOGS/order"
 if [[ -n "${FAKE_LOCAL_OWNER:-}" ]]; then
   echo "1 archive entries name a user or group other than root. Set owner and group to root for every archive entry in .goreleaser.yml, then rerun." >&2
@@ -74,15 +62,10 @@ dist/
 EOF
   fake go <<'EOF'
 #!/bin/sh
-# Stands in for go. bin/release-local only checks that it exists.
 exit 0
 EOF
   fake goreleaser <<'EOF'
 #!/bin/sh
-# Stands in for GoReleaser. Each run builds 3 release assets in dist. Like Go,
-# it stamps the archive with the tag on HEAD, or with a pseudo-version when
-# HEAD has no tag. A run with publish rights records whether it got the token
-# and uploads the assets into the draft that the logs folder holds.
 {
   printf 'goreleaser %s' "$*"
   [ -n "${GORELEASER_CURRENT_TAG:-}" ] && printf ' with GORELEASER_CURRENT_TAG=%s' "$GORELEASER_CURRENT_TAG"
@@ -97,7 +80,6 @@ stamp="$(git describe --tags --exact-match HEAD 2>/dev/null || echo "pseudo-vers
 printf 'archive %s built as %s\n' "$version" "$stamp" >"dist/${prefix}_linux_amd64.tar.gz"
 printf 'Package: x-twitter-scraper\nVersion: %s\nMaintainer: support@xquik.com\nHomepage: https://xquik.com\nDescription: %s\n' \
   "$version" "${FAKE_DESCRIPTION:-X API & Twitter API CLI by Xquik for tests. Not affiliated with X Corp.}" >dist/control/control
-# Fixed times keep the archive identical between builds, as GoReleaser's are.
 (cd dist/control && touch -t 202601010000 control && tar -cf - ./control | gzip -n >control.tar.gz &&
   echo "2.0" >debian-binary && : >data.tar.gz && touch -t 202601010000 debian-binary control.tar.gz data.tar.gz &&
   ar -rc "../${prefix}_linux_amd64.deb" debian-binary control.tar.gz data.tar.gz)
@@ -127,12 +109,6 @@ esac
 EOF
   fake gh <<'EOF'
 #!/bin/sh
-# Stands in for the GitHub CLI. FAKE_RELEASES holds the releases GitHub
-# lists, and FAKE_PUBLISHED makes the tag endpoint return a published
-# release. GitHub's list can leave out a published release, so the tests
-# keep it out of FAKE_RELEASES. FAKE_TAG_LOOKUP_FAILS makes the tag endpoint
-# fail. The draft's assets live in the logs folder, unless FAKE_VIEW_ASSETS
-# or FAKE_DOWNLOADED_CHECKSUMS override what GitHub returns.
 echo "gh $*" >>"$FAKE_LOGS/order"
 case "$1 $2" in
   "api repos/Xquik-dev/x-twitter-scraper-cli/releases/tags/"*)
@@ -317,8 +293,6 @@ test_a_release_skips_the_upload_when_the_draft_already_has_every_asset() {
   printf '%s\n' x-twitter-scraper_1.2.3_checksums.txt x-twitter-scraper_1.2.3_linux_amd64.deb \
     x-twitter-scraper_1.2.3_linux_amd64.tar.gz >"$sandbox_logs/uploaded"
   run_env=('FAKE_RELEASES=[[{"tag_name": "v1.2.3", "draft": true, "assets": [{"name": "x-twitter-scraper_1.2.3_checksums.txt"}, {"name": "x-twitter-scraper_1.2.3_linux_amd64.deb"}, {"name": "x-twitter-scraper_1.2.3_linux_amd64.tar.gz"}]}]]')
-  # An earlier run created the local tag and left the assets of its identical
-  # build on the draft.
   sandbox_git tag --annotate v1.2.3 --message "Release v1.2.3"
   mkdir -p "$sandbox/setup-logs"
   (

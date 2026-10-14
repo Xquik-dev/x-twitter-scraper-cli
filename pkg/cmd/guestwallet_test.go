@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -26,7 +24,6 @@ func TestGuestWalletsCreate(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"amount_minor: 1000\n" +
 			"currency: usd\n")
@@ -65,7 +62,6 @@ func TestGuestWalletsTopup(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"amount_minor: 1000\n" +
 			"currency: usd\n")

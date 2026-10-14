@@ -4,10 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs scripts/codeql in a throwaway repository. A fake CodeQL CLI downloads
-# a fake pack, builds a fake database and writes a SARIF report. A fake go
-# command lists the Go files of the copy. No test reaches the CodeQL registry.
-
 set -euo pipefail
 
 # shellcheck source=scripts/tests/support.sh
@@ -23,13 +19,6 @@ package lib
 EOF
   fake codeql <<'EOF'
 #!/bin/sh
-# Stands in for the CodeQL CLI. FAKE_STALL makes the pack download hang,
-# FAKE_DOWNLOAD_FAILS makes it fail, FAKE_INCOMPLETE_PACK leaves out the
-# suite and FAKE_SKIPPED_FILE leaves a file out of the database. The report
-# has the shape CodeQL 2.27 writes. FAKE_RESULTS adds 1 result to it,
-# FAKE_UNREAD_FILE adds 1 extraction error for that file and
-# FAKE_NO_EXTRACTION_DIAGNOSTIC leaves the extraction diagnostic out of the
-# queries that ran.
 echo "$*" >>"$FAKE_LOGS/codeql"
 option() {
   name="$1"
@@ -54,6 +43,9 @@ case "$1 $2" in
     mkdir -p "$pack/codeql-suites"
     echo "version: 1.6.12" >"$pack/qlpack.yml"
     [ -n "${FAKE_INCOMPLETE_PACK:-}" ] || : >"$pack/codeql-suites/go-security-extended.qls"
+    ;;
+  "pack install")
+    [ -z "${FAKE_INSTALL_FAILS:-}" ] || exit 1
     ;;
   "database create")
     source_root="$(option --source-root "$@")"
@@ -88,7 +80,6 @@ esac
 EOF
   fake go <<'EOF'
 #!/bin/sh
-# Stands in for go list -json. It reports the 2 Go files of the copy.
 [ "$*" = "list -json ./..." ] || exit 97
 here="$(pwd -P)"
 echo "{\"Dir\": \"$here\", \"GoFiles\": [\"main.go\"]}"
@@ -109,9 +100,9 @@ test_codeql_scans_a_copy_with_the_pinned_pack_and_leaves_the_working_tree_alone(
   assert_contains "$(log_of source-root)" "$sandbox/tmp/xquik-cli-codeql." "the scanned folder"
   assert_contains "$(log_of codeql)" "pack download codeql/go-queries@1.6.12 --dir=$sandbox/tmp/" "the pack download"
   assert_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
-  assert_contains "$(log_of codeql)" " codeql/go-queries@1.6.12:codeql-suites/go-security-extended.qls --additional-packs=$sandbox/tmp/" "the analysis"
-  # Every call after the version check keeps its caches in the run's folder.
-  assert_equal 3 "$(grep -c -- "--common-caches=$sandbox/tmp/xquik-cli-codeql." "$sandbox_logs/codeql")" "the calls with a private cache"
+  assert_contains "$(log_of codeql)" " codeql/go-queries@1.6.12:codeql-suites/go-security-extended.qls codeql/no-code-comments --additional-packs=$sandbox/tmp/" "the analysis"
+  assert_contains "$(log_of codeql)" "pack install codeql/no-code-comments --common-caches=$sandbox/tmp/" "the comment query install"
+  assert_equal 4 "$(grep -c -- "--common-caches=$sandbox/tmp/xquik-cli-codeql." "$sandbox_logs/codeql")" "the calls with a private cache"
   assert_equal "" "$(ls "$sandbox/tmp")" "the leftover temporary files"
 }
 
@@ -124,6 +115,17 @@ test_a_codeql_result_fails_the_run_and_is_printed() {
   assert_equal 1 "$run_status" "the exit code"
   assert_equal "go/sql-injection at pkg/lib.go:7
 CodeQL found 1 results. Fix each one above, then rerun." "$run_stderr" "stderr"
+}
+
+test_a_failed_comment_query_install_fails_the_run() {
+  prepare_codeql
+  run_env=("FAKE_INSTALL_FAILS=1")
+
+  run_in_repo scripts/codeql
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "CodeQL could not install the libraries of codeql/no-code-comments. Check the network and GitHub access, then rerun." "$run_stderr" "stderr"
+  assert_not_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
 }
 
 test_a_go_file_missing_from_the_database_fails_the_run() {

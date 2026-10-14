@@ -140,7 +140,6 @@ func TestDateTimeValueParse(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 
-				// Parse again to verify RFC3339.
 				_, parseErr := time.Parse(time.RFC3339, d.String())
 				assert.NoError(t, parseErr)
 			}
@@ -217,12 +216,10 @@ func TestRequestParams(t *testing.T) {
 	t.Run("map body type", func(t *testing.T) {
 		t.Parallel()
 
-		// Create a mock command with flags
 		cmd := &cli.Command{
 			Name: "test",
 		}
 
-		// Create string flag with body path
 		stringFlag := &Flag[string]{
 			Name:       "string-flag",
 			Default:    "default-string",
@@ -231,7 +228,6 @@ func TestRequestParams(t *testing.T) {
 			hasBeenSet: true,
 		}
 
-		// Create int flag with header path
 		intFlag := &Flag[int64]{
 			Name:       "int-flag",
 			Default:    42,
@@ -240,7 +236,6 @@ func TestRequestParams(t *testing.T) {
 			hasBeenSet: true,
 		}
 
-		// Create bool flag with query path
 		boolFlag := &Flag[bool]{
 			Name:       "bool-flag",
 			Default:    false,
@@ -249,7 +244,6 @@ func TestRequestParams(t *testing.T) {
 			hasBeenSet: true,
 		}
 
-		// Create date flag with multiple paths
 		dateFlag := &Flag[DateValue]{
 			Name:       "date-flag",
 			Default:    DateValue("2023-01-01"),
@@ -260,7 +254,6 @@ func TestRequestParams(t *testing.T) {
 			hasBeenSet: true,
 		}
 
-		// Create flag with no path
 		noPathFlag := &Flag[string]{
 			Name:       "no-path-flag",
 			Default:    "no-path",
@@ -268,7 +261,6 @@ func TestRequestParams(t *testing.T) {
 			hasBeenSet: true,
 		}
 
-		// Create unset flag
 		unsetFlag := &Flag[string]{
 			Name:       "unset-flag",
 			Default:    "unset",
@@ -279,34 +271,28 @@ func TestRequestParams(t *testing.T) {
 
 		cmd.Flags = []cli.Flag{stringFlag, intFlag, boolFlag, dateFlag, noPathFlag, unsetFlag}
 
-		// Test the RequestParams function
 		contents := ExtractRequestContents(cmd)
 
-		// Verify query parameters
 		assert.Equal(t, true, contents.Queries["include_details"])
 		assert.Equal(t, DateValue("2023-05-15"), contents.Queries["as_of_date"])
 		assert.Len(t, contents.Queries, 2)
 
-		// Verify headers
 		assert.Equal(t, int64(99), contents.Headers["X-Int-Value"])
 		assert.Equal(t, DateValue("2023-05-15"), contents.Headers["X-Effective-Date"])
 		assert.Len(t, contents.Headers, 2)
 
-		// Verify body
 		bodyMap, ok := contents.Body.(map[string]any)
 		assert.True(t, ok, "Expected body to be map[string]any, got %T", contents.Body)
 		assert.Equal(t, "test-value", bodyMap["string_field"])
 		assert.Equal(t, DateValue("2023-05-15"), bodyMap["effective_date"])
 		assert.Len(t, bodyMap, 2)
 
-		// Verify the unset flag didn't make it into the maps
 		assert.NotContains(t, contents.Body, "should_not_appear")
 	})
 
 	t.Run("non-map body type", func(t *testing.T) {
 		t.Parallel()
 
-		// Create a mock command with flags
 		cmd := &cli.Command{
 			Name: "test",
 			Flags: []cli.Flag{
@@ -350,7 +336,6 @@ func TestFlagSet(t *testing.T) {
 		Default: false,
 	}
 
-	// Test initialization and setting
 	t.Run("PreParse initialization", func(t *testing.T) {
 		assert.NoError(t, strFlag.PreParse())
 		assert.True(t, strFlag.applied)
@@ -389,17 +374,13 @@ func TestFlagSet(t *testing.T) {
 			Default: []int64{},
 		}
 
-		// Initialize the flag
 		assert.NoError(t, sliceFlag.PreParse())
 
-		// First set
 		assert.NoError(t, sliceFlag.Set("slice-flag", "10"))
 
-		// Subsequent setting should append, not replace
 		assert.NoError(t, sliceFlag.Set("slice-flag", "20"))
 		assert.NoError(t, sliceFlag.Set("slice-flag", "30"))
 
-		// Verify that we have both values in the slice
 		result := sliceFlag.Get()
 		assert.Equal(t, []int64{10, 20, 30}, result)
 		assert.True(t, sliceFlag.IsSet())
@@ -416,8 +397,6 @@ func TestFlagSet(t *testing.T) {
 		assert.NoError(t, sliceFlag.Set("slice-flag", "20"))
 		assert.NoError(t, sliceFlag.Set("slice-flag", "30"))
 
-		// Verify that we have clobbered the default value instead of appending
-		// to it.
 		result := sliceFlag.Get()
 		assert.Equal(t, []int64{10, 20, 30}, result)
 		assert.True(t, sliceFlag.IsSet())
@@ -483,7 +462,6 @@ func TestParseTimeWithFormats(t *testing.T) {
 func TestYamlHandling(t *testing.T) {
 	t.Parallel()
 
-	// Test with any value
 	t.Run("Parse YAML to any", func(t *testing.T) {
 		t.Parallel()
 
@@ -491,7 +469,6 @@ func TestYamlHandling(t *testing.T) {
 		err := cv.Set("name: test\nvalue: 42\n")
 		assert.NoError(t, err)
 
-		// The value should be a map
 		val, ok := cv.Get().(map[string]any)
 		assert.True(t, ok, "Expected map[string]any, got %T", cv.Get())
 
@@ -500,7 +477,6 @@ func TestYamlHandling(t *testing.T) {
 			assert.Equal(t, uint64(42), val["value"])
 		}
 
-		// The string representation should be valid YAML
 		strVal := cv.String()
 		var parsed map[string]any
 		err = yaml.Unmarshal([]byte(strVal), &parsed)
@@ -509,7 +485,6 @@ func TestYamlHandling(t *testing.T) {
 		assert.Equal(t, uint64(42), parsed["value"])
 	})
 
-	// Test with array
 	t.Run("Parse YAML array", func(t *testing.T) {
 		t.Parallel()
 
@@ -517,7 +492,6 @@ func TestYamlHandling(t *testing.T) {
 		err := cv.Set("- item1\n- item2\n- item3\n")
 		assert.NoError(t, err)
 
-		// The value should be a slice
 		val, ok := cv.Get().([]any)
 		assert.True(t, ok, "Expected []any, got %T", cv.Get())
 
@@ -594,7 +568,6 @@ func TestYamlHandling(t *testing.T) {
 		}
 	})
 
-	// Test with invalid YAML
 	t.Run("Parse invalid YAML", func(t *testing.T) {
 		t.Parallel()
 
@@ -605,11 +578,6 @@ func TestYamlHandling(t *testing.T) {
 	})
 }
 
-// TestNullLiteralHandling pins how each Flag[T] type handles the literal value "null"
-// when passed via the CLI. Pointer-typed flags serialize nil as JSON null, which is how
-// nullable body fields (`anyOf: [T, null]` / `{nullable: true}`) let users clear a field
-// via `--foo null`. Non-pointer primitive flags treat "null" as a raw value. These are
-// non-nullable schemas where explicit null has no API semantics anyway.
 func TestNullLiteralHandling(t *testing.T) {
 	t.Parallel()
 
@@ -768,7 +736,6 @@ func TestNullLiteralHandling(t *testing.T) {
 		assert.Error(t, cv.Set("not-a-time"))
 	})
 
-	// Nil maps already marshal as JSON null.
 	t.Run("Flag[map[string]any] null sends JSON null", func(t *testing.T) {
 		t.Parallel()
 		cv := &cliValue[map[string]any]{}
@@ -808,11 +775,6 @@ func TestFlagTypeNames(t *testing.T) {
 	}
 }
 
-// TestInnerFlagDispatchOnUntypedFlag pins inner-flag behavior for `Flag[any]`,
-// which is the codegen output for nullable complex schemas (`anyOf: [T, null]`
-// or `{nullable: true}`). The untyped-nil zero value carries no reflect.Kind,
-// so SetInnerField has nowhere to dispatch the assignment. Without explicit
-// help the inner-field value silently drops.
 func TestInnerFlagDispatchOnUntypedFlag(t *testing.T) {
 	t.Parallel()
 
@@ -909,7 +871,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 	t.Run("does not set body path flag from piped data", func(t *testing.T) {
 		t.Parallel()
 
-		// Body params are handled by the maps.Copy merge in flagOptions, not by ApplyStdinDataToFlags.
 		flag := &Flag[string]{
 			Name:     "message",
 			BodyPath: "message",
@@ -937,7 +898,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 		cmd := &cli.Command{Flags: []cli.Flag{flag}}
 		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
 
-		// The explicitly-set value should win.
 		assert.Equal(t, "explicit_value", flag.Get())
 	})
 
@@ -985,7 +945,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 		}
 		assert.NoError(t, flag.PreParse())
 
-		// Use one of the aliases as the key in piped data.
 		data := map[string]any{"accountId": "acct_alias"}
 		cmd := &cli.Command{Flags: []cli.Flag{flag}}
 		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
@@ -997,7 +956,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 	t.Run("does not set body path flag via data alias", func(t *testing.T) {
 		t.Parallel()
 
-		// Body params are handled by the maps.Copy merge in flagOptions, not by ApplyStdinDataToFlags.
 		flag := &Flag[string]{
 			Name:        "user-name",
 			BodyPath:    "user_name",
@@ -1033,7 +991,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 
 		flag := &Flag[string]{
 			Name: "some-flag",
-			// No QueryPath, HeaderPath, or BodyPath
 		}
 		assert.NoError(t, flag.PreParse())
 
@@ -1092,8 +1049,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 		cmd := &cli.Command{Flags: []cli.Flag{outer, cityInner}}
 		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
 
-		// InnerFlag.IsSet() is always false by design; verify the value was written
-		// into the outer flag's underlying map instead.
 		outerVal, ok := outer.Get().(map[string]any)
 		assert.True(t, ok, "expected outer flag value to be map[string]any, got %T", outer.Get())
 		assert.Equal(t, "San Francisco", outerVal["city"])
@@ -1115,15 +1070,12 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 			OuterFlag:   outer,
 		}
 
-		// Use the alias in piped data.
 		data := map[string]any{
 			"address": map[string]any{"cityName": "Portland"},
 		}
 		cmd := &cli.Command{Flags: []cli.Flag{outer, cityInner}}
 		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
 
-		// InnerFlag.IsSet() is always false by design; verify the value was written
-		// into the outer flag's underlying map instead.
 		outerVal, ok := outer.Get().(map[string]any)
 		assert.True(t, ok, "expected outer flag value to be map[string]any, got %T", outer.Get())
 		assert.Equal(t, "Portland", outerVal["city"])
@@ -1134,7 +1086,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 
 		outer := &Flag[map[string]any]{
 			Name: "options",
-			// No BodyPath set
 		}
 		assert.NoError(t, outer.PreParse())
 
@@ -1168,7 +1119,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 			OuterFlag:  outer,
 		}
 
-		// The outer body path key is missing from the piped data.
 		data := map[string]any{"other": "value"}
 		cmd := &cli.Command{Flags: []cli.Flag{outer, inner}}
 		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
@@ -1186,7 +1136,6 @@ func TestApplyStdinDataToFlags(t *testing.T) {
 		}
 		assert.NoError(t, flag.PreParse())
 
-		// The canonical key wins when both forms are present.
 		data := map[string]any{
 			"account_id": "canonical_value",
 			"accountId":  "alias_value",

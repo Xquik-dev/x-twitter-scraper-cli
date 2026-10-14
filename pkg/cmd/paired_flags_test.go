@@ -22,15 +22,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Some request bodies hold a text field and a list field whose flag names
-// match, such as searchQuery and searchQueries. Release 0.13.3 sent each such
-// flag to 1 field. These tests pin that field, so callers keep the request
-// they had, and check that piped input still reaches the other field.
-//
-// Commands keep their flags in package variables, so a second run in the same
-// process would see the first run's values. Each case runs the CLI in a child
-// copy of this test binary, as a user's shell would start a fresh process.
-
 const pairedFlagsArgsVariable = "XQUIK_CLI_PAIRED_FLAGS_ARGS"
 
 func init() {
@@ -53,8 +44,6 @@ func init() {
 	os.Exit(0)
 }
 
-// runCLIProcess runs the CLI with args in a child copy of this test binary.
-// It returns the combined output and the exit code.
 func runCLIProcess(t *testing.T, stdin string, args ...string) (string, int) {
 	t.Helper()
 	encoded, err := json.Marshal(append([]string{"x-twitter-scraper"}, args...))
@@ -187,7 +176,6 @@ func TestPipedInputReachesTheOtherFieldOfEachPair(t *testing.T) {
 	}
 }
 
-// Release 0.13.3 gave -z to both --gzip and --text, and -z set --gzip.
 func TestManpagesShortFlagZStillSetsGzip(t *testing.T) {
 	output := t.TempDir()
 	result, code := runCLIProcess(t, "", "@manpages", "--output", output, "--text", "-z=false")

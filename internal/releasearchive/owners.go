@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package releasearchive checks the archives a release publishes.
 package releasearchive
 
 import (
@@ -19,8 +18,6 @@ import (
 	"strings"
 )
 
-// Info-ZIP stores a Unix owner in these extra fields. Go's zip writer adds
-// neither, so an archive that holds one was not built the way releases are.
 var zipOwnerFields = map[uint16]string{0x7855: "Unix", 0x7875: "Unix owner"}
 
 type artifact struct {
@@ -29,9 +26,6 @@ type artifact struct {
 	Type string `json:"type"`
 }
 
-// ArchiveOwners reads the GoReleaser manifest at manifestPath and returns 1
-// line for each archive entry whose owner or group is not root. Archive paths
-// in the manifest are relative to the folder that holds dist.
 func ArchiveOwners(manifestPath string) ([]string, int, error) {
 	contents, err := os.ReadFile(manifestPath)
 	if err != nil {

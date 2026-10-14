@@ -4,10 +4,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Runs scripts/audit in a throwaway repository. A fake go command answers go
-# mod verify and go list, and serves a canned govulncheck report, so no test
-# reaches the Go module proxy or the vulnerability database.
-
 set -euo pipefail
 
 # shellcheck source=scripts/tests/support.sh
@@ -21,16 +17,12 @@ day() {
   jq -nr --argjson offset "$1" 'now + $offset * 86400 | strftime("%Y-%m-%d")'
 }
 
-# Builds a repository with scripts/audit, an exceptions file from standard
-# input and an empty govulncheck report.
 prepare_audit() {
   copy_file scripts/audit
   write_file audit-exceptions.json
   : >"$sandbox/report.json"
   fake go <<EOF
 #!/bin/sh
-# Stands in for go. It knows 3 packages and the modules that ship, and serves
-# the canned govulncheck report.
 case "\$1 \$2" in
   "mod verify")
     echo "all modules verified"
@@ -59,9 +51,6 @@ esac
 EOF
 }
 
-# Adds a finding to the report. Arguments are the advisory ID, the module, the
-# fixed version or an empty string, and an optional called function. Without
-# a function, govulncheck traced no call.
 add_finding() {
   local trace
   if [[ -n "${4:-}" ]]; then

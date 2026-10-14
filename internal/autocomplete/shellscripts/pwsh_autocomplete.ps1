@@ -4,12 +4,10 @@ Register-ArgumentCompleter -Native -CommandName __APPNAME__ -ScriptBlock {
   $elements = $commandAst.CommandElements
   $completionArgs = @()
 
-  # Collect command arguments.
   for ($i = 0; $i -lt $elements.Count; $i++) {
     $completionArgs += $elements[$i].Extent.Text
   }
 
-  # Preserve trailing space to distinguish namespaced commands from subcommands.
   if ($wordToComplete.Length -eq 0 -and $elements.Count -gt 0) {
     $completionArgs += ""
   }
@@ -20,20 +18,16 @@ Register-ArgumentCompleter -Native -CommandName __APPNAME__ -ScriptBlock {
   }
   $exitCode = $LASTEXITCODE
 
-  # Detect file references anywhere in the token.
   $prefix = ""
   $filePart = $wordToComplete
   $forceFileCompletion = $false
 
-  # Strip quotes for matching, but preserve them in completion results.
   $wordContent = $wordToComplete
   $leadingQuote = ""
   if ($wordToComplete -match '^([''"])(.*)(\1)$') {
-    # Handle a fully quoted token.
     $leadingQuote = $Matches[1]
     $wordContent = $Matches[2]
   } elseif ($wordToComplete -match '^([''"])(.*)$') {
-    # Handle an opening quote.
     $leadingQuote = $Matches[1]
     $wordContent = $Matches[2]
   }
@@ -45,7 +39,6 @@ Register-ArgumentCompleter -Native -CommandName __APPNAME__ -ScriptBlock {
   }
 
   if ($forceFileCompletion) {
-    # List the current directory for an empty file path.
     $items = if ([string]::IsNullOrEmpty($filePart)) {
       Get-ChildItem -ErrorAction SilentlyContinue
     } else {
@@ -63,7 +56,6 @@ Register-ArgumentCompleter -Native -CommandName __APPNAME__ -ScriptBlock {
   } else {
     switch ($exitCode) {
       10 {
-        # Complete files.
         $items = if ([string]::IsNullOrEmpty($wordToComplete)) {
           Get-ChildItem -ErrorAction SilentlyContinue
         } else {
@@ -80,11 +72,9 @@ Register-ArgumentCompleter -Native -CommandName __APPNAME__ -ScriptBlock {
         }
       }
       11 {
-        # Disable completion.
         [System.Management.Automation.CompletionResult]::new(' ', ' ', 'ParameterValue', ' ')
       }
       default {
-        # Use command completions.
         $output | ForEach-Object {
           [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }

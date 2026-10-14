@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package cmd
 
 import (
@@ -26,7 +24,6 @@ func TestSupportTicketsCreate(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("" +
 			"body: I am unable to connect my X account. Please help.\n" +
 			"subject: Cannot connect X account\n")
@@ -65,7 +62,6 @@ func TestSupportTicketsUpdate(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("status: resolved")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,
@@ -102,7 +98,6 @@ func TestSupportTicketsReply(t *testing.T) {
 	})
 
 	t.Run("piping data", func(t *testing.T) {
-		// Test piping YAML data over stdin
 		pipeData := []byte("body: Thank you for the update.")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData,

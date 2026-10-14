@@ -287,9 +287,6 @@ type JSONViewer struct {
 	help    help.Model
 }
 
-// ExploreJSON opens an interactive view for one JSON value. Without options
-// it reads keys from the terminal and draws on standard output. Options name
-// another input or output.
 func ExploreJSON(title string, json gjson.Result, options ...tea.ProgramOption) error {
 	view, err := newView("", json, false)
 	if err != nil {
@@ -310,9 +307,6 @@ type hasRawJSON interface {
 	RawJSON() string
 }
 
-// ExploreJSONStream opens an interactive view for streamed JSON. Without
-// options it reads keys from the terminal and draws on standard output.
-// Options name another input or output.
 func ExploreJSONStream[T any](title string, it Iterator[T], options ...tea.ProgramOption) error {
 	anyIt := genericToAnyIterator(it)
 
@@ -756,21 +750,18 @@ func sum(ints []int) int {
 	return total
 }
 
-// AnyIterator iterates over arbitrary values.
 type AnyIterator interface {
 	Next() bool
 	Err() error
 	Current() any
 }
 
-// Iterator provides typed iteration.
 type Iterator[T any] interface {
 	Next() bool
 	Err() error
 	Current() T
 }
 
-// genericIterator adapts Iterator[T] to AnyIterator.
 type genericIterator[T any] struct {
 	iterator Iterator[T]
 	current  any

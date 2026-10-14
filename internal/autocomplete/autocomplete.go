@@ -50,8 +50,6 @@ var (
 	}
 )
 
-// shellChoices lists the shells as a sentence in a stable order, such as
-// "bash, fish or zsh".
 func shellChoices(shells []CompletionStyle) string {
 	names := make([]string, 0, len(shells))
 	for _, shell := range shells {
@@ -200,7 +198,6 @@ func (scb *shellCompletionBuilder) createFromFlag(input string, flag *cli.Flag, 
 func GetCompletions(completionStyle CompletionStyle, root *cli.Command, args []string) CompletionResult {
 	result := getAllPossibleCompletions(completionStyle, root, args)
 
-	// Hide colon-delimited subcommands until the user enters a colon.
 	if len(args) > 0 && !strings.Contains(args[len(args)-1], ":") {
 		foundNames := make([]string, 0, len(result.Completions))
 		filteredCompletions := make([]ShellCompletion, 0, len(result.Completions))
@@ -248,7 +245,6 @@ func getAllPossibleCompletions(completionStyle CompletionStyle, root *cli.Comman
 			if flag == nil {
 				i++
 			} else if docFlag, ok := (*flag).(cli.DocGenerationFlag); ok && docFlag.TakesValue() {
-				// Non-boolean flags consume the next argument.
 				i += 2
 			} else {
 				i++
@@ -262,7 +258,6 @@ func getAllPossibleCompletions(completionStyle CompletionStyle, root *cli.Comman
 		}
 	}
 
-	// Complete a value when the previous argument expects one.
 	if len(preceding) > 0 {
 		prev := preceding[len(preceding)-1]
 		if isFlag(prev) {
@@ -335,8 +330,6 @@ func ExecuteShellCompletion(ctx context.Context, cmd *cli.Command) error {
 	return cli.Exit("", int(result.Behavior))
 }
 
-// rebuildColonSeparatedArgs rejoins colon-delimited commands split by shells.
-// Example: `["a", "b", ":", "c", "d"]` becomes `["a", "b:c", "d"]`.
 func rebuildColonSeparatedArgs(args []string) []string {
 	if len(args) == 0 {
 		return args

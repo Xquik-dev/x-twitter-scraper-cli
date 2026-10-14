@@ -10,7 +10,6 @@ import (
 	"testing"
 )
 
-// Define test cases
 var tests = map[string]struct {
 	value    any
 	format   FormFormat

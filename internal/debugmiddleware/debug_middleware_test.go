@@ -60,7 +60,6 @@ func TestDebugMiddleware(t *testing.T) {
 		middleware.Middleware()(req, func(req *http.Request) (*http.Response, error) {
 			nextMiddlewareRan = true
 
-			// The request sent down through middleware shouldn't be mutated.
 			require.Equal(t, stainlessUserAgent, req.Header.Get("User-Agent"))
 
 			return &http.Response{}, nil
@@ -84,7 +83,6 @@ func TestDebugMiddleware(t *testing.T) {
 		middleware.Middleware()(req, func(req *http.Request) (*http.Response, error) {
 			nextMiddlewareRan = true
 
-			// The request sent down through middleware shouldn't be mutated.
 			require.Equal(t, secretToken, req.Header.Get("Authorization"))
 
 			return &http.Response{}, nil
@@ -126,7 +124,6 @@ func TestDebugMiddleware(t *testing.T) {
 		middleware.Middleware()(req, func(req *http.Request) (*http.Response, error) {
 			nextMiddlewareRan = true
 
-			// The request sent down through middleware shouldn't be mutated.
 			require.Equal(t, []string{secretToken + "1", secretToken + "2"}, req.Header.Values("Authorization"))
 
 			return &http.Response{}, nil
@@ -155,7 +152,6 @@ func TestDebugMiddleware(t *testing.T) {
 		middleware.Middleware()(req, func(req *http.Request) (*http.Response, error) {
 			nextMiddlewareRan = true
 
-			// The request sent down through middleware shouldn't be mutated.
 			require.Equal(t, secretToken, req.Header.Get(customAPIKeyHeader))
 
 			return &http.Response{}, nil
@@ -180,7 +176,6 @@ func TestDebugMiddleware(t *testing.T) {
 		middleware.Middleware()(req, func(req *http.Request) (*http.Response, error) {
 			nextMiddlewareRan = true
 
-			// The request sent down through middleware shouldn't be mutated.
 			require.Equal(t, []string{secretToken + "1", secretToken + "2"}, req.Header.Values(customAPIKeyHeader))
 
 			return &http.Response{}, nil
@@ -206,12 +201,10 @@ func TestDebugMiddleware(t *testing.T) {
 		middleware.Middleware()(req, func(req *http.Request) (*http.Response, error) {
 			nextMiddlewareRan = true
 
-			// The request body should still be fully readable after the middleware runs
 			body, err := io.ReadAll(req.Body)
 			require.NoError(t, err)
 			require.Equal(t, bodyContent, string(body))
 
-			// The request sent down through middleware shouldn't be mutated.
 			require.Equal(t, secretToken, req.Header.Get("Authorization"))
 
 			return &http.Response{}, nil

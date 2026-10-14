@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// File generated from our OpenAPI spec.
-
 package main
 
 import (
@@ -54,7 +52,6 @@ func run(
 	if err := app.Run(context.Background(), args); err != nil {
 		exitCode := 1
 
-		// Check if error has a custom exit code
 		if exitErr, ok := err.(cli.ExitCoder); ok {
 			exitCode = exitErr.ExitCode()
 		}
@@ -71,7 +68,6 @@ func run(
 				Transform:      app.String("transform-error"),
 			})
 			if showErr != nil {
-				// Just print the original error:
 				fmt.Fprintf(stderr, "%s\n", err.Error())
 			}
 		} else {
@@ -87,8 +83,6 @@ func run(
 }
 
 func prepareForAutocomplete(cmd *cli.Command) {
-	// urfave/cli does not handle flag completions and will print an error if we inspect a command with invalid flags.
-	// This skips that sort of validation
 	cmd.SkipFlagParsing = true
 	for _, child := range cmd.Commands {
 		prepareForAutocomplete(child)

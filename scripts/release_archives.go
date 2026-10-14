@@ -4,8 +4,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// release_archives fails when an entry of a built release archive belongs to
-// a user or group other than root.
 package main
 
 import (
