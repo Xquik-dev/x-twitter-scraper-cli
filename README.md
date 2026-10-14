@@ -111,7 +111,7 @@ Use file references inside JSON or YAML.
 
 ```bash
 x-twitter-scraper <command> --arg '{image: "@abe.jpg"}'
-# Equivalent:
+# The same input as YAML.
 x-twitter-scraper <command> <<YAML
 arg:
   image: "@abe.jpg"
