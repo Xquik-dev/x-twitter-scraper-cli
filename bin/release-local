@@ -55,6 +55,11 @@ if ! command -v goreleaser >/dev/null 2>&1; then
   brew install goreleaser
 fi
 
+if [[ "$dry_run" == false ]]; then
+  step "Checking that npm publishing is ready"
+  bin/release-npm --check
+fi
+
 step "Checking that the working tree is clean"
 [[ -z "$(git status --porcelain)" ]] ||
   refuse "The working tree has changes. Commit or remove them, then rerun."
@@ -214,5 +219,9 @@ step "Publishing GitHub release $tag with notes from CHANGELOG.md"
 gh release edit "$tag" --repo "$repository" --draft=false --verify-tag \
   --title "$tag" --notes-file "$notes_file" "${release_flags[@]}" ||
   refuse "Tag $tag is pushed. Publish its draft release on GitHub with notes from CHANGELOG.md."
+
+step "Publishing the npm packages for $version"
+bin/release-npm ||
+  refuse "GitHub release $tag is published, but npm is not. Fix the errors above, then run bin/release-npm."
 
 echo "Released $tag at https://github.com/$repository/releases/tag/$tag"
