@@ -24,6 +24,14 @@ EOF
 #!/usr/bin/env bash
 echo "audit" >>"$FAKE_LOGS/order"
 EOF
+  stub bin/release-npm <<'EOF'
+#!/usr/bin/env bash
+echo "release-npm${*:+ $*}" >>"$FAKE_LOGS/order"
+if [[ -n "${FAKE_NPM_NOT_READY:-}" ]]; then
+  echo "Set NPM_KEYCHAIN_SERVICE and NPM_KEYCHAIN_ACCOUNT to the Keychain item of the npm token, then rerun." >&2
+  exit 1
+fi
+EOF
   stub bin/check-release-debug-info <<'EOF'
 #!/usr/bin/env bash
 echo "check-release-debug-info" >>"$FAKE_LOGS/order"
@@ -266,7 +274,8 @@ test_a_release_uploads_with_the_token_in_the_environment_then_tags_and_publishes
   assert_equal "" "$run_stderr" "stderr"
   assert_equal 0 "$run_status" "the exit code"
   assert_ends_with "$run_stdout" "Released v1.2.3 at https://github.com/$repository/releases/tag/v1.2.3" "stdout"
-  assert_equal "gh auth status --hostname github.com
+  assert_equal "release-npm --check
+gh auth status --hostname github.com
 gh api repos/$repository/releases/tags/v1.2.3
 gh api --paginate --slurp repos/$repository/releases?per_page=100
 check-local
@@ -279,7 +288,8 @@ gh auth token --hostname github.com
 goreleaser release --clean
 gh release view v1.2.3 --repo $repository --json assets --jq [.assets[].name] | sort
 gh release download v1.2.3 --repo $repository --pattern x-twitter-scraper_1.2.3_checksums.txt --output -
-gh release edit v1.2.3 --repo $repository --draft=false --verify-tag --title v1.2.3 --notes-file NOTES --latest" \
+gh release edit v1.2.3 --repo $repository --draft=false --verify-tag --title v1.2.3 --notes-file NOTES --latest
+release-npm" \
     "$(order_without_paths)" "the steps"
   assert_equal "the expected token" "$(log_of goreleaser-token)" "the token GoReleaser saw"
   assert_not_contains "$(log_of goreleaser-arguments)" "$test_token" "the GoReleaser arguments"
@@ -310,6 +320,18 @@ test_a_release_skips_the_upload_when_the_draft_already_has_every_asset() {
   assert_not_contains "$(log_of order)" "gh release create" "the steps"
   assert_not_contains "$(log_of order)" "gh auth token" "the steps"
   assert_contains "$(log_of order)" "gh release edit v1.2.3" "the steps"
+}
+
+test_npm_publishing_that_is_not_ready_stops_a_release_before_any_step() {
+  prepare_release
+  run_env=("FAKE_NPM_NOT_READY=1")
+
+  run_in_repo bin/release-local
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "Set NPM_KEYCHAIN_SERVICE and NPM_KEYCHAIN_ACCOUNT to the Keychain item of the npm token, then rerun." "$run_stderr" "stderr"
+  assert_equal "release-npm --check" "$(log_of order)" "the steps"
+  assert_equal "" "$(remote_tags)" "the tags on origin"
 }
 
 test_a_published_release_stops_a_real_run_before_the_checks() {
@@ -374,7 +396,8 @@ test_a_prerelease_is_published_without_the_latest_label() {
 
   assert_equal 0 "$run_status" "the exit code"
   assert_contains "$(log_of order)" "--draft=false --verify-tag --title v1.3.0-beta.1" "the steps"
-  assert_ends_with "$(log_of order)" "--prerelease --latest=false" "the steps"
+  assert_contains "$(log_of order)" "--prerelease --latest=false
+release-npm" "the steps"
 }
 
 test_a_package_description_without_the_listing_words_stops_the_run() {

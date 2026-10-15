@@ -1,0 +1,275 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Xquik contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -euo pipefail
+set +o xtrace
+
+cd -- "$(dirname -- "$0")/.."
+
+readonly repository="Xquik-dev/x-twitter-scraper-cli"
+readonly registry="https://registry.npmjs.org"
+readonly main_package="x-twitter-scraper-cli"
+readonly template="npm/$main_package"
+readonly version_pattern='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$'
+readonly targets=(
+  "darwin x64 macos_amd64.zip"
+  "darwin arm64 macos_arm64.zip"
+  "linux ia32 linux_386.tar.gz"
+  "linux x64 linux_amd64.tar.gz"
+  "linux arm linux_armv6.tar.gz"
+  "linux arm64 linux_arm64.tar.gz"
+  "win32 ia32 windows_386.zip"
+  "win32 x64 windows_amd64.zip"
+  "win32 arm64 windows_arm64.zip"
+)
+
+mode=publish
+for argument in "$@"; do
+  case "$argument" in
+    --dry-run) mode=dry-run ;;
+    --check) mode=check ;;
+    *)
+      echo "Unknown option $argument. Run bin/release-npm, bin/release-npm --dry-run or bin/release-npm --check." >&2
+      exit 2
+      ;;
+  esac
+done
+
+step() {
+  echo "==> $1"
+}
+
+refuse() {
+  echo "$1" >&2
+  exit 1
+}
+
+step "Checking required tools"
+for tool in bun curl gh git jq shasum tar unzip; do
+  command -v "$tool" >/dev/null 2>&1 || refuse "$tool is not installed. Install it, then rerun."
+done
+
+if [[ "$mode" != dry-run ]]; then
+  step "Checking the Keychain item of the npm token"
+  [[ -n "${NPM_KEYCHAIN_SERVICE:-}" && -n "${NPM_KEYCHAIN_ACCOUNT:-}" ]] ||
+    refuse "Set NPM_KEYCHAIN_SERVICE and NPM_KEYCHAIN_ACCOUNT to the Keychain item of the npm token, then rerun."
+  command -v security >/dev/null 2>&1 ||
+    refuse "The macOS security tool is missing. Publish from a Mac, then rerun."
+  security find-generic-password -s "$NPM_KEYCHAIN_SERVICE" -a "$NPM_KEYCHAIN_ACCOUNT" >/dev/null 2>&1 ||
+    refuse "The Keychain holds no item for NPM_KEYCHAIN_SERVICE and NPM_KEYCHAIN_ACCOUNT. Add the npm token, then rerun."
+fi
+
+if [[ "$mode" == check ]]; then
+  echo "npm publishing is ready."
+  exit 0
+fi
+
+temp_root="${TMPDIR:-/tmp}"
+workspace="$(mktemp -d "${temp_root%/}/xquik-cli-npm.XXXXXX")"
+
+cleanup() {
+  rm -rf -- "${workspace:?}"
+}
+trap cleanup EXIT
+
+if [[ "$mode" == publish ]]; then
+  step "Checking that the working tree is clean"
+  [[ -z "$(git status --porcelain)" ]] ||
+    refuse "The working tree has changes. Commit or remove them, then rerun."
+
+  step "Checking that main is checked out"
+  [[ "$(git symbolic-ref --quiet --short HEAD || true)" == main ]] ||
+    refuse "The current branch is not main. Switch to main, then rerun."
+
+  step "Checking that main matches origin/main"
+  git fetch --quiet origin main ||
+    refuse "git could not fetch origin. Check the network, then rerun."
+  [[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]] ||
+    refuse "main differs from origin/main. Pull or push main, then rerun."
+fi
+
+step "Reading the version from .release-please-manifest.json"
+version="$(jq -er '."."' .release-please-manifest.json)" ||
+  refuse ".release-please-manifest.json has no version. Fix it, then rerun."
+[[ "$version" =~ $version_pattern ]] ||
+  refuse "Version $version is not a semantic version. Fix .release-please-manifest.json, then rerun."
+readonly version
+readonly tag="v$version"
+
+step "Checking that GitHub release $tag is published"
+lookup="$(gh api "repos/$repository/releases/tags/$tag" 2>&1)" ||
+  refuse "GitHub shows no release $tag. Publish it with bin/release-local, then rerun."
+[[ "$(jq -r '.draft' <<<"$lookup")" == false ]] ||
+  refuse "GitHub release $tag is still a draft. Publish it with bin/release-local, then rerun."
+
+step "Checking that the npm files match tag $tag"
+git fetch --quiet origin tag "$tag" ||
+  refuse "git could not fetch tag $tag from origin. Check the network, then rerun."
+if git cat-file -e "$tag:$template/package.json" 2>/dev/null; then
+  git diff --quiet "$tag" HEAD -- npm LICENSE ||
+    refuse "npm/ or LICENSE changed after $tag. Release a new version, then publish it."
+else
+  echo "$tag predates the npm packages, so they use the launcher on this commit."
+fi
+
+assets="$workspace/assets"
+checksums="x-twitter-scraper_${version}_checksums.txt"
+patterns=(--pattern "$checksums")
+for target in "${targets[@]}"; do
+  read -r _ _ suffix <<<"$target"
+  patterns+=(--pattern "x-twitter-scraper_${version}_${suffix}")
+done
+
+step "Downloading the archives of $tag"
+gh release download "$tag" --repo "$repository" --dir "$assets" "${patterns[@]}" ||
+  refuse "GitHub did not return the archives of $tag. Retry later."
+
+packages="$workspace/packages"
+order=()
+
+step "Checking each archive against $checksums & building 1 npm package per platform"
+for target in "${targets[@]}"; do
+  read -r os cpu suffix <<<"$target"
+  name="$main_package-$os-$cpu"
+  archive="x-twitter-scraper_${version}_${suffix}"
+  expected="$(awk -v name="$archive" '$2 == name { print $1 }' "$assets/$checksums")"
+  [[ -n "$expected" ]] || refuse "$checksums does not list $archive. Check release $tag on GitHub."
+  [[ "$(shasum -a 256 "$assets/$archive" | awk '{ print $1 }')" == "$expected" ]] ||
+    refuse "$archive does not match $checksums. Rerun, and check release $tag on GitHub if it fails again."
+  unpacked="$workspace/unpacked/$name"
+  folder="$packages/$name"
+  binary=x-twitter-scraper
+  if [[ "$os" == win32 ]]; then
+    binary=x-twitter-scraper.exe
+  fi
+  mkdir -p "$unpacked" "$folder/bin"
+  if [[ "$suffix" == *.zip ]]; then
+    unzip -q "$assets/$archive" -d "$unpacked"
+  else
+    tar -xzf "$assets/$archive" -C "$unpacked"
+  fi
+  [[ -f "$unpacked/$binary" ]] || refuse "$archive holds no $binary. Check release $tag on GitHub."
+  cp "$unpacked/$binary" "$folder/bin/$binary"
+  chmod 755 "$folder/bin/$binary"
+  cp -R "$unpacked/LICENSE" "$unpacked/LICENSES" "$unpacked/THIRD_PARTY_NOTICES.md" "$folder/"
+  jq -n --slurpfile main "$template/package.json" \
+    --arg name "$name" --arg version "$version" --arg os "$os" --arg cpu "$cpu" '
+    {
+      name: $name,
+      version: $version,
+      description: "The \($os) \($cpu) build of x-twitter-scraper-cli. Install x-twitter-scraper-cli instead.",
+      homepage: $main[0].homepage,
+      bugs: $main[0].bugs,
+      repository: $main[0].repository,
+      license: $main[0].license,
+      os: [$os],
+      cpu: [$cpu],
+      files: ["bin", "LICENSE", "LICENSES", "THIRD_PARTY_NOTICES.md"],
+      preferUnplugged: true
+    }' >"$folder/package.json"
+  cat >"$folder/README.md" <<EOF
+# $name
+
+The $os $cpu build of [x-twitter-scraper-cli](https://www.npmjs.com/package/$main_package).
+Install $main_package instead. npm picks this package for your platform.
+
+> Xquik is an independent third-party service. Not affiliated with X Corp.
+> "Twitter" and "X" are trademarks of X Corp.
+EOF
+  order+=("$name")
+done
+
+step "Building $main_package"
+main_folder="$packages/$main_package"
+mkdir -p "$main_folder"
+cp -R "$template/." "$main_folder/"
+cp LICENSE "$main_folder/LICENSE"
+optional="$(jq -n --arg version "$version" '$ARGS.positional | map({(.): $version}) | add' --args "${order[@]}")"
+jq --arg version "$version" --argjson optional "$optional" \
+  '.version = $version | .optionalDependencies = $optional' "$template/package.json" >"$main_folder/package.json"
+order+=("$main_package")
+
+tarballs="$workspace/tarballs"
+mkdir -p "$tarballs"
+
+step "Packing the npm packages"
+for name in "${order[@]}"; do
+  tarball="$tarballs/$name-$version.tgz"
+  (cd -- "$packages/$name" && bun pm pack --ignore-scripts --filename "$tarball" --quiet >/dev/null) ||
+    refuse "bun could not pack $name. Fix the errors above, then rerun."
+  if [[ "$name" != "$main_package" && "$name" != *-win32-* ]]; then
+    tar -tvzf "$tarball" package/bin/x-twitter-scraper | grep -q '^-rwx' ||
+      refuse "$name packs its binary without the executable bit. Fix the pack step, then rerun."
+  fi
+done
+
+step "Listing the npm packages for $version"
+for name in "${order[@]}"; do
+  tarball="$tarballs/$name-$version.tgz"
+  printf '  %s@%s  %s bytes  sha256 %s\n' "$name" "$version" \
+    "$(wc -c <"$tarball" | tr -d ' ')" "$(shasum -a 256 "$tarball" | awk '{ print $1 }')"
+done
+echo "Package count  ${#order[@]}"
+
+if [[ "$mode" == dry-run ]]; then
+  echo "Dry run finished. Nothing was published."
+  exit 0
+fi
+
+dist_tag=latest
+if [[ "$version" == *-* ]]; then
+  dist_tag=next
+fi
+
+registry_has() {
+  local status
+  status="$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 30 "$registry/$1/$version")" ||
+    refuse "npm did not answer for $1@$version. Check the network, then rerun."
+  case "$status" in
+    200) return 0 ;;
+    404) return 1 ;;
+    *) refuse "npm answered $status for $1@$version. Retry later." ;;
+  esac
+}
+
+step "Checking which packages npm already has"
+missing=()
+for name in "${order[@]}"; do
+  if registry_has "$name"; then
+    echo "npm already has $name@$version."
+  else
+    missing+=("$name")
+  fi
+done
+
+if ((${#missing[@]} == 0)); then
+  echo "npm already has every package for $version."
+  exit 0
+fi
+
+token="$(security find-generic-password -s "$NPM_KEYCHAIN_SERVICE" -a "$NPM_KEYCHAIN_ACCOUNT" -w)" ||
+  refuse "The Keychain did not return the npm token. Unlock the Keychain, then rerun."
+
+step "Publishing ${#missing[@]} npm packages with the $dist_tag tag"
+for name in "${missing[@]}"; do
+  (cd -- "$packages/$name" &&
+    NPM_CONFIG_TOKEN="$token" bun publish "$tarballs/$name-$version.tgz" \
+      --access public --tag "$dist_tag" --registry "$registry") ||
+    refuse "npm did not take $name@$version. Fix the errors above, then rerun to skip what npm has."
+  published=false
+  for ((attempt = 0; attempt < 30; attempt++)); do
+    if registry_has "$name"; then
+      published=true
+      break
+    fi
+    sleep 10
+  done
+  [[ "$published" == true ]] ||
+    refuse "npm does not show $name@$version after 5 minutes. Check the registry, then rerun."
+  echo "Published $name@$version."
+done
+
+echo "Published $main_package@$version at https://www.npmjs.com/package/$main_package"

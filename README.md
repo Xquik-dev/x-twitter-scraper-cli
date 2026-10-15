@@ -48,6 +48,22 @@ Checked on 2026-10-15. See each number with its date & source on [xquik.com/trus
 
 ## Installation
 
+### Install with npm
+
+Install [Node.js](https://nodejs.org) 18 or later.
+
+```sh
+npm install --global x-twitter-scraper-cli
+```
+
+Or run the CLI once without installing it.
+
+```sh
+npx x-twitter-scraper-cli --help
+```
+
+npm installs only the build for your platform. Nothing downloads when the CLI runs.
+
 ### Install with Go
 
 Install [Go](https://go.dev/doc/install) 1.21 or later. Go downloads the toolchain this CLI needs.
@@ -176,6 +192,9 @@ It runs REUSE, lint, script tests, Go tests, coverage, `govulncheck`, 2 reproduc
 It posts the result as the `xquik-local-checks` commit status.
 Maintainers publish releases from `main` with `bin/release-local`.
 `bin/release-local --dry-run` builds every release asset and publishes nothing.
+After the GitHub release, `bin/release-local` runs `bin/release-npm`.
+It publishes the [x-twitter-scraper-cli](https://www.npmjs.com/package/x-twitter-scraper-cli) package and 1 package per platform.
+`bin/release-npm --dry-run` packs them from the published release and publishes nothing.
 
 ## More Xquik tools
 

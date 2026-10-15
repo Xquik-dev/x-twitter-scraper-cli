@@ -26,7 +26,7 @@ No OpenSSF exclusion applies.
 | Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that `bin/check-local` runs for 15 seconds |
 | Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit`, with reviewed exceptions in `audit-exceptions.json` |
 | Local checks | `bin/check-local` runs licensing, lint, script, test, audit, build, fuzzing & CodeQL checks, then posts the `xquik-local-checks` status |
-| Releases | `bin/release-local` publishes checksums & an annotated tag from `main` |
+| Releases | `bin/release-local` publishes checksums & an annotated tag from `main`. `bin/release-npm` checks each archive against those checksums before it packs the npm packages |
 | Reproducibility | `bin/check-local` builds each GoReleaser snapshot twice & compares checksums. Every archive entry belongs to root, and a dry run builds with the release tag, so its checksums equal the release's |
 | Portability | `./scripts/test` compiles every package for Windows AMD64 |
 | Two-factor authentication | The Xquik-dev organization requires 2FA |

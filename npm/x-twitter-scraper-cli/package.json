@@ -1,0 +1,34 @@
+{
+  "name": "x-twitter-scraper-cli",
+  "version": "0.0.0",
+  "description": "X API & Twitter API CLI by Xquik. Search tweets, export followers & monitor accounts from a terminal. Not affiliated with X Corp.",
+  "keywords": [
+    "xquik",
+    "twitter-cli",
+    "x-cli",
+    "twitter-scraper",
+    "tweet-scraper",
+    "twitter-api",
+    "x-api",
+    "cli"
+  ],
+  "homepage": "https://docs.xquik.com/sdks/cli",
+  "bugs": {
+    "url": "https://github.com/Xquik-dev/x-twitter-scraper-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xquik-dev/x-twitter-scraper-cli.git"
+  },
+  "license": "Apache-2.0",
+  "bin": {
+    "x-twitter-scraper": "bin/x-twitter-scraper.js"
+  },
+  "files": [
+    "bin/x-twitter-scraper.js"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "optionalDependencies": {}
+}
