@@ -241,13 +241,13 @@ func (a *audit) inspectFile(file *ast.File, info *types.Info, at func(token.Pos)
 				a.hatches[at(node.Lparen)] = hatch{"unchecked assertion", "type assertion without the comma-ok form"}
 			}
 		case *ast.AssignStmt:
-			a.discardedAssertion(node.Lhs, node.Rhs, at)
+			a.discardedAssertion(node.Lhs, node.Rhs, info, at)
 		case *ast.ValueSpec:
 			names := make([]ast.Expr, len(node.Names))
 			for i, name := range node.Names {
 				names[i] = name
 			}
-			a.discardedAssertion(names, node.Values, at)
+			a.discardedAssertion(names, node.Values, info, at)
 		case *ast.SelectorExpr:
 			if function, ok := info.Uses[node.Sel].(*types.Func); ok && function.Pkg() != nil &&
 				function.Pkg().Path() == "reflect" && unsafeReflect[function.Name()] {
@@ -266,14 +266,36 @@ func (a *audit) inspectFile(file *ast.File, info *types.Info, at func(token.Pos)
 	})
 }
 
-func (a *audit) discardedAssertion(targets, values []ast.Expr, at func(token.Pos) token.Position) {
+func (a *audit) discardedAssertion(targets, values []ast.Expr, info *types.Info, at func(token.Pos) token.Position) {
 	if len(targets) != 2 || len(values) != 1 {
 		return
 	}
-	assertion, isAssertion := ast.Unparen(values[0]).(*ast.TypeAssertExpr)
-	if blank, isIdent := targets[1].(*ast.Ident); isAssertion && isIdent && blank.Name == "_" {
-		a.hatches[at(assertion.Lparen)] = hatch{"unchecked assertion", "type assertion discards its ok result"}
+	if blank, isIdent := targets[1].(*ast.Ident); !isIdent || blank.Name != "_" {
+		return
 	}
+	switch value := ast.Unparen(values[0]).(type) {
+	case *ast.TypeAssertExpr:
+		a.hatches[at(value.Lparen)] = hatch{"unchecked assertion", "type assertion discards its ok result"}
+	case *ast.CallExpr:
+		if reflectTypeAssert(value.Fun, info) {
+			a.hatches[at(value.Lparen)] = hatch{"unchecked assertion", "reflect TypeAssert discards its ok result"}
+		}
+	}
+}
+
+func reflectTypeAssert(function ast.Expr, info *types.Info) bool {
+	switch generic := function.(type) {
+	case *ast.IndexExpr:
+		function = generic.X
+	case *ast.IndexListExpr:
+		function = generic.X
+	}
+	selector, isSelector := function.(*ast.SelectorExpr)
+	if !isSelector {
+		return false
+	}
+	called, isFunc := info.Uses[selector.Sel].(*types.Func)
+	return isFunc && called.Pkg() != nil && called.Pkg().Path() == "reflect" && called.Name() == "TypeAssert"
 }
 
 func markConstraints(parameters *ast.FieldList, constraints map[ast.Expr]bool) {

@@ -111,6 +111,10 @@ func TestEscapeHatchesFail(t *testing.T) {
 			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nvar failure error\n\nvar Stringer, _ = failure.(fmt.Stringer)\n"},
 			"probe.go:7:27: type assertion discards its ok result",
 		},
+		"discarded reflect ok": {
+			map[string]string{"probe.go": "package probe\n\nimport (\n\t\"fmt\"\n\t\"reflect\"\n)\n\nfunc Name(v reflect.Value) string {\n\ts, _ := reflect.TypeAssert[fmt.Stringer](v)\n\treturn s.String()\n}\n"},
+			"probe.go:9:42: reflect TypeAssert discards its ok result",
+		},
 		"unsafe import": {
 			map[string]string{"probe.go": "package probe\n\nimport \"unsafe\"\n\nvar Size = unsafe.Sizeof(0)\n"},
 			"probe.go:3:8: import of package unsafe",
