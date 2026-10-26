@@ -119,71 +119,159 @@ func (d yamlDocument) resolve(node ast.Node) (ast.Node, error) {
 	}
 }
 
+type tagValue interface {
+	printed() string
+	encoded() (json.RawMessage, error)
+}
+
+type textValue string
+
+type nullValue struct{}
+
+type intValue int
+
+type floatValue float64
+
+type boolValue bool
+
+type timeValue time.Time
+
+type bytesValue []byte
+
+func (v textValue) printed() string                   { return string(v) }
+func (v textValue) encoded() (json.RawMessage, error) { return json.Marshal(string(v)) }
+
+func (nullValue) printed() string                   { return "" }
+func (nullValue) encoded() (json.RawMessage, error) { return json.RawMessage("null"), nil }
+
+func (v intValue) printed() string                   { return strconv.Itoa(int(v)) }
+func (v intValue) encoded() (json.RawMessage, error) { return json.Marshal(int(v)) }
+
+func (v floatValue) printed() string                   { return fmt.Sprint(float64(v)) }
+func (v floatValue) encoded() (json.RawMessage, error) { return json.Marshal(float64(v)) }
+
+func (v boolValue) printed() string                   { return strconv.FormatBool(bool(v)) }
+func (v boolValue) encoded() (json.RawMessage, error) { return json.Marshal(bool(v)) }
+
+func (v timeValue) printed() string                   { return time.Time(v).Format(time.RFC3339Nano) }
+func (v timeValue) encoded() (json.RawMessage, error) { return json.Marshal(time.Time(v)) }
+
+func (v bytesValue) printed() string                   { return base64.StdEncoding.EncodeToString(v) }
+func (v bytesValue) encoded() (json.RawMessage, error) { return json.Marshal([]byte(v)) }
+
 func (d yamlDocument) tagged(tag *ast.TagNode) (json.RawMessage, error) {
-	node, err := d.resolve(tag.Value)
+	value, isScalar, err := d.readTag(tag)
 	if err != nil {
 		return nil, err
 	}
-	switch tag.Start.Value {
+	if !isScalar {
+		return d.convert(tag.Value)
+	}
+	return value.encoded()
+}
+
+func (d yamlDocument) readTag(tag *ast.TagNode) (tagValue, bool, error) {
+	name := tag.Start.Value
+	if tag.Directive != nil {
+		name = "!!str"
+	}
+	var read func(ast.Node) (tagValue, error)
+	switch name {
 	case "!!str":
-		return d.taggedText(node)
+		read = d.readText
 	case "!!null":
-		return json.RawMessage("null"), nil
+		read = readNull
 	case "!!int":
-		text, _ := d.text(node)
-		whole, _ := strconv.Atoi(text)
-		return json.Marshal(whole)
+		read = d.readInt
 	case "!!float":
-		return d.taggedFloat(node)
+		read = d.readFloat
 	case "!!bool":
-		text, err := d.text(node)
-		if err != nil {
-			return nil, err
-		}
-		switch lowered := strings.ToLower(text); lowered {
-		case "yes", "no":
-			return json.Marshal(lowered == "yes")
-		default:
-			truth, err := strconv.ParseBool(lowered)
-			if err != nil {
-				return nil, fmt.Errorf("cannot convert %q to boolean", text)
-			}
-			return json.Marshal(truth)
-		}
+		read = d.readBool
 	case "!!timestamp":
-		var moment time.Time
-		switch node.(type) {
-		case *ast.StringNode, *ast.TagNode:
-			text, _ := d.text(node)
-			for _, format := range timestampFormats {
-				if parsed, err := time.Parse(format, text); err == nil {
-					moment = parsed
-					break
-				}
-			}
-		}
-		return json.Marshal(moment)
+		read = d.readTimestamp
 	case "!!binary":
-		if !d.holdsText(node) {
-			return nil, fmt.Errorf("cannot convert %s to binary", node.String())
-		}
-		text, err := d.text(node)
-		if err != nil {
-			return nil, err
-		}
-		decoded, _ := base64.StdEncoding.DecodeString(text)
-		return json.Marshal(decoded)
+		read = d.readBinary
 	default:
-		return d.convert(node)
+		return nil, false, nil
+	}
+	node, err := d.resolve(tag.Value)
+	if err != nil {
+		return nil, true, err
+	}
+	value, err := read(node)
+	return value, true, err
+}
+
+func (d yamlDocument) readText(node ast.Node) (tagValue, error) {
+	text, err := d.text(node)
+	return textValue(text), err
+}
+
+func readNull(ast.Node) (tagValue, error) {
+	return nullValue{}, nil
+}
+
+func (d yamlDocument) readInt(node ast.Node) (tagValue, error) {
+	text, _ := d.text(node)
+	whole, _ := strconv.Atoi(text)
+	return intValue(whole), nil
+}
+
+func (d yamlDocument) readFloat(node ast.Node) (tagValue, error) {
+	switch node.(type) {
+	case *ast.IntegerNode, *ast.FloatNode, *ast.InfinityNode, *ast.NanNode:
+		var number float64
+		err := yaml.NodeToValue(node, &number)
+		return floatValue(number), err
+	case *ast.StringNode, *ast.TagNode:
+		text, _ := d.text(node)
+		number, _ := strconv.ParseFloat(text, 64)
+		return floatValue(number), nil
+	default:
+		return floatValue(0), nil
 	}
 }
 
-func (d yamlDocument) taggedText(node ast.Node) (json.RawMessage, error) {
+func (d yamlDocument) readBool(node ast.Node) (tagValue, error) {
 	text, err := d.text(node)
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(text)
+	switch lowered := strings.ToLower(text); lowered {
+	case "yes", "no":
+		return boolValue(lowered == "yes"), nil
+	default:
+		truth, err := strconv.ParseBool(lowered)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert %q to boolean", text)
+		}
+		return boolValue(truth), nil
+	}
+}
+
+func (d yamlDocument) readTimestamp(node ast.Node) (tagValue, error) {
+	switch node.(type) {
+	case *ast.StringNode, *ast.TagNode:
+		text, _ := d.text(node)
+		for _, format := range timestampFormats {
+			if moment, err := time.Parse(format, text); err == nil {
+				return timeValue(moment), nil
+			}
+		}
+	}
+	return timeValue(time.Time{}), nil
+}
+
+func (d yamlDocument) readBinary(node ast.Node) (tagValue, error) {
+	if !d.holdsText(node) {
+		return nil, fmt.Errorf("cannot convert %s to binary", node.String())
+	}
+	text, err := d.text(node)
+	if err != nil {
+		return nil, err
+	}
+	decoded, _ := base64.StdEncoding.DecodeString(text)
+	return bytesValue(decoded), nil
 }
 
 func (d yamlDocument) text(node ast.Node) (string, error) {
@@ -191,35 +279,18 @@ func (d yamlDocument) text(node ast.Node) (string, error) {
 	if !isTagged {
 		return scalarText(node)
 	}
-	switch tag.Start.Value {
-	case "!!null":
-		return "", nil
-	case "!!int", "!!bool":
-		raw, err := d.tagged(tag)
-		return string(raw), err
-	case "!!float":
-		raw, err := d.tagged(tag)
-		if err != nil {
-			return "", err
-		}
-		var number float64
-		err = json.Unmarshal(raw, &number)
-		return fmt.Sprint(number), err
-	case "!!str", "!!timestamp", "!!binary":
-		raw, err := d.tagged(tag)
-		if err != nil {
-			return "", err
-		}
-		var text string
-		err = json.Unmarshal(raw, &text)
-		return text, err
-	default:
-		inner, err := d.resolve(tag.Value)
-		if err != nil {
-			return "", err
-		}
-		return d.text(inner)
+	value, isScalar, err := d.readTag(tag)
+	if err != nil {
+		return "", err
 	}
+	if isScalar {
+		return value.printed(), nil
+	}
+	inner, err := d.resolve(tag.Value)
+	if err != nil {
+		return "", err
+	}
+	return d.text(inner)
 }
 
 func (d yamlDocument) holdsText(node ast.Node) bool {
@@ -227,29 +298,15 @@ func (d yamlDocument) holdsText(node ast.Node) bool {
 	case *ast.StringNode, *ast.LiteralNode:
 		return true
 	case *ast.TagNode:
-		switch node.Start.Value {
-		case "!!str":
-			return true
-		case "!!null", "!!int", "!!float", "!!bool", "!!timestamp", "!!binary":
-			return false
+		value, isScalar, err := d.readTag(node)
+		if isScalar {
+			_, isText := value.(textValue)
+			return err == nil && isText
 		}
 		inner, err := d.resolve(node.Value)
 		return err == nil && d.holdsText(inner)
 	default:
 		return false
-	}
-}
-
-func (d yamlDocument) taggedFloat(node ast.Node) (json.RawMessage, error) {
-	switch node.(type) {
-	case *ast.IntegerNode, *ast.FloatNode, *ast.InfinityNode, *ast.NanNode:
-		return encodeScalar[float64](node)
-	case *ast.StringNode, *ast.TagNode:
-		text, _ := d.text(node)
-		number, _ := strconv.ParseFloat(text, 64)
-		return json.Marshal(number)
-	default:
-		return json.Marshal(0)
 	}
 }
 
