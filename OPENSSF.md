@@ -20,9 +20,9 @@ No OpenSSF exclusion applies.
 | Security reporting | Private GitHub reporting, response targets, & safe harbor in `SECURITY.md` |
 | Build | Pinned Go modules, checksum verification, & `./scripts/build` |
 | Tests | Race-enabled tests, regression coverage & a second run of every package on a pseudo-terminal through `./scripts/test` |
-| Statement coverage | `./scripts/coverage` enforces 90%. The current result is 91.7%. |
-| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 883/1,098 (80.42%). |
-| Static analysis | `go vet`, `shellcheck` & CodeQL security-extended queries through `bin/check-local` |
+| Statement coverage | `./scripts/coverage` enforces 90%. The current result is 92.8%. |
+| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 759/925 (82.05%). |
+| Static analysis | `go vet`, staticcheck with every check, 100% type coverage with no escape hatch, `shellcheck` & CodeQL security-extended queries through `bin/check-local` |
 | Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that `bin/check-local` runs for 15 seconds |
 | Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit`, with reviewed exceptions in `audit-exceptions.json` |
 | Local checks | `bin/check-local` runs licensing, lint, script, test, audit, build, fuzzing & CodeQL checks, then posts the `xquik-local-checks` status |
