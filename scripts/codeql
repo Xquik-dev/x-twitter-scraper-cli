@@ -102,7 +102,7 @@ if ((status != 0)); then
   echo "CodeQL could not install the libraries of $comment_test_pack. Check the network and GitHub access, then rerun." >&2
   exit 1
 fi
-if ! codeql test run "$query_tests/${comment_test_pack##*/}" \
+if ! CODEQL_EXTRACTOR_GO_OPTION_EXTRACT_TESTS=true codeql test run "$query_tests/${comment_test_pack##*/}" \
   --additional-packs="$query_tests" --common-caches="$caches" --threads=0; then
   echo "The comment query test failed. Fix $comment_pack or the expected results in $comment_test_pack, then rerun." >&2
   exit 1

@@ -26,7 +26,8 @@ predicate directive(Comment comment) {
 
 predicate documentsPackage(GoFile file) {
   exists(file.getDocumentation()) and
-  not file.getPackageName() = "main"
+  not file.getPackageName() = "main" and
+  not file.getBaseName().matches("%\\_test.go")
 }
 
 predicate packageDoc(Comment comment) {
