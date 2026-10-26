@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package autocomplete prints and answers shell completion for the commands of
+// https://pkg.go.dev/github.com/urfave/cli/v3.
 package autocomplete
 
 import (

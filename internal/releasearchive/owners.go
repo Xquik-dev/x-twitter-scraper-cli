@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package releasearchive reads the owner of each entry in the release archives
+// that https://goreleaser.com builds.
 package releasearchive
 
 import (

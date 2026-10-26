@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -115,7 +114,7 @@ func handleXProfileUpdate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -156,7 +155,7 @@ func handleXProfileUpdateAvatar(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -197,7 +196,7 @@ func handleXProfileUpdateBanner(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(

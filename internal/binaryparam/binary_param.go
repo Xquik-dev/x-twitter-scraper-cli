@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package binaryparam opens a binary parameter from a file path or from standard
+// input as an https://pkg.go.dev/io#ReadCloser.
 package binaryparam
 
 import (

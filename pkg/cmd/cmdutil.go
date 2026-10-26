@@ -9,10 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -66,27 +64,6 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 
 	return opts
 }
-
-var debugMiddlewareOption = option.WithMiddleware(
-	func(r *http.Request, mn option.MiddlewareNext) (*http.Response, error) {
-		logger := log.Default()
-
-		if reqBytes, err := httputil.DumpRequest(r, true); err == nil {
-			logger.Printf("HTTP Request:\n%s\n", reqBytes)
-		}
-
-		resp, err := mn(r)
-		if err != nil {
-			return resp, err
-		}
-
-		if respBytes, err := httputil.DumpResponse(resp, true); err == nil {
-			logger.Printf("HTTP Response:\n%s\n", respBytes)
-		}
-
-		return resp, err
-	},
-)
 
 func isInputPiped() bool {
 	stat, err := os.Stdin.Stat()
@@ -327,8 +304,20 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 		_, err := opts.Stdout.Write([]byte(yaml.String()))
 		return nil, err
 	default:
-		return nil, fmt.Errorf("Format %q is unknown. Choose %s.", opts.Format, formatChoices())
+		return nil, unknownFormatError(opts.Format)
 	}
+}
+
+type unknownFormatError string
+
+func (e unknownFormatError) Error() string {
+	return fmt.Sprintf("Format %q is unknown. Choose %s.", string(e), formatChoices())
+}
+
+type unexpectedArgumentsError []string
+
+func (e unexpectedArgumentsError) Error() string {
+	return fmt.Sprintf("Unexpected extra arguments %v. Remove them, then run the command again.", []string(e))
 }
 
 const warningExploreNotSupported = "Explore format requires a terminal. Using JSON instead.\n"

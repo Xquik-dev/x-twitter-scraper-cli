@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -83,7 +82,7 @@ func handleCreditsRedirectTopupCheckout(ctx context.Context, cmd *cli.Command) e
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -107,7 +106,7 @@ func handleCreditsRetrieveBalance(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -146,7 +145,7 @@ func handleCreditsRetrieveTopupStatus(ctx context.Context, cmd *cli.Command) err
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -187,7 +186,7 @@ func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package apiquery encodes request parameters as the URL query values of
+// https://pkg.go.dev/net/url#Values.
 package apiquery
 
 import (

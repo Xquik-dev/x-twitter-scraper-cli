@@ -1214,7 +1214,7 @@ func handleExtractionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1260,7 +1260,7 @@ func handleExtractionsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1301,7 +1301,7 @@ func handleExtractionsEstimateCost(ctx context.Context, cmd *cli.Command) error 
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1345,7 +1345,7 @@ func handleExtractionsExportResults(ctx context.Context, cmd *cli.Command) error
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -1382,7 +1382,7 @@ func handleExtractionsRun(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(

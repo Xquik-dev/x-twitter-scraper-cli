@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -257,7 +256,7 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -306,7 +305,7 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -355,7 +354,7 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(

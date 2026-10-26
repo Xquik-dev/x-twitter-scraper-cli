@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -134,7 +133,7 @@ func handleXAccountsCreate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -178,7 +177,7 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -217,7 +216,7 @@ func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -259,7 +258,7 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -298,7 +297,7 @@ func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -340,7 +339,7 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(

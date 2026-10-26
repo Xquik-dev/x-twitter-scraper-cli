@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package cmd defines the x-twitter-scraper commands, which call the Xquik API
+// that https://docs.xquik.com/api-reference/overview documents.
 package cmd
 
 import (
@@ -525,6 +527,7 @@ func generateManpages(ctx context.Context, c *cli.Command) error {
 	dir := c.String("output")
 	err = os.MkdirAll(filepath.Join(dir, "man1"), 0755)
 	if err != nil {
+		return err
 	}
 	if c.Bool("text") {
 		file, err := os.Create(filepath.Join(dir, "man1", "x-twitter-scraper.1"))

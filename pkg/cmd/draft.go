@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
@@ -96,7 +95,7 @@ func handleDraftsCreate(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -140,7 +139,7 @@ func handleDraftsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -179,7 +178,7 @@ func handleDraftsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(
@@ -223,7 +222,7 @@ func handleDraftsDelete(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
 	options, err := flagOptions(

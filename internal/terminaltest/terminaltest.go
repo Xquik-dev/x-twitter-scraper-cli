@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package terminaltest runs tests with the standard streams detached from the
+// terminal that https://pkg.go.dev/github.com/charmbracelet/x/term detects.
 package terminaltest
 
 import (

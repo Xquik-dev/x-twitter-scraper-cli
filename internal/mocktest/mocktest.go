@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package mocktest runs commands against a local server from
+// https://pkg.go.dev/net/http/httptest.
 package mocktest
 
 import (

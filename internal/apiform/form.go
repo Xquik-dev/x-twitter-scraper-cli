@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package apiform encodes request bodies as multipart/form-data, which
+// https://www.rfc-editor.org/rfc/rfc7578 defines.
 package apiform
 
 type Marshaler interface {

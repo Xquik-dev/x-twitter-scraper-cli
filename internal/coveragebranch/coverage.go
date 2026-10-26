@@ -1,6 +1,8 @@
 // Copyright the Xquik contributors.
 // SPDX-License-Identifier: Apache-2.0
 
+// Package coveragebranch measures branch coverage from the report of
+// https://github.com/srvgit/gocove.
 package coveragebranch
 
 import (
