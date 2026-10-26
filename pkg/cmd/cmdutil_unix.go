@@ -13,7 +13,9 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func pipedDataOSSpecific(stdin *os.File) (io.Reader, bool) {
+var stdinProbe = pipeProbe{check: pollStdin}
+
+func pollStdin(stdin *os.File) (io.Reader, bool) {
 	fds := []unix.PollFd{{Fd: int32(stdin.Fd()), Events: unix.POLLIN}}
 	n, _ := unix.Poll(fds, 10)
 	return stdin, n > 0

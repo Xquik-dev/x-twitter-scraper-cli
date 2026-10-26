@@ -206,7 +206,7 @@ func flagOptions(cmd *cli.Command, bodyType BodyContentType) ([]option.RequestOp
 	}
 
 	var rootBody json.RawMessage
-	stdin, piped := pipedInput()
+	stdin, piped := pipedInput(os.Stdin, bodyType == ApplicationJSON, stdinProbe)
 	stdinReader := onceStdinReader{stdinReader: stdin}
 	if piped {
 		pipeData, err := io.ReadAll(stdin)

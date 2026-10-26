@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -63,7 +64,7 @@ func TestPipedDataIsDetected(t *testing.T) {
 	require.NoError(t, err)
 	defer idle.Close()
 	defer idleWriter.Close()
-	_, ready := pipedDataOSSpecific(idle)
+	_, ready := stdinProbe.check(idle)
 	assert.False(t, ready)
 
 	filled, filledWriter, err := os.Pipe()
@@ -72,11 +73,92 @@ func TestPipedDataIsDetected(t *testing.T) {
 	_, err = filledWriter.WriteString("piped data")
 	require.NoError(t, err)
 	require.NoError(t, filledWriter.Close())
-	input, ready := pipedDataOSSpecific(filled)
+	input, ready := stdinProbe.check(filled)
 	require.True(t, ready)
 	content, err := io.ReadAll(input)
 	require.NoError(t, err)
 	assert.Equal(t, "piped data", string(content))
+}
+
+func TestReadWithinKeepsEveryByte(t *testing.T) {
+	t.Parallel()
+
+	idle, idleWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer idle.Close()
+	input, ready := readWithin(idle, 10*time.Millisecond)
+	assert.False(t, ready)
+	_, err = idleWriter.WriteString("late data")
+	require.NoError(t, err)
+	require.NoError(t, idleWriter.Close())
+	content, err := io.ReadAll(input)
+	require.NoError(t, err)
+	assert.Equal(t, "late data", string(content))
+
+	filled, filledWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer filled.Close()
+	_, err = filledWriter.WriteString(strings.Repeat("x", 40*1024))
+	require.NoError(t, err)
+	require.NoError(t, filledWriter.Close())
+	input, ready = readWithin(filled, time.Second)
+	require.True(t, ready)
+	content, err = io.ReadAll(input)
+	require.NoError(t, err)
+	assert.Len(t, content, 40*1024)
+
+	failing := &controlledReader{err: errors.New("read failed")}
+	input, ready = readWithin(failing, time.Second)
+	require.True(t, ready)
+	_, err = io.ReadAll(input)
+	require.EqualError(t, err, "read failed")
+}
+
+type controlledReader struct {
+	err error
+}
+
+func (r *controlledReader) Read([]byte) (int, error) { return 0, r.err }
+
+func TestPipedInputReadsStdinOnlyWhenItMayBeTheBody(t *testing.T) {
+	t.Parallel()
+
+	pipe, pipeWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer pipe.Close()
+	defer pipeWriter.Close()
+
+	calls := 0
+	consuming := pipeProbe{check: func(stdin *os.File) (io.Reader, bool) {
+		calls++
+		return stdin, true
+	}, consumes: true}
+	_, piped := pipedInput(pipe, false, consuming)
+	assert.False(t, piped)
+	assert.Equal(t, 0, calls)
+	_, piped = pipedInput(pipe, true, consuming)
+	assert.True(t, piped)
+	assert.Equal(t, 1, calls)
+
+	polling := pipeProbe{check: consuming.check}
+	_, piped = pipedInput(pipe, false, polling)
+	assert.True(t, piped)
+	assert.Equal(t, 2, calls)
+
+	file, err := os.CreateTemp(t.TempDir(), "stdin")
+	require.NoError(t, err)
+	defer file.Close()
+	_, piped = pipedInput(file, false, consuming)
+	assert.False(t, piped)
+	_, err = file.WriteString("{}")
+	require.NoError(t, err)
+	_, piped = pipedInput(file, false, consuming)
+	assert.True(t, piped)
+	assert.Equal(t, 2, calls)
+
+	require.NoError(t, file.Close())
+	_, piped = pipedInput(file, true, consuming)
+	assert.False(t, piped)
 }
 
 func TestBinaryResponseFailuresAndExtensions(t *testing.T) {

@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/jsonview"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -59,23 +60,53 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 	return opts
 }
 
-func pipedInput() (io.Reader, bool) {
-	stat, err := os.Stdin.Stat()
+type pipeProbe struct {
+	check    func(*os.File) (io.Reader, bool)
+	consumes bool
+}
+
+func pipedInput(stdin *os.File, readsBody bool, probe pipeProbe) (io.Reader, bool) {
+	stat, err := stdin.Stat()
 	if err != nil {
-		return os.Stdin, false
+		return stdin, false
 	}
 
 	mode := stat.Mode()
 
 	if mode.IsRegular() && stat.Size() > 0 {
-		return os.Stdin, true
+		return stdin, true
 	}
 
-	if mode&(os.ModeNamedPipe|os.ModeSocket) != 0 {
-		return pipedDataOSSpecific(os.Stdin)
+	if mode&(os.ModeNamedPipe|os.ModeSocket) == 0 || (probe.consumes && !readsBody) {
+		return stdin, false
 	}
 
-	return os.Stdin, false
+	return probe.check(stdin)
+}
+
+func readWithin(stdin io.Reader, wait time.Duration) (io.Reader, bool) {
+	reader, writer := io.Pipe()
+	ready := make(chan struct{})
+	go func() {
+		buffer := make([]byte, 32*1024)
+		n, err := stdin.Read(buffer)
+		close(ready)
+		if n > 0 {
+			if _, writeErr := writer.Write(buffer[:n]); writeErr != nil {
+				return
+			}
+		}
+		if err == nil {
+			_, err = io.Copy(writer, stdin)
+		}
+		writer.CloseWithError(err)
+	}()
+	select {
+	case <-ready:
+		return reader, true
+	case <-time.After(wait):
+		return reader, false
+	}
 }
 
 func isTerminal(w io.Writer) bool {
