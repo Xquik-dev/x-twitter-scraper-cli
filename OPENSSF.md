@@ -21,7 +21,7 @@ No OpenSSF exclusion applies.
 | Build | Pinned Go modules, checksum verification, & `./scripts/build` |
 | Tests | Race-enabled tests, regression coverage & a second run of every package on a pseudo-terminal through `./scripts/test` |
 | Statement coverage | `./scripts/coverage` enforces 90%. The current result is 92.4%. |
-| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 771/947 (81.41%). |
+| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 772/949 (81.35%). |
 | Static analysis | `go vet`, staticcheck with every check, 100% type coverage with no escape hatch, `shellcheck` & CodeQL security-extended queries through `bin/check-local` |
 | Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that `bin/check-local` runs for 15 seconds |
 | Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit`, with reviewed exceptions in `audit-exceptions.json` |
