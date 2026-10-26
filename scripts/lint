@@ -34,3 +34,7 @@ for platform in "${platforms[@]}"; do
   echo "==> Running staticcheck for $platform"
   GOOS="$platform" "$workspace/staticcheck" -checks all -show-ignored ./...
 done
+
+echo "==> Checking type coverage"
+platform_list="${platforms[*]}"
+go run ./cmd/type-coverage -goos "${platform_list// /,}"
