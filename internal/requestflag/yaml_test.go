@@ -51,6 +51,13 @@ func TestYAMLToJSONEncodesWithEncodingJSON(t *testing.T) {
 		"str over int tag":   {"a: &a !!int 5\nb: !!str *a\n", `{"a":5,"b":"5"}`},
 		"timestamp tag key":  {"!!timestamp 2001-12-14: y\n", `{"2001-12-14T00:00:00Z":"y"}`},
 		"binary tag key":     {"!!binary aGk=: y\n", `{"aGk=":"y"}`},
+		"float over tagged":  {"a: &a !!float 2.5\nb: !!float *a\n", `{"a":2.5,"b":2.5}`},
+		"timestamp over tag": {"a: &a !!timestamp 2001-12-14\nb: !!timestamp *a\n", `{"a":"2001-12-14T00:00:00Z","b":"2001-12-14T00:00:00Z"}`},
+		"binary over str":    {"a: &a !!str aGk=\nb: !!binary *a\n", `{"a":"aGk=","b":"aGk="}`},
+		"binary over custom": {"a: &a !custom aGk=\nb: !!binary *a\n", `{"a":"aGk=","b":"aGk="}`},
+		"str over float 1e6": {"b: !!str !!float 1000000\n", `{"b":"1e+06"}`},
+		"float tag key":      {"!!float 1000000: y\n", `{"1e+06":"y"}`},
+		"custom merge":       {"<<: !custom {a: 1}\n", `{"a":1}`},
 		"self key alias":     {"&k key: *k\n", `{"key":"key"}`},
 		"alias int key":      {"a: &k 5\n*k : x\n", `{"5":"x","a":5}`},
 		"key anchor":         {"&k key: 1\nv: *k\n", `{"key":1,"v":"key"}`},
@@ -85,6 +92,7 @@ func TestYAMLToJSONRejectsInvalidInput(t *testing.T) {
 		"{a: 1", "key: *missing", "<<: 1", "value: .inf", "!!bool maybe", "!!binary [1]",
 		"<<: ~", "<<: !!null x", "n: &n ~\nc:\n  <<: *n", "a: &a {x: 1}\nb: !!str *a", "a: &a [1]\nb: !!str *a",
 		"a: &a !custom {x: 1}\nb: !!str *a", "a: &k {x: 1}\n*k : y",
+		"a: &a !!timestamp 2001-12-14\nb: !!binary *a", "a: &a !!binary aGk=\nb: !!binary *a",
 	} {
 		_, err := YAMLToJSON([]byte(input))
 		require.Error(t, err, input)
