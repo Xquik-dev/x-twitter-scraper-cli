@@ -33,6 +33,8 @@ var directive = regexp.MustCompile(`^//\s*(nolint\b|lint:ignore\b|lint:file-igno
 
 var unsafeReflect = map[string]bool{"NewAt": true, "UnsafeAddr": true, "UnsafePointer": true}
 
+var assigningReflect = map[string]bool{"Set": true, "SetIterKey": true, "SetIterValue": true, "SetMapIndex": true}
+
 type hatch struct {
 	kind    string
 	message string
@@ -249,9 +251,13 @@ func (a *audit) inspectFile(file *ast.File, info *types.Info, at func(token.Pos)
 			}
 			a.discardedAssertion(names, node.Values, info, at)
 		case *ast.SelectorExpr:
-			if function, ok := info.Uses[node.Sel].(*types.Func); ok && function.Pkg() != nil &&
-				function.Pkg().Path() == "reflect" && unsafeReflect[function.Name()] {
-				a.hatches[at(node.Sel.Pos())] = hatch{"unsafe", "reflect " + function.Name() + " bypasses type safety"}
+			if function, ok := info.Uses[node.Sel].(*types.Func); ok && function.Pkg() != nil && function.Pkg().Path() == "reflect" {
+				switch name := function.Name(); {
+				case unsafeReflect[name]:
+					a.hatches[at(node.Sel.Pos())] = hatch{"unsafe", "reflect " + name + " bypasses type safety"}
+				case assigningReflect[name]:
+					a.hatches[at(node.Sel.Pos())] = hatch{"unchecked assertion", "reflect Value." + name + " panics when the types differ, like an assertion without the comma-ok form"}
+				}
 			}
 		case *ast.Ident:
 			if object, ok := info.Uses[node].(*types.TypeName); ok && object.Pkg() == nil && object.Name() == "any" {

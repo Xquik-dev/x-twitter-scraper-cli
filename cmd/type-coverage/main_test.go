@@ -123,6 +123,14 @@ func TestEscapeHatchesFail(t *testing.T) {
 			map[string]string{"probe.go": "package probe\n\nimport \"reflect\"\n\nvar Pointer = reflect.NewAt\n"},
 			"probe.go:5:23: reflect NewAt bypasses type safety",
 		},
+		"reflect set": {
+			map[string]string{"probe.go": "package probe\n\nimport \"reflect\"\n\nfunc Fill(v reflect.Value) (t int) {\n\treflect.ValueOf(&t).Elem().Set(v)\n\treturn t\n}\n"},
+			"probe.go:6:29: reflect Value.Set panics when the types differ, like an assertion without the comma-ok form",
+		},
+		"reflect map set": {
+			map[string]string{"probe.go": "package probe\n\nimport \"reflect\"\n\nfunc Fill(fields map[string]int, v reflect.Value) {\n\treflect.ValueOf(fields).SetMapIndex(reflect.ValueOf(\"a\"), v)\n}\n"},
+			"probe.go:6:26: reflect Value.SetMapIndex panics when the types differ, like an assertion without the comma-ok form",
+		},
 		"nolint": {
 			map[string]string{"probe.go": "package probe\n\nvar Flag = true //nolint:gochecknoglobals\n"},
 			"probe.go:3:17: //nolint directive escapes a check",
