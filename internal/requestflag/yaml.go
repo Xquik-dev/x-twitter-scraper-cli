@@ -111,6 +111,8 @@ func (d yamlDocument) resolve(node ast.Node) (ast.Node, error) {
 				return nil, fmt.Errorf("alias %q has no anchor", name)
 			}
 			node = target
+		case *ast.MappingKeyNode:
+			node = reference.Value
 		default:
 			return node, nil
 		}
@@ -128,16 +130,13 @@ func (d yamlDocument) tagged(tag *ast.TagNode) (json.RawMessage, error) {
 	case "!!null":
 		return json.RawMessage("null"), nil
 	case "!!int":
-		text, _, err := scalarText(node)
-		if err != nil {
-			return nil, err
-		}
+		text, _ := scalarText(node)
 		whole, _ := strconv.Atoi(text)
 		return json.Marshal(whole)
 	case "!!float":
 		return taggedFloat(node)
 	case "!!bool":
-		text, _, err := scalarText(node)
+		text, err := scalarText(node)
 		if err != nil {
 			return nil, err
 		}
@@ -154,7 +153,7 @@ func (d yamlDocument) tagged(tag *ast.TagNode) (json.RawMessage, error) {
 	case "!!timestamp":
 		var moment time.Time
 		if _, isText := node.(*ast.StringNode); isText {
-			text, _, err := scalarText(node)
+			text, err := scalarText(node)
 			if err != nil {
 				return nil, err
 			}
@@ -172,7 +171,7 @@ func (d yamlDocument) tagged(tag *ast.TagNode) (json.RawMessage, error) {
 		default:
 			return nil, fmt.Errorf("cannot convert %s to binary", node.String())
 		}
-		text, _, err := scalarText(node)
+		text, err := scalarText(node)
 		if err != nil {
 			return nil, err
 		}
@@ -184,11 +183,41 @@ func (d yamlDocument) tagged(tag *ast.TagNode) (json.RawMessage, error) {
 }
 
 func (d yamlDocument) taggedText(node ast.Node) (json.RawMessage, error) {
-	text, _, err := scalarText(node)
+	text, err := d.text(node)
 	if err != nil {
 		return nil, err
 	}
 	return json.Marshal(text)
+}
+
+func (d yamlDocument) text(node ast.Node) (string, error) {
+	tag, isTagged := node.(*ast.TagNode)
+	if !isTagged {
+		return scalarText(node)
+	}
+	raw, err := d.tagged(tag)
+	if err != nil {
+		return "", err
+	}
+	switch raw[0] {
+	case 'n':
+		return "", nil
+	case 't', 'f':
+		return string(raw), nil
+	case '"':
+		var text string
+		err := json.Unmarshal(raw, &text)
+		return text, err
+	case '{', '[':
+		return "", fmt.Errorf("cannot convert %s to string", raw)
+	}
+	var whole int64
+	if err := json.Unmarshal(raw, &whole); err == nil {
+		return strconv.FormatInt(whole, 10), nil
+	}
+	var number float64
+	err = json.Unmarshal(raw, &number)
+	return fmt.Sprint(number), err
 }
 
 func taggedFloat(node ast.Node) (json.RawMessage, error) {
@@ -196,7 +225,7 @@ func taggedFloat(node ast.Node) (json.RawMessage, error) {
 	case *ast.IntegerNode, *ast.FloatNode, *ast.InfinityNode, *ast.NanNode:
 		return encodeScalar[float64](node)
 	case *ast.StringNode:
-		text, _, err := scalarText(node)
+		text, err := scalarText(node)
 		if err != nil {
 			return nil, err
 		}
@@ -207,34 +236,34 @@ func taggedFloat(node ast.Node) (json.RawMessage, error) {
 	}
 }
 
-func scalarText(node ast.Node) (string, bool, error) {
+func scalarText(node ast.Node) (string, error) {
 	switch node.(type) {
 	case nil, *ast.NullNode:
-		return "", true, nil
+		return "", nil
 	case *ast.IntegerNode:
 		var whole int64
 		if err := yaml.NodeToValue(node, &whole); err == nil {
-			return strconv.FormatInt(whole, 10), false, nil
+			return strconv.FormatInt(whole, 10), nil
 		}
 		var natural uint64
 		if err := yaml.NodeToValue(node, &natural); err == nil {
-			return strconv.FormatUint(natural, 10), false, nil
+			return strconv.FormatUint(natural, 10), nil
 		}
 		var number float64
 		err := yaml.NodeToValue(node, &number)
-		return fmt.Sprint(number), false, err
+		return fmt.Sprint(number), err
 	case *ast.FloatNode, *ast.InfinityNode, *ast.NanNode:
 		var number float64
 		err := yaml.NodeToValue(node, &number)
-		return fmt.Sprint(number), false, err
+		return fmt.Sprint(number), err
 	case *ast.BoolNode:
 		var truth bool
 		err := yaml.NodeToValue(node, &truth)
-		return strconv.FormatBool(truth), false, err
+		return strconv.FormatBool(truth), err
 	default:
 		var text string
 		err := yaml.NodeToValue(node, &text)
-		return text, false, err
+		return text, err
 	}
 }
 
@@ -242,20 +271,20 @@ func (d yamlDocument) mapping(pairs []*ast.MappingValueNode) (json.RawMessage, e
 	fields := map[string]json.RawMessage{}
 	var merged []map[string]json.RawMessage
 	for _, pair := range pairs {
-		value, err := d.convert(pair.Value)
-		if err != nil {
-			return nil, err
-		}
 		if pair.Key.IsMergeKey() {
-			sources, err := mergeSources(value)
+			sources, err := d.mergeSources(pair.Value)
 			if err != nil {
 				return nil, err
 			}
 			merged = append(merged, sources...)
 			continue
 		}
-		var key string
-		if err := yaml.NodeToValue(pair.Key, &key); err != nil {
+		key, err := d.keyText(pair.Key)
+		if err != nil {
+			return nil, err
+		}
+		value, err := d.convert(pair.Value)
+		if err != nil {
 			return nil, err
 		}
 		fields[key] = value
@@ -270,12 +299,29 @@ func (d yamlDocument) mapping(pairs []*ast.MappingValueNode) (json.RawMessage, e
 	return json.Marshal(fields)
 }
 
-func mergeSources(raw json.RawMessage) ([]map[string]json.RawMessage, error) {
+func (d yamlDocument) keyText(key ast.MapKeyNode) (string, error) {
+	node, err := d.resolve(key)
+	if err != nil {
+		return "", err
+	}
+	if _, isTagged := node.(*ast.TagNode); isTagged {
+		return d.text(node)
+	}
+	var text string
+	err = yaml.NodeToValue(node, &text)
+	return text, err
+}
+
+func (d yamlDocument) mergeSources(node ast.Node) ([]map[string]json.RawMessage, error) {
+	raw, err := d.convert(node)
+	if err != nil {
+		return nil, err
+	}
 	if fields, ok := JSONObject(raw); ok {
 		return []map[string]json.RawMessage{fields}, nil
 	}
 	var items []json.RawMessage
-	if err := json.Unmarshal(raw, &items); err != nil {
+	if err := json.Unmarshal(raw, &items); err != nil || items == nil {
 		return nil, fmt.Errorf("a merge key needs a mapping or a list of mappings")
 	}
 	sources := make([]map[string]json.RawMessage, 0, len(items))
