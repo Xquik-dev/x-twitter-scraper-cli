@@ -59,23 +59,23 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 	return opts
 }
 
-func isInputPiped() bool {
+func pipedInput() (io.Reader, bool) {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
-		return false
+		return os.Stdin, false
 	}
 
 	mode := stat.Mode()
 
 	if mode.IsRegular() && stat.Size() > 0 {
-		return true
+		return os.Stdin, true
 	}
 
 	if mode&(os.ModeNamedPipe|os.ModeSocket) != 0 {
-		return isPipedDataAvailableOSSpecific()
+		return pipedDataOSSpecific(os.Stdin)
 	}
 
-	return false
+	return os.Stdin, false
 }
 
 func isTerminal(w io.Writer) bool {

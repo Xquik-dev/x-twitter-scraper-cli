@@ -206,9 +206,10 @@ func flagOptions(cmd *cli.Command, bodyType BodyContentType) ([]option.RequestOp
 	}
 
 	var rootBody json.RawMessage
-	stdinReader := onceStdinReader{stdinReader: os.Stdin}
-	if isInputPiped() {
-		pipeData, err := io.ReadAll(os.Stdin)
+	stdin, piped := pipedInput()
+	stdinReader := onceStdinReader{stdinReader: stdin}
+	if piped {
+		pipeData, err := io.ReadAll(stdin)
 		if err != nil {
 			return nil, err
 		}

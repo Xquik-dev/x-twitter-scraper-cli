@@ -7,25 +7,32 @@
 package cmd
 
 import (
+	"io"
 	"os"
-	"syscall"
-	"unsafe"
+	"time"
 )
 
-var (
-	kernel32          = syscall.NewLazyDLL("kernel32.dll")
-	procPeekNamedPipe = kernel32.NewProc("PeekNamedPipe")
-)
-
-func isPipedDataAvailableOSSpecific() bool {
-	var available uint32
-	r, _, _ := procPeekNamedPipe.Call(
-		os.Stdin.Fd(),
-		0,
-		0,
-		0,
-		uintptr(unsafe.Pointer(&available)),
-		0,
-	)
-	return r != 0 && available > 0
+func pipedDataOSSpecific(stdin *os.File) (io.Reader, bool) {
+	reader, writer := io.Pipe()
+	ready := make(chan struct{})
+	go func() {
+		buffer := make([]byte, 32*1024)
+		n, err := stdin.Read(buffer)
+		close(ready)
+		if n > 0 {
+			if _, writeErr := writer.Write(buffer[:n]); writeErr != nil {
+				return
+			}
+		}
+		if err == nil {
+			_, err = io.Copy(writer, stdin)
+		}
+		writer.CloseWithError(err)
+	}()
+	select {
+	case <-ready:
+		return reader, true
+	case <-time.After(10 * time.Millisecond):
+		return reader, false
+	}
 }

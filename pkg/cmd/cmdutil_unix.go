@@ -7,13 +7,14 @@
 package cmd
 
 import (
+	"io"
 	"os"
 
 	"golang.org/x/sys/unix"
 )
 
-func isPipedDataAvailableOSSpecific() bool {
-	fds := []unix.PollFd{{Fd: int32(os.Stdin.Fd()), Events: unix.POLLIN}}
+func pipedDataOSSpecific(stdin *os.File) (io.Reader, bool) {
+	fds := []unix.PollFd{{Fd: int32(stdin.Fd()), Events: unix.POLLIN}}
 	n, _ := unix.Poll(fds, 10)
-	return n > 0
+	return stdin, n > 0
 }

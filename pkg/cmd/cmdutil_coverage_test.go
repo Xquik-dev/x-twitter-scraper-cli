@@ -56,8 +56,27 @@ func TestCommandValidatorsAndManpages(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestPipedDataCheckReturns(t *testing.T) {
-	_ = isPipedDataAvailableOSSpecific()
+func TestPipedDataIsDetected(t *testing.T) {
+	t.Parallel()
+
+	idle, idleWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer idle.Close()
+	defer idleWriter.Close()
+	_, ready := pipedDataOSSpecific(idle)
+	assert.False(t, ready)
+
+	filled, filledWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer filled.Close()
+	_, err = filledWriter.WriteString("piped data")
+	require.NoError(t, err)
+	require.NoError(t, filledWriter.Close())
+	input, ready := pipedDataOSSpecific(filled)
+	require.True(t, ready)
+	content, err := io.ReadAll(input)
+	require.NoError(t, err)
+	assert.Equal(t, "piped data", string(content))
 }
 
 func TestBinaryResponseFailuresAndExtensions(t *testing.T) {
