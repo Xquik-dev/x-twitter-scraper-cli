@@ -95,9 +95,9 @@ func TestValidatorRunsOnDefaultAndValue(t *testing.T) {
 		return nil
 	}
 	_, err := run(t, []cli.Flag{&Int{Name: "count", Validator: validator}}, "--count", "11")
-	require.ErrorIs(t, err, tooBig)
+	require.ErrorContains(t, err, tooBig.Error())
 	_, err = run(t, []cli.Flag{&Int{Name: "count", Default: 20, Validator: validator}})
-	require.ErrorIs(t, err, tooBig)
+	require.ErrorContains(t, err, tooBig.Error())
 	_, err = run(t, []cli.Flag{&Int{Name: "count", Validator: validator}}, "--count", "3")
 	require.NoError(t, err)
 }

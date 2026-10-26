@@ -13,6 +13,8 @@ import (
 )
 
 type InnerFlag[T any, C codec[T]] struct {
+	cli.FlagBase[T, cli.NoConfig, valueStore[T, C]]
+
 	Name        string
 	DefaultText string
 	Usage       string
@@ -88,11 +90,6 @@ func (f *InnerFlag[T, C]) Set(name string, input string) error {
 		return err
 	}
 	return outer.setInnerField(f.InnerField, encoded)
-}
-
-func (f *InnerFlag[T, C]) Get() any {
-	var empty T
-	return empty
 }
 
 func (f *InnerFlag[T, C]) String() string {

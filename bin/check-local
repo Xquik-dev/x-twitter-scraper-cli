@@ -163,8 +163,8 @@ start_check "Release debug information" "reproducible build" "Keep DWARF data. R
 ./bin/check-release-debug-info
 pass_check
 
-start_check "Fuzzing" "fuzzing" "Fix the crash. Go saved its input under internal/apiform/testdata/fuzz."
-go test ./internal/apiform -run '^$' -fuzz '^FuzzMarshalRoundTrip$' -fuzztime="$fuzz_time"
+start_check "Fuzzing" "fuzzing" "Fix the crash. Go saved its input under internal/requestflag/testdata/fuzz."
+go test ./internal/requestflag -run '^$' -fuzz '^FuzzJSONFlagValue$' -fuzztime="$fuzz_time"
 pass_check
 
 start_check "CodeQL security-extended queries" "CodeQL" "Fix the CodeQL error or results above, then rerun."

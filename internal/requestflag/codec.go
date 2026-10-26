@@ -15,6 +15,7 @@ import (
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/goccy/go-yaml"
+	"github.com/urfave/cli/v3"
 )
 
 type codec[T any] interface {
@@ -33,6 +34,15 @@ type traits struct {
 }
 
 var errNotAnObject = errors.New("the flag value is not an object")
+
+type valueStore[T any, C codec[T]] struct{}
+
+func (valueStore[T, C]) Create(T, *T, cli.NoConfig) cli.Value { return nil }
+
+func (valueStore[T, C]) ToString(value T) string {
+	var c C
+	return c.display(value)
+}
 
 type textCodec struct{}
 

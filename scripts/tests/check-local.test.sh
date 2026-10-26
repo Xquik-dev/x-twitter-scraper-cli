@@ -159,8 +159,8 @@ test_fuzzing_runs_for_15_seconds_unless_fuzz_time_says_otherwise() {
   run_in_repo bin/check-local --no-status
 
   assert_equal 0 "$run_status" "the exit code"
-  assert_equal "test ./internal/apiform -run ^\$ -fuzz ^FuzzMarshalRoundTrip\$ -fuzztime=15s
-test ./internal/apiform -run ^\$ -fuzz ^FuzzMarshalRoundTrip\$ -fuzztime=2m" "$(log_of go)" "the fuzzing calls"
+  assert_equal "test ./internal/requestflag -run ^\$ -fuzz ^FuzzJSONFlagValue\$ -fuzztime=15s
+test ./internal/requestflag -run ^\$ -fuzz ^FuzzJSONFlagValue\$ -fuzztime=2m" "$(log_of go)" "the fuzzing calls"
 }
 
 test_shellcheck_reads_every_bash_script_and_skips_other_files() {

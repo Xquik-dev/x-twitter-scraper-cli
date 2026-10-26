@@ -17,6 +17,8 @@ import (
 )
 
 type Flag[T any, C codec[T]] struct {
+	cli.FlagBase[T, cli.NoConfig, valueStore[T, C]]
+
 	Name        string
 	Category    string
 	DefaultText string
@@ -42,7 +44,6 @@ type Flag[T any, C codec[T]] struct {
 	hasBeenSet bool
 	applied    bool
 	hasValue   bool
-	value      T
 }
 
 type (
@@ -64,6 +65,8 @@ var (
 	_ cli.LocalFlag                   = (*String)(nil)
 	_ InRequest                       = (*String)(nil)
 	_ fieldSetter                     = (*ObjectList)(nil)
+
+	_ cli.ValueCreator[string, cli.NoConfig] = valueStore[string, textCodec]{}
 )
 
 type InRequest interface {
@@ -94,7 +97,7 @@ func (f *Flag[T, C]) GetDataAliases() []string { return f.DataAliases }
 
 func (f *Flag[T, C]) current() T {
 	if f.hasValue {
-		return f.value
+		return f.FlagBase.Value
 	}
 	return f.Default
 }
@@ -114,7 +117,7 @@ func (f *Flag[T, C]) setInnerField(field string, value json.RawMessage) error {
 	if err != nil {
 		return fmt.Errorf("cannot set an inner field on flag %s: %w", f.Name, err)
 	}
-	f.value = updated
+	f.FlagBase.Value = updated
 	f.hasValue = true
 	f.hasBeenSet = true
 	return nil
@@ -126,10 +129,10 @@ func (f *Flag[T, C]) PreParse() error {
 			return err
 		}
 	}
-	f.value = f.Default
+	f.FlagBase.Value = f.Default
 	f.hasValue = true
 	f.applied = true
-	return nil
+	return f.FlagBase.PreParse()
 }
 
 func (f *Flag[T, C]) PostParse() error {
@@ -162,7 +165,7 @@ func (f *Flag[T, C]) Set(name string, input string) error {
 		}
 	}
 	f.count++
-	current := f.value
+	current := f.FlagBase.Value
 	if f.count == 1 {
 		var empty T
 		current = empty
@@ -172,17 +175,13 @@ func (f *Flag[T, C]) Set(name string, input string) error {
 	if err != nil {
 		return err
 	}
-	f.value = parsed
+	f.FlagBase.Value = parsed
 	f.hasValue = true
 	f.hasBeenSet = true
 	if f.Validator != nil {
-		return f.Validator(f.value)
+		return f.Validator(parsed)
 	}
 	return nil
-}
-
-func (f *Flag[T, C]) Get() any {
-	return f.current()
 }
 
 func (f *Flag[T, C]) String() string {
@@ -236,8 +235,7 @@ func (f *Flag[T, C]) GetValue() string {
 	if !f.hasValue {
 		return ""
 	}
-	var c C
-	return c.display(f.value)
+	return f.FlagBase.GetValue()
 }
 
 func (f *Flag[T, C]) GetDefaultText() string {

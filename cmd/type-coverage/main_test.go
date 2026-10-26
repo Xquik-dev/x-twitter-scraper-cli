@@ -81,7 +81,7 @@ func TestEscapeHatchesFail(t *testing.T) {
 	}{
 		"any field": {
 			map[string]string{"probe.go": "package probe\n\ntype Box struct{ Value any }\n"},
-			"probe.go:3:17: Value has type any, which holds an empty interface",
+			"probe.go:3:18: Value has type any, which holds an empty interface",
 		},
 		"interface literal": {
 			map[string]string{"probe.go": "package probe\n\nvar Values []interface{}\n"},
