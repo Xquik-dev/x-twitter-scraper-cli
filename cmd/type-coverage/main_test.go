@@ -103,6 +103,14 @@ func TestEscapeHatchesFail(t *testing.T) {
 			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nfunc Name(err error) string { return err.(fmt.Stringer).String() }\n"},
 			"probe.go:5:42: type assertion without the comma-ok form",
 		},
+		"discarded ok": {
+			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nfunc Name(err error) string {\n\ts, _ := err.(fmt.Stringer)\n\treturn s.String()\n}\n"},
+			"probe.go:6:14: type assertion discards its ok result",
+		},
+		"discarded ok in a declaration": {
+			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nvar failure error\n\nvar Stringer, _ = failure.(fmt.Stringer)\n"},
+			"probe.go:7:27: type assertion discards its ok result",
+		},
 		"unsafe import": {
 			map[string]string{"probe.go": "package probe\n\nimport \"unsafe\"\n\nvar Size = unsafe.Sizeof(0)\n"},
 			"probe.go:3:8: import of package unsafe",
