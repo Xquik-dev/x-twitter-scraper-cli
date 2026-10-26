@@ -8,7 +8,6 @@ package debugmiddleware
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -31,13 +30,14 @@ var sensitiveHeaders = []string{
 	"set-cookie",
 }
 
-type lineLogger interface {
-	Output(calldepth int, s string) error
+type RequestLogger struct {
+	logger           *log.Logger
+	sensitiveHeaders []string
 }
 
-type RequestLogger struct {
-	logger           lineLogger
-	sensitiveHeaders []string
+type redactedRequest struct {
+	request *http.Request
+	err     error
 }
 
 func NewRequestLogger() *RequestLogger {
@@ -49,12 +49,12 @@ func NewRequestLogger() *RequestLogger {
 
 func (m *RequestLogger) Middleware() Middleware {
 	return func(req *http.Request, mn MiddlewareNext) (*http.Response, error) {
-		redacted, err := m.redactRequest(req)
-		if err != nil {
-			return nil, err
+		redacted := m.redact(req)
+		if redacted.err != nil {
+			return nil, redacted.err
 		}
-		if reqBytes, err := httputil.DumpRequest(redacted, true); err == nil {
-			_ = m.logger.Output(2, fmt.Sprintf("HTTP Request:\n%s\n", reqBytes))
+		if reqBytes, err := httputil.DumpRequest(redacted.request, true); err == nil {
+			m.logger.Printf("HTTP Request:\n%s\n", reqBytes)
 		}
 
 		resp, err := mn(req)
@@ -63,14 +63,14 @@ func (m *RequestLogger) Middleware() Middleware {
 		}
 
 		if respBytes, err := httputil.DumpResponse(resp, true); err == nil {
-			_ = m.logger.Output(2, fmt.Sprintf("HTTP Response:\n%s\n", respBytes))
+			m.logger.Printf("HTTP Response:\n%s\n", respBytes)
 		}
 
 		return resp, err
 	}
 }
 
-func (m *RequestLogger) redactRequest(req *http.Request) (*http.Request, error) {
+func (m *RequestLogger) redact(req *http.Request) redactedRequest {
 	redactedHeaders := req.Header.Clone()
 
 	if values := redactedHeaders.Values("Authorization"); len(values) > 0 {
@@ -99,14 +99,14 @@ func (m *RequestLogger) redactRequest(req *http.Request) (*http.Request, error) 
 	}
 
 	if reflect.DeepEqual(req.Header, redactedHeaders) {
-		return req, nil
+		return redactedRequest{request: req}
 	}
 
 	redacted := req.Clone(req.Context())
 	redacted.Header = redactedHeaders
 	var err error
 	redacted.Body, req.Body, err = cloneBody(req.Body)
-	return redacted, err
+	return redactedRequest{request: redacted, err: err}
 }
 
 func cloneBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {

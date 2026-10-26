@@ -185,6 +185,31 @@ func TestDebugMiddleware(t *testing.T) {
 		require.Equal(t, 2, strings.Count(logBuf.String(), customAPIKeyHeader+": "+redactedPlaceholder))
 	})
 
+	t.Run("RedactsTheDefaultSensitiveHeaders", func(t *testing.T) {
+		t.Parallel()
+
+		middleware, logBuf := setup()
+
+		req := httptest.NewRequest("GET", "https://example.com", nil)
+		req.Header.Set("Authorization", "Bearer "+secretToken+"-bearer")
+		req.Header.Set("Cookie", "session="+secretToken+"-cookie")
+		req.Header.Set("Set-Cookie", "session="+secretToken+"-set-cookie")
+		req.Header.Set("X-Api-Key", secretToken+"-x-api-key")
+		req.Header.Set("Api-Key", secretToken+"-api-key")
+
+		_, err := middleware.Middleware()(req, func(*http.Request) (*http.Response, error) {
+			return &http.Response{}, nil
+		})
+		require.NoError(t, err)
+
+		logged := logBuf.String()
+		require.NotContains(t, logged, secretToken)
+		for _, header := range []string{"Authorization: Bearer ", "Cookie: ", "Set-Cookie: ", "X-Api-Key: ", "Api-Key: "} {
+			require.Contains(t, logged, header+redactedPlaceholder)
+		}
+		require.Equal(t, "session="+secretToken+"-cookie", req.Header.Get("Cookie"))
+	})
+
 	t.Run("DoesNotConsumeRequestBodyWhenIoReader", func(t *testing.T) {
 		t.Parallel()
 
