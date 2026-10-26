@@ -26,16 +26,31 @@ codeql"
 readonly passed_line="Passed modules, REUSE, lint, shellcheck, script tests, Go tests, audit, reproducible build, fuzzing and CodeQL."
 readonly status_endpoint="repos/Xquik-dev/x-twitter-scraper-cli/statuses"
 
+write_openssf() {
+  write_file OPENSSF.md <<EOF
+| Statement coverage | \`./scripts/coverage\` enforces 90%. The current result is $1. |
+| Branch coverage | \`./scripts/branch-coverage\` enforces 80%. The current result is $2. |
+EOF
+}
+
 prepare_checks() {
   local name
   copy_file bin/check-local
-  for name in bootstrap lint test-scripts test codeql; do
+  for name in bootstrap lint test-scripts codeql; do
     stub "scripts/$name" <<EOF
 #!/usr/bin/env bash
 echo "$name" >>"\$FAKE_LOGS/order"
 [[ "\${FAKE_FAILING_CHECK:-}" != "$name" ]]
 EOF
   done
+  stub scripts/test <<'EOF'
+#!/usr/bin/env bash
+echo "test" >>"$FAKE_LOGS/order"
+[[ "${FAKE_FAILING_CHECK:-}" != "test" ]] || exit 1
+echo "Total statement coverage: 92.4%"
+echo "Branch coverage: 772/949 (81.35%); minimum 80.00%"
+EOF
+  write_openssf "92.4%" "772/949 (81.35%)"
   stub scripts/audit <<'EOF'
 #!/usr/bin/env bash
 echo "audit" >>"$FAKE_LOGS/order"
@@ -313,6 +328,29 @@ test_a_check_that_changes_the_tree_fails_the_run() {
   assert_contains "$run_stdout" "?? leftover.txt" "stdout"
   assert_equal "Check failed at Unchanged working tree. A check changed or added the files above. Fix that check so it leaves the tree alone, then rerun." "$run_stderr" "stderr"
   assert_not_contains "$(log_of gh)" "success" "the posted statuses"
+}
+
+test_a_statement_coverage_result_that_differs_from_the_openssf_notes_fails_the_run() {
+  prepare_checks
+  write_openssf "92.7%" "772/949 (81.35%)"
+
+  run_in_repo bin/check-local --no-status
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "OPENSSF.md gives statement coverage 92.7% and branch coverage 772/949 (81.35%). This run measured 92.4% and 772/949 (81.35%).
+Check failed at OpenSSF coverage results. Set the coverage results in OPENSSF.md to the measured ones, then rerun." "$run_stderr" "stderr"
+  assert_not_contains "$(log_of order)" "audit" "the checks that ran"
+}
+
+test_a_branch_coverage_result_that_differs_from_the_openssf_notes_fails_the_run() {
+  prepare_checks
+  write_openssf "92.4%" "771/947 (81.41%)"
+
+  run_in_repo bin/check-local --no-status
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "OPENSSF.md gives statement coverage 92.4% and branch coverage 771/947 (81.41%). This run measured 92.4% and 772/949 (81.35%).
+Check failed at OpenSSF coverage results. Set the coverage results in OPENSSF.md to the measured ones, then rerun." "$run_stderr" "stderr"
 }
 
 test_an_unknown_option_stops_with_the_usage_line() {

@@ -131,8 +131,18 @@ start_check "Script tests" "script tests" "Fix the failing script tests above, t
 pass_check
 
 start_check "Go tests and coverage" "Go tests" "Fix the failing test or add coverage, then rerun."
-./scripts/test
+bash scripts/test | tee "$workspace/test.log"
 pass_check
+
+start_check "OpenSSF coverage results" "" "Set the coverage results in OPENSSF.md to the measured ones, then rerun."
+measured_statement="$(sed -nE 's/^Total statement coverage: (.+)$/\1/p' "$workspace/test.log")"
+measured_branch="$(sed -nE 's/^Branch coverage: ([^;]+);.*$/\1/p' "$workspace/test.log")"
+documented_statement="$(sed -nE 's/^\| Statement coverage \|.* The current result is (.+)\. \|$/\1/p' OPENSSF.md)"
+documented_branch="$(sed -nE 's/^\| Branch coverage \|.* The current result is (.+)\. \|$/\1/p' OPENSSF.md)"
+if [[ "$documented_statement" != "$measured_statement" || "$documented_branch" != "$measured_branch" ]]; then
+  echo "OPENSSF.md gives statement coverage ${documented_statement:-nothing} and branch coverage ${documented_branch:-nothing}. This run measured ${measured_statement:-nothing} and ${measured_branch:-nothing}." >&2
+  exit 1
+fi
 
 start_check "Dependency audit" "audit" "Upgrade each blocked module above, or raise the go line in go.mod for standard library findings."
 ./scripts/audit | tee "$workspace/audit.log"
