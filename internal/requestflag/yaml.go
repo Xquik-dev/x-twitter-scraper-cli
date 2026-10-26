@@ -20,6 +20,13 @@ import (
 type yamlDocument struct {
 	anchors     map[string]json.RawMessage
 	anchorNodes map[string]ast.Node
+	tags        map[*ast.TagNode]tagReading
+}
+
+type tagReading struct {
+	value    tagValue
+	isScalar bool
+	err      error
 }
 
 func YAMLToJSON(data []byte) (json.RawMessage, error) {
@@ -34,7 +41,7 @@ func YAMLToJSON(data []byte) (json.RawMessage, error) {
 			break
 		}
 	}
-	document := yamlDocument{anchors: map[string]json.RawMessage{}, anchorNodes: map[string]ast.Node{}}
+	document := yamlDocument{anchors: map[string]json.RawMessage{}, anchorNodes: map[string]ast.Node{}, tags: map[*ast.TagNode]tagReading{}}
 	return document.convert(body)
 }
 
@@ -171,6 +178,16 @@ func (d yamlDocument) tagged(tag *ast.TagNode) (json.RawMessage, error) {
 }
 
 func (d yamlDocument) readTag(tag *ast.TagNode) (tagValue, bool, error) {
+	reading, found := d.tags[tag]
+	if !found {
+		value, isScalar, err := d.readTagOnce(tag)
+		reading = tagReading{value: value, isScalar: isScalar, err: err}
+		d.tags[tag] = reading
+	}
+	return reading.value, reading.isScalar, reading.err
+}
+
+func (d yamlDocument) readTagOnce(tag *ast.TagNode) (tagValue, bool, error) {
 	name := tag.Start.Value
 	if tag.Directive != nil {
 		name = "!!str"
@@ -203,7 +220,7 @@ func (d yamlDocument) readTag(tag *ast.TagNode) (tagValue, bool, error) {
 }
 
 func (d yamlDocument) readText(node ast.Node) (tagValue, error) {
-	text, err := d.text(node)
+	text, _, err := d.text(node)
 	return textValue(text), err
 }
 
@@ -212,7 +229,10 @@ func readNull(ast.Node) (tagValue, error) {
 }
 
 func (d yamlDocument) readInt(node ast.Node) (tagValue, error) {
-	text, _ := d.text(node)
+	text, _, err := d.text(node)
+	if _, isTagged := node.(*ast.TagNode); isTagged && err != nil {
+		return nil, err
+	}
 	whole, _ := strconv.Atoi(text)
 	return intValue(whole), nil
 }
@@ -224,7 +244,10 @@ func (d yamlDocument) readFloat(node ast.Node) (tagValue, error) {
 		err := yaml.NodeToValue(node, &number)
 		return floatValue(number), err
 	case *ast.StringNode, *ast.TagNode:
-		text, _ := d.text(node)
+		text, _, err := d.text(node)
+		if err != nil {
+			return nil, err
+		}
 		number, _ := strconv.ParseFloat(text, 64)
 		return floatValue(number), nil
 	default:
@@ -233,7 +256,7 @@ func (d yamlDocument) readFloat(node ast.Node) (tagValue, error) {
 }
 
 func (d yamlDocument) readBool(node ast.Node) (tagValue, error) {
-	text, err := d.text(node)
+	text, _, err := d.text(node)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +275,7 @@ func (d yamlDocument) readBool(node ast.Node) (tagValue, error) {
 func (d yamlDocument) readTimestamp(node ast.Node) (tagValue, error) {
 	switch node.(type) {
 	case *ast.StringNode, *ast.TagNode:
-		text, _ := d.text(node)
+		text, _, _ := d.text(node)
 		for _, format := range timestampFormats {
 			if moment, err := time.Parse(format, text); err == nil {
 				return timeValue(moment), nil
@@ -263,50 +286,36 @@ func (d yamlDocument) readTimestamp(node ast.Node) (tagValue, error) {
 }
 
 func (d yamlDocument) readBinary(node ast.Node) (tagValue, error) {
-	if !d.holdsText(node) {
+	text, isText, err := d.text(node)
+	if err != nil || !isText {
 		return nil, fmt.Errorf("cannot convert %s to binary", node.String())
-	}
-	text, err := d.text(node)
-	if err != nil {
-		return nil, err
 	}
 	decoded, _ := base64.StdEncoding.DecodeString(text)
 	return bytesValue(decoded), nil
 }
 
-func (d yamlDocument) text(node ast.Node) (string, error) {
-	tag, isTagged := node.(*ast.TagNode)
-	if !isTagged {
-		return scalarText(node)
-	}
-	value, isScalar, err := d.readTag(tag)
-	if err != nil {
-		return "", err
-	}
-	if isScalar {
-		return value.printed(), nil
-	}
-	inner, err := d.resolve(tag.Value)
-	if err != nil {
-		return "", err
-	}
-	return d.text(inner)
-}
-
-func (d yamlDocument) holdsText(node ast.Node) bool {
+func (d yamlDocument) text(node ast.Node) (string, bool, error) {
 	switch node := node.(type) {
-	case *ast.StringNode, *ast.LiteralNode:
-		return true
 	case *ast.TagNode:
 		value, isScalar, err := d.readTag(node)
+		if err != nil {
+			return "", false, err
+		}
 		if isScalar {
 			_, isText := value.(textValue)
-			return err == nil && isText
+			return value.printed(), isText, nil
 		}
 		inner, err := d.resolve(node.Value)
-		return err == nil && d.holdsText(inner)
+		if err != nil {
+			return "", false, err
+		}
+		return d.text(inner)
+	case *ast.StringNode, *ast.LiteralNode:
+		text, err := scalarText(node)
+		return text, true, err
 	default:
-		return false
+		text, err := scalarText(node)
+		return text, false, err
 	}
 }
 
@@ -379,7 +388,8 @@ func (d yamlDocument) keyText(key ast.MapKeyNode) (string, error) {
 		return "", err
 	}
 	if _, isTagged := node.(*ast.TagNode); isTagged {
-		return d.text(node)
+		text, _, err := d.text(node)
+		return text, err
 	}
 	var text string
 	err = yaml.NodeToValue(node, &text)
