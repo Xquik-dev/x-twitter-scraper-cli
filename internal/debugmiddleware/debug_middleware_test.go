@@ -206,7 +206,7 @@ func TestDebugMiddleware(t *testing.T) {
 			return &http.Response{Header: http.Header{}, Body: http.NoBody}, nil
 		})
 		require.NoError(t, err)
-		require.Contains(t, logBuf.String(), "POST /x/accounts")
+		require.Contains(t, logBuf.String(), "POST https://example.com/x/accounts")
 		require.NotContains(t, logBuf.String(), secretToken)
 	})
 
