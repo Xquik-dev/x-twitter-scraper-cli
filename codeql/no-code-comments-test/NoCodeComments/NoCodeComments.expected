@@ -2,6 +2,10 @@
 | docs/first.go:8:1:8:48 | comment | Code has no comments. Put the meaning in names, types and tests. |
 | docs/first.go:10:2:10:43 | comment | Code has no comments. Put the meaning in names, types and tests. |
 | docs/first.go:11:11:11:55 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/first.go:24:2:24:55 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/first.go:25:2:25:58 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/first.go:29:2:29:59 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/first.go:30:2:30:39 | comment | Code has no comments. Put the meaning in names, types and tests. |
 | docs/second.go:1:1:1:71 | comment | Code has no comments. Put the meaning in names, types and tests. |
 | docs/second.go:4:1:4:45 | comment | Code has no comments. Put the meaning in names, types and tests. |
 | docs/third_test.go:1:1:1:69 | comment | Code has no comments. Put the meaning in names, types and tests. |

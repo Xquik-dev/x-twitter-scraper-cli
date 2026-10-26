@@ -4,7 +4,7 @@
 
 /**
  * @name Code comment
- * @description Code has no comments. A comment needs a legal marker, a functional directive or an https link that proves it. A library package may keep 1 doc comment for ST1000.
+ * @description Code has no comments. A comment needs a legal marker in its file's first comment group, a functional directive or an https link that proves it. A library package may keep 1 doc comment for ST1000.
  * @kind problem
  * @problem.severity error
  * @id go/no-code-comments
@@ -16,7 +16,12 @@ predicate proven(Comment comment) {
   exists(CommentGroup group, int index, int later |
     comment = group.getComment(index) and
     later >= index and
-    group.getComment(later).getText().regexpMatch("(?s).*(https://|SPDX-|REUSE-Ignore).*")
+    (
+      group.getComment(later).getText().regexpMatch("(?s).*https://.*")
+      or
+      group = comment.getFile().getCommentGroup(0) and
+      group.getComment(later).getText().regexpMatch("(?s).*(SPDX-|REUSE-Ignore).*")
+    )
   )
 }
 

@@ -19,3 +19,13 @@ func Old() {}
 
 //go:noinline
 func Inline() {}
+
+func License() {
+	// Copyright 2009 The Go Authors. All rights reserved.
+	// A comment under a license line, which the query flags.
+}
+
+func Marked() {
+	// A comment over a license marker, which the query flags.
+	// SPDX-License-Identifier: Apache-2.0
+}
