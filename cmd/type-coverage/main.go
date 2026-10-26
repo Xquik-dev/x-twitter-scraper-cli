@@ -124,7 +124,7 @@ func comparePositions(a, b token.Position) int {
 }
 
 func trackedFiles(root string) (map[string]bool, []string, error) {
-	command := exec.Command("git", "ls-files", "-z", "--", "*.go", "*staticcheck.conf")
+	command := exec.Command("git", "ls-files", "-z", "--", "*.go", ":(icase)*staticcheck.conf")
 	command.Dir = root
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
@@ -136,7 +136,7 @@ func trackedFiles(root string) (map[string]bool, []string, error) {
 	var configs []string
 	for name := range strings.SplitSeq(string(listing), "\x00") {
 		switch {
-		case filepath.Base(name) == "staticcheck.conf":
+		case strings.EqualFold(filepath.Base(name), "staticcheck.conf"):
 			configs = append(configs, filepath.Join(root, name))
 		case strings.HasSuffix(name, ".go"):
 			files[filepath.Join(root, name)] = true
