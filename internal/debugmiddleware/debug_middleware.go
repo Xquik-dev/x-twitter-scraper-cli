@@ -8,6 +8,7 @@ package debugmiddleware
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -30,8 +31,12 @@ var sensitiveHeaders = []string{
 	"set-cookie",
 }
 
+type lineLogger interface {
+	Output(calldepth int, s string) error
+}
+
 type RequestLogger struct {
-	logger           *log.Logger
+	logger           lineLogger
 	sensitiveHeaders []string
 }
 
@@ -49,7 +54,7 @@ func (m *RequestLogger) Middleware() Middleware {
 			return nil, err
 		}
 		if reqBytes, err := httputil.DumpRequest(redacted, true); err == nil {
-			m.logger.Printf("HTTP Request:\n%s\n", reqBytes)
+			_ = m.logger.Output(2, fmt.Sprintf("HTTP Request:\n%s\n", reqBytes))
 		}
 
 		resp, err := mn(req)
@@ -58,7 +63,7 @@ func (m *RequestLogger) Middleware() Middleware {
 		}
 
 		if respBytes, err := httputil.DumpResponse(resp, true); err == nil {
-			m.logger.Printf("HTTP Response:\n%s\n", respBytes)
+			_ = m.logger.Output(2, fmt.Sprintf("HTTP Response:\n%s\n", respBytes))
 		}
 
 		return resp, err
