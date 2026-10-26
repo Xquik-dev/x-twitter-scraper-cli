@@ -5,19 +5,14 @@
 package requestflag
 
 import (
+	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/urfave/cli/v3"
 )
 
-type InnerFlag[
-	T []any | []map[string]any | []DateTimeValue | []DateValue | []TimeValue | []string |
-		[]float64 | []int64 | []bool | any | map[string]any | DateTimeValue | DateValue | TimeValue |
-		string | float64 | int64 | bool |
-		*string | *float64 | *int64 | *bool | *DateTimeValue | *DateValue | *TimeValue,
-] struct {
+type InnerFlag[T any, C codec[T]] struct {
 	Name        string
 	DefaultText string
 	Usage       string
@@ -27,17 +22,14 @@ type InnerFlag[
 	OuterFlag   cli.Flag
 	InnerField  string
 	DataAliases []string
-
-	OuterIsArrayOfObjects bool
 }
 
-func (f *InnerFlag[T]) GetDataAliases() []string {
-	return f.DataAliases
-}
+type InnerString = InnerFlag[string, textCodec]
 
-func (f *InnerFlag[T]) GetInnerField() string {
-	return f.InnerField
-}
+var (
+	_ HasOuterFlag                    = (*InnerString)(nil)
+	_ cli.DocGenerationMultiValueFlag = (*InnerString)(nil)
+)
 
 type HasOuterFlag interface {
 	cli.Flag
@@ -47,152 +39,111 @@ type HasOuterFlag interface {
 	GetDataAliases() []string
 }
 
-func (f *InnerFlag[T]) SetOuterFlag(flag cli.Flag) {
+type fieldSetter interface {
+	setInnerField(field string, value json.RawMessage) error
+}
+
+func (f *InnerFlag[T, C]) GetDataAliases() []string {
+	return f.DataAliases
+}
+
+func (f *InnerFlag[T, C]) GetInnerField() string {
+	return f.InnerField
+}
+
+func (f *InnerFlag[T, C]) SetOuterFlag(flag cli.Flag) {
 	f.OuterFlag = flag
 }
 
-func (f *InnerFlag[T]) GetOuterFlag() cli.Flag {
+func (f *InnerFlag[T, C]) GetOuterFlag() cli.Flag {
 	return f.OuterFlag
 }
 
-var _ cli.Flag = (*InnerFlag[any])(nil)
-
-func (f *InnerFlag[T]) PreParse() error {
+func (f *InnerFlag[T, C]) PreParse() error {
 	return nil
 }
 
-func (f *InnerFlag[T]) PostParse() error {
+func (f *InnerFlag[T, C]) PostParse() error {
 	return nil
 }
 
-func (f *InnerFlag[T]) Set(name string, rawVal string) error {
-	if parsedValue, err := parseCLIArg[T](rawVal); err != nil {
+func (f *InnerFlag[T, C]) Set(name string, input string) error {
+	var c C
+	var empty T
+	parsed, err := c.parse(empty, input)
+	if err != nil {
 		return err
-	} else {
-		if f.Validator != nil {
-			if err := f.Validator(parsedValue); err != nil {
-				return err
-			}
-		}
-
-		if seeder, ok := f.OuterFlag.(InnerFieldSeeder); ok {
-			seeder.SeedInnerCollection(f.OuterIsArrayOfObjects)
-		}
-
-		if settableInnerField, ok := f.OuterFlag.(SettableInnerField); ok {
-			settableInnerField.SetInnerField(f.InnerField, parsedValue)
-		} else {
-			return fmt.Errorf("cannot set an inner field on %v", f.OuterFlag)
-		}
-		return nil
 	}
+	if f.Validator != nil {
+		if err := f.Validator(parsed); err != nil {
+			return err
+		}
+	}
+	outer, ok := f.OuterFlag.(fieldSetter)
+	if !ok {
+		return fmt.Errorf("cannot set an inner field on %v", f.OuterFlag)
+	}
+	encoded, err := json.Marshal(parsed)
+	if err != nil {
+		return err
+	}
+	return outer.setInnerField(f.InnerField, encoded)
 }
 
-func (f *InnerFlag[T]) Get() any {
-	var zeroValue T
-	return zeroValue
+func (f *InnerFlag[T, C]) Get() any {
+	var empty T
+	return empty
 }
 
-func (f *InnerFlag[T]) String() string {
+func (f *InnerFlag[T, C]) String() string {
 	return cli.FlagStringer(f)
 }
 
-func (f *InnerFlag[T]) IsSet() bool {
+func (f *InnerFlag[T, C]) IsSet() bool {
 	return false
 }
 
-func (f *InnerFlag[T]) Names() []string {
+func (f *InnerFlag[T, C]) Names() []string {
 	return cli.FlagNames(f.Name, f.Aliases)
 }
 
-var _ cli.DocGenerationFlag = (*InnerFlag[any])(nil)
-
-func (f *InnerFlag[T]) TakesValue() bool {
-	var t T
-	return reflect.TypeOf(t) == nil || reflect.TypeOf(t).Kind() != reflect.Bool
+func (f *InnerFlag[T, C]) TakesValue() bool {
+	var c C
+	return !c.traits().isBool
 }
 
-func (f *InnerFlag[T]) GetUsage() string {
+func (f *InnerFlag[T, C]) GetUsage() string {
 	return f.Usage
 }
 
-func (f *InnerFlag[T]) GetValue() string {
+func (f *InnerFlag[T, C]) GetValue() string {
 	return ""
 }
 
-func (f *InnerFlag[T]) GetDefaultText() string {
+func (f *InnerFlag[T, C]) GetDefaultText() string {
 	return f.DefaultText
 }
 
-func (f *InnerFlag[T]) GetEnvVars() []string {
+func (f *InnerFlag[T, C]) GetEnvVars() []string {
 	return nil
 }
 
-func (f *InnerFlag[T]) IsDefaultVisible() bool {
+func (f *InnerFlag[T, C]) IsDefaultVisible() bool {
 	return false
 }
 
-func (f *InnerFlag[T]) TypeName() string {
-	var zeroValue T
-	ty := reflect.TypeOf(zeroValue)
-	if ty == nil {
-		return ""
-	}
-	if ty.Kind() == reflect.Pointer {
-		ty = ty.Elem()
-	}
-
-	getTypeName := func(t reflect.Type) string {
-		switch t.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return "int"
-		case reflect.Float32, reflect.Float64:
-			return "float"
-		case reflect.Bool:
-			return "boolean"
-		case reflect.String:
-			switch t.Name() {
-			case "DateTimeValue":
-				return "datetime"
-			case "DateValue":
-				return "date"
-			case "TimeValue":
-				return "time"
-			default:
-				return "string"
-			}
-		default:
-			if t.Name() == "" {
-				return "any"
-			}
-			return strings.ToLower(t.Name())
-		}
-	}
-
-	switch ty.Kind() {
-	case reflect.Slice:
-		elemType := ty.Elem()
-		return getTypeName(elemType)
-	case reflect.Map:
-		keyType := ty.Key()
-		valueType := ty.Elem()
-		return fmt.Sprintf("%s=%s", getTypeName(keyType), getTypeName(valueType))
-	default:
-		return getTypeName(ty)
-	}
+func (f *InnerFlag[T, C]) TypeName() string {
+	var c C
+	return c.traits().typeName
 }
 
-var _ cli.DocGenerationMultiValueFlag = (*InnerFlag[any])(nil)
-
-func (f *InnerFlag[T]) IsMultiValueFlag() bool {
+func (f *InnerFlag[T, C]) IsMultiValueFlag() bool {
 	return false
 }
 
-func (f *InnerFlag[T]) IsBoolFlag() bool {
-	var zeroValue T
-	_, isBool := any(zeroValue).(bool)
-	return isBool
+func (f *InnerFlag[T, C]) IsBoolFlag() bool {
+	var c C
+	return c.traits().isBool
 }
 
 func WithInnerFlags(cmd cli.Command, innerFlagMap map[string][]HasOuterFlag) cli.Command {

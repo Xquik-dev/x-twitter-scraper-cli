@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,12 +19,12 @@ var xBookmarksList = cli.Command{
 	Usage:   "Get bookmarked tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for bookmarks",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "folder-id",
 			Usage:     "Optional bookmark folder ID",
 			QueryPath: "folderId",
@@ -52,13 +51,7 @@ func handleXBookmarksList(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -93,13 +86,7 @@ func handleXBookmarksRetrieveFolders(ctx context.Context, cmd *cli.Command) erro
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

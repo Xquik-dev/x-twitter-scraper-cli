@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,7 +19,7 @@ var stylesRetrieve = cli.Command{
 	Usage:   "Get cached style profile",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -35,18 +34,18 @@ var stylesUpdate = requestflag.WithInnerFlags(cli.Command{
 	Usage:   "Save style profile with custom tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "label",
 			Usage:    "Display label for the style",
 			Required: true,
 			BodyPath: "label",
 		},
-		&requestflag.Flag[[]map[string]any]{
+		&requestflag.ObjectList{
 			Name:     "tweet",
 			Usage:    "Array of tweet objects",
 			Required: true,
@@ -57,7 +56,7 @@ var stylesUpdate = requestflag.WithInnerFlags(cli.Command{
 	HideHelpCommand: true,
 }, map[string][]requestflag.HasOuterFlag{
 	"tweet": {
-		&requestflag.InnerFlag[string]{
+		&requestflag.InnerString{
 			Name:       "tweet.text",
 			InnerField: "text",
 		},
@@ -78,7 +77,7 @@ var stylesDelete = cli.Command{
 	Usage:   "Delete a style profile",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -93,7 +92,7 @@ var stylesAnalyze = cli.Command{
 	Usage:   "Analyze writing style from recent tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "username",
 			Usage:    "X username to analyze",
 			Required: true,
@@ -109,13 +108,13 @@ var stylesCompare = cli.Command{
 	Usage:   "Compare two style profiles",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "username1",
 			Usage:     "First username to compare",
 			Required:  true,
 			QueryPath: "username1",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "username2",
 			Usage:     "Second username to compare",
 			Required:  true,
@@ -131,7 +130,7 @@ var stylesGetPerformance = cli.Command{
 	Usage:   "Get engagement metrics for style tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -152,13 +151,7 @@ func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -194,13 +187,7 @@ func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -240,13 +227,7 @@ func handleStylesList(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -282,13 +263,7 @@ func handleStylesDelete(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -304,13 +279,7 @@ func handleStylesAnalyze(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -345,13 +314,7 @@ func handleStylesCompare(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -389,13 +352,7 @@ func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

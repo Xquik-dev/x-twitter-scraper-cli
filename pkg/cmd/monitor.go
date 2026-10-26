@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,13 +19,13 @@ var monitorsCreate = cli.Command{
 	Usage:   "Creates an account monitor. Monitors are unlimited. Active monitors check every\n1 second and cost 30 credits per hour. Events and webhook deliveries are\nincluded. Creation requires available credits for the first hourly charge and\nusername lookup.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[[]string]{
+		&requestflag.StringList{
 			Name:     "event-type",
 			Usage:    "Array of event types to subscribe to.",
 			Required: true,
 			BodyPath: "eventTypes",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "username",
 			Usage:    "X username (without @)",
 			Required: true,
@@ -42,7 +41,7 @@ var monitorsRetrieve = cli.Command{
 	Usage:   "Get monitor",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -57,17 +56,17 @@ var monitorsUpdate = cli.Command{
 	Usage:   "Update monitor",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[[]string]{
+		&requestflag.StringList{
 			Name:     "event-type",
 			Usage:    "Array of event types to subscribe to.",
 			BodyPath: "eventTypes",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:     "is-active",
 			BodyPath: "isActive",
 		},
@@ -90,7 +89,7 @@ var monitorsDeactivate = cli.Command{
 	Usage:   "Delete monitor",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -108,13 +107,7 @@ func handleMonitorsCreate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -152,13 +145,7 @@ func handleMonitorsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -194,13 +181,7 @@ func handleMonitorsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -240,13 +221,7 @@ func handleMonitorsList(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -282,13 +257,7 @@ func handleMonitorsDeactivate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

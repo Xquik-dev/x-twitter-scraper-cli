@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,17 +19,17 @@ var xMediaDownload = cli.Command{
 	Usage:   "Download images and videos from tweets",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "tweet-id",
 			Usage:    "Numeric tweet ID alias for tweetInput",
 			BodyPath: "tweetId",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "tweet-input",
 			Usage:    "Tweet URL or ID (single tweet)",
 			BodyPath: "tweetInput",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "tweet-url",
 			Usage:    "Tweet URL alias for tweetInput",
 			BodyPath: "tweetUrl",
@@ -45,19 +44,19 @@ var xMediaUpload = cli.Command{
 	Usage:   "Upload media",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "account",
 			Usage:    "X account (@username or ID) uploading media from URL",
 			Required: true,
 			BodyPath: "account",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "url",
 			Usage:    "HTTPS URL to download and upload as media",
 			Required: true,
 			BodyPath: "url",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			Required:   true,
 			HeaderPath: "Idempotency-Key",
@@ -75,13 +74,7 @@ func handleXMediaDownload(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -116,13 +109,7 @@ func handleXMediaUpload(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

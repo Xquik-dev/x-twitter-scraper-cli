@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,17 +19,17 @@ var supportTicketsCreate = cli.Command{
 	Usage:   "Create a support ticket",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "body",
 			Required: true,
 			BodyPath: "body",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "subject",
 			Required: true,
 			BodyPath: "subject",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			HeaderPath: "Idempotency-Key",
 		},
@@ -44,7 +43,7 @@ var supportTicketsRetrieve = cli.Command{
 	Usage:   "Get ticket with all messages",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -59,12 +58,12 @@ var supportTicketsUpdate = cli.Command{
 	Usage:   "Update ticket status",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "status",
 			Usage:    `Choose "open", "resolved" or "closed".`,
 			Required: true,
@@ -89,17 +88,17 @@ var supportTicketsReply = cli.Command{
 	Usage:   "Reply to a support ticket",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "body",
 			Required: true,
 			BodyPath: "body",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			HeaderPath: "Idempotency-Key",
 		},
@@ -116,13 +115,7 @@ func handleSupportTicketsCreate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -160,13 +153,7 @@ func handleSupportTicketsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -202,13 +189,7 @@ func handleSupportTicketsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -248,13 +229,7 @@ func handleSupportTicketsList(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -290,13 +265,7 @@ func handleSupportTicketsReply(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

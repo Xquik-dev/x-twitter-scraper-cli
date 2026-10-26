@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,20 +19,20 @@ var guestWalletsCreate = cli.Command{
 	Usage:   "Create a one-use hosted checkout after the user confirms $10-$250 USD. The\nrequest creates no charge. It returns a paid-read API key without an Xquik\naccount. Idempotent replays return the same key.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:     "amount-minor",
 			Usage:    "USD cents accepted for this checkout.",
 			Required: true,
 			BodyPath: "amount_minor",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "currency",
 			Usage:    `Use "usd".`,
 			Default:  "usd",
 			Const:    true,
 			BodyPath: "currency",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			Required:   true,
 			HeaderPath: "Idempotency-Key",
@@ -57,20 +56,20 @@ var guestWalletsTopup = cli.Command{
 	Usage:   "Create a one-use hosted checkout after the user confirms a $10-$250 USD amount\nfor an existing paid-read guest key. The key remains the same. This request\ncreates no charge and never redirects through Xquik.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:     "amount-minor",
 			Usage:    "USD cents accepted for this checkout.",
 			Required: true,
 			BodyPath: "amount_minor",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "currency",
 			Usage:    `Use "usd".`,
 			Default:  "usd",
 			Const:    true,
 			BodyPath: "currency",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			Required:   true,
 			HeaderPath: "Idempotency-Key",
@@ -88,13 +87,7 @@ func handleGuestWalletsCreate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -129,13 +122,7 @@ func handleGuestWalletsRetrieveStatus(ctx context.Context, cmd *cli.Command) err
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -168,13 +155,7 @@ func handleGuestWalletsTopup(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

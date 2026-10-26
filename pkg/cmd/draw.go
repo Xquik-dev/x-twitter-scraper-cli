@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -22,7 +21,7 @@ var drawsRetrieve = cli.Command{
 	Usage:   "Get draw details",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -37,12 +36,12 @@ var drawsList = cli.Command{
 	Usage:   "List draws",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Previous nextCursor.",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "limit",
 			Usage:     "Maximum number of items to return (1-100, default 50). For paid per-result endpoints, the returned count may be lower when remaining credits cannot cover the requested page. If zero paid results are affordable, the endpoint returns 402 insufficient_credits.\n",
 			Default:   50,
@@ -58,24 +57,24 @@ var drawsExport = cli.Command{
 	Usage:   "Export draw data",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "format",
 			Usage:     "Export output format. PDF entry exports include up to 10,000 rows. Other entry formats include up to 100,000 rows.",
 			Required:  true,
 			QueryPath: "format",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "type",
 			Usage:     "Export winners or all entries",
 			Default:   "winners",
 			QueryPath: "type",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:    "output",
 			Aliases: []string{"o"},
 			Usage:   "The file where the response contents will be stored. Use the value '-' to force output to stdout.",
@@ -90,52 +89,52 @@ var drawsRun = cli.Command{
 	Usage:   "Runs a giveaway draw from a source tweet. The draw first checks the minimum\ncredits needed to inspect the source tweet and at least one candidate. Remaining\ncredits cap how many replies and retweeters can be inspected before filters and\nwinner selection run.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "tweet-url",
 			Required: true,
 			BodyPath: "tweetUrl",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:     "backup-count",
 			BodyPath: "backupCount",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:     "filter-account-age-days",
 			BodyPath: "filterAccountAgeDays",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "filter-language",
 			BodyPath: "filterLanguage",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:     "filter-min-followers",
 			BodyPath: "filterMinFollowers",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "must-follow-username",
 			BodyPath: "mustFollowUsername",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:     "must-retweet",
 			BodyPath: "mustRetweet",
 		},
-		&requestflag.Flag[[]string]{
+		&requestflag.StringList{
 			Name:     "required-hashtag",
 			BodyPath: "requiredHashtags",
 		},
-		&requestflag.Flag[[]string]{
+		&requestflag.StringList{
 			Name:     "required-keyword",
 			BodyPath: "requiredKeywords",
 		},
-		&requestflag.Flag[[]string]{
+		&requestflag.StringList{
 			Name:     "required-mention",
 			BodyPath: "requiredMentions",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:     "unique-authors-only",
 			BodyPath: "uniqueAuthorsOnly",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:     "winner-count",
 			Default:  1,
 			BodyPath: "winnerCount",
@@ -156,13 +155,7 @@ func handleDrawsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -195,13 +188,7 @@ func handleDrawsList(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -239,13 +226,7 @@ func handleDrawsExport(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -276,13 +257,7 @@ func handleDrawsRun(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

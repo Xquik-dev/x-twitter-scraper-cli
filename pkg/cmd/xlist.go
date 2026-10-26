@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,88 +19,88 @@ var xListsRetrieveFollowers = cli.Command{
 	Usage:   "List followers of an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "bio-contains",
 			Usage:     "Match any comma-separated or line-separated bio term, ignoring case.\n",
 			QueryPath: "bioContains",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for list followers",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:      "has-location",
 			Usage:     "Only return profiles with a location.",
 			QueryPath: "hasLocation",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:      "has-website",
 			Usage:     "Only return profiles with a website.",
 			QueryPath: "hasWebsite",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "location-contains",
 			Usage:     "Match a location substring, ignoring case.",
 			QueryPath: "locationContains",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "max-followers",
 			Usage:     "Maximum follower count. Missing counts pass this maximum.",
 			QueryPath: "maxFollowers",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "max-following",
 			Usage:     "Maximum following count.",
 			QueryPath: "maxFollowing",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "max-statuses",
 			Usage:     "Maximum post count. maxPosts is also accepted.",
 			QueryPath: "maxStatuses",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-account-age-days",
 			Usage:     "Minimum account age in whole days.",
 			QueryPath: "minAccountAgeDays",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-followers",
 			Usage:     "Minimum follower count. Filtering happens before billing.",
 			QueryPath: "minFollowers",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-following",
 			Usage:     "Minimum following count.",
 			QueryPath: "minFollowing",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-statuses",
 			Usage:     "Minimum post count. minPosts is also accepted.",
 			QueryPath: "minStatuses",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "page-size",
 			Usage:     "Maximum user profiles requested from this page (20-200, default 200). Source, filters, or credits can return fewer profiles. Keep requesting next_cursor while has_next_page is true. Deprecated aliases remain accepted.\n",
 			Default:   200,
 			QueryPath: "pageSize",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "username-contains",
 			Usage:     "Match a username substring, ignoring case.",
 			QueryPath: "usernameContains",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:      "verified-only",
 			Usage:     "Only return verified profiles.",
 			QueryPath: "verifiedOnly",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "verified-type",
 			Usage:     "Match the verification type exactly, ignoring case.",
 			QueryPath: "verifiedType",
@@ -116,88 +115,88 @@ var xListsRetrieveMembers = cli.Command{
 	Usage:   "List members of an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "bio-contains",
 			Usage:     "Match any comma-separated or line-separated bio term, ignoring case.\n",
 			QueryPath: "bioContains",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for list members",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:      "has-location",
 			Usage:     "Only return profiles with a location.",
 			QueryPath: "hasLocation",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:      "has-website",
 			Usage:     "Only return profiles with a website.",
 			QueryPath: "hasWebsite",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "location-contains",
 			Usage:     "Match a location substring, ignoring case.",
 			QueryPath: "locationContains",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "max-followers",
 			Usage:     "Maximum follower count. Missing counts pass this maximum.",
 			QueryPath: "maxFollowers",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "max-following",
 			Usage:     "Maximum following count.",
 			QueryPath: "maxFollowing",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "max-statuses",
 			Usage:     "Maximum post count. maxPosts is also accepted.",
 			QueryPath: "maxStatuses",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-account-age-days",
 			Usage:     "Minimum account age in whole days.",
 			QueryPath: "minAccountAgeDays",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-followers",
 			Usage:     "Minimum follower count. Filtering happens before billing.",
 			QueryPath: "minFollowers",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-following",
 			Usage:     "Minimum following count.",
 			QueryPath: "minFollowing",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "min-statuses",
 			Usage:     "Minimum post count. minPosts is also accepted.",
 			QueryPath: "minStatuses",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "page-size",
 			Usage:     "Members per page (20-200, default 20)",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "username-contains",
 			Usage:     "Match a username substring, ignoring case.",
 			QueryPath: "usernameContains",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:      "verified-only",
 			Usage:     "Only return verified profiles.",
 			QueryPath: "verifiedOnly",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "verified-type",
 			Usage:     "Match the verification type exactly, ignoring case.",
 			QueryPath: "verifiedType",
@@ -212,33 +211,33 @@ var xListsRetrieveTweets = cli.Command{
 	Usage:   "List tweets from an X List",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for list tweets",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:      "include-replies",
 			Usage:     "Include replies (default false)",
 			QueryPath: "includeReplies",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "page-size",
 			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "since-time",
 			Usage:     "Unix timestamp - filter after",
 			QueryPath: "sinceTime",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "until-time",
 			Usage:     "Unix timestamp - filter before",
 			QueryPath: "untilTime",
@@ -259,13 +258,7 @@ func handleXListsRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -308,13 +301,7 @@ func handleXListsRetrieveMembers(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -357,13 +344,7 @@ func handleXListsRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

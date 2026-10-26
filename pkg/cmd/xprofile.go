@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,32 +19,32 @@ var xProfileUpdate = cli.Command{
 	Usage:   "Update X profile",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "account",
 			Usage:    "X account (@username or ID) to update profile",
 			Required: true,
 			BodyPath: "account",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			Required:   true,
 			HeaderPath: "Idempotency-Key",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "description",
 			Usage:    "Bio description",
 			BodyPath: "description",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "location",
 			BodyPath: "location",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "name",
 			Usage:    "Display name",
 			BodyPath: "name",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "url",
 			Usage:    "Website URL",
 			BodyPath: "url",
@@ -60,19 +59,19 @@ var xProfileUpdateAvatar = cli.Command{
 	Usage:   "Update profile avatar",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "account",
 			Usage:    "X account (@username or ID) receiving avatar from URL",
 			Required: true,
 			BodyPath: "account",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "url",
 			Usage:    "HTTPS URL to the avatar image to download",
 			Required: true,
 			BodyPath: "url",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			Required:   true,
 			HeaderPath: "Idempotency-Key",
@@ -87,19 +86,19 @@ var xProfileUpdateBanner = cli.Command{
 	Usage:   "Update profile banner",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "account",
 			Usage:    "X account (@username or ID) receiving banner from URL",
 			Required: true,
 			BodyPath: "account",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "url",
 			Usage:    "HTTPS URL to the banner image to download",
 			Required: true,
 			BodyPath: "url",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			Required:   true,
 			HeaderPath: "Idempotency-Key",
@@ -117,13 +116,7 @@ func handleXProfileUpdate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -158,13 +151,7 @@ func handleXProfileUpdateAvatar(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -199,13 +186,7 @@ func handleXProfileUpdateBanner(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

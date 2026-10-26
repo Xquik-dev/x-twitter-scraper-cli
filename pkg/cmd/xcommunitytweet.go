@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,30 +19,30 @@ var xCommunitiesTweetsList = cli.Command{
 	Usage:   "Requires a Community ID and keyword query.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "community-id",
 			Usage:     "Numeric ID of the community to search",
 			Required:  true,
 			QueryPath: "communityId",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "q",
 			Usage:     "Keyword query within the selected community",
 			Required:  true,
 			QueryPath: "q",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for community results",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "page-size",
 			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
 			QueryPath: "pageSize",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "query-type",
 			Usage:     "Sort order for community results (Latest or Top)",
 			Default:   "Latest",
@@ -59,17 +58,17 @@ var xCommunitiesTweetsListByCommunity = cli.Command{
 	Usage:   "List tweets posted in a community",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for community tweets",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "page-size",
 			Usage:     "Maximum page items (1-100, default 20). Source, filters, or credits can reduce results. Continue while has_next_page is true. Deprecated limit and count aliases remain accepted.\n",
 			Default:   20,
@@ -88,13 +87,7 @@ func handleXCommunitiesTweetsList(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -132,13 +125,7 @@ func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Comma
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,25 +19,25 @@ var xAccountsCreate = cli.Command{
 	Usage:   "Connect X account",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "email",
 			Usage:    "Account email",
 			Required: true,
 			BodyPath: "email",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "password",
 			Usage:    "Account password",
 			Required: true,
 			BodyPath: "password",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "totp-secret",
 			Usage:    "Authenticator App TOTP secret required for durable login",
 			Required: true,
 			BodyPath: "totp_secret",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "username",
 			Usage:    "X username",
 			Required: true,
@@ -54,7 +53,7 @@ var xAccountsRetrieve = cli.Command{
 	Usage:   "Get X account details",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -78,7 +77,7 @@ var xAccountsDelete = cli.Command{
 	Usage:   "Disconnect X account",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -102,23 +101,23 @@ var xAccountsReauth = cli.Command{
 	Usage:   "Re-authenticate X account",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "password",
 			Usage:    "Updated account password",
 			Required: true,
 			BodyPath: "password",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "email",
 			Usage:    "Email for the X account (updates stored email)",
 			BodyPath: "email",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "totp-secret",
 			Usage:    "Replacement Authenticator App TOTP secret. Omit it to reuse the saved secret.",
 			BodyPath: "totp_secret",
@@ -136,13 +135,7 @@ func handleXAccountsCreate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -180,13 +173,7 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -219,13 +206,7 @@ func handleXAccountsList(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -261,13 +242,7 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -300,13 +275,7 @@ func handleXAccountsBulkRetry(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -342,13 +311,7 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -20,61 +19,61 @@ var composeCreate = cli.Command{
 	Usage:   "Run one step of Xquik's three-step writing workflow. Compose returns questions,\neditorial rules, and source-specific Radar recommendations. Refine returns\ngoal-specific guidance. Score applies deterministic text checks. It does not\npredict reach or expose X ranking weights.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "step",
 			Usage:    `Use "compose".`,
 			Default:  "compose",
 			Const:    true,
 			BodyPath: "step",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "topic",
 			Usage:    "Subject for the post.",
 			BodyPath: "topic",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "goal",
 			Usage:    "Editorial goal used to order the rules and questions.",
 			Default:  "engagement",
 			BodyPath: "goal",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "style-username",
 			Usage:    "Username from a style analysis saved to this account.",
 			BodyPath: "styleUsername",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "tone",
 			Usage:    "Requested writing tone.",
 			BodyPath: "tone",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "additional-context",
 			Usage:    "Audience, constraints, sources, or other writing context.",
 			BodyPath: "additionalContext",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "call-to-action",
 			Usage:    "Specific action the draft should request.",
 			BodyPath: "callToAction",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "media-type",
 			Usage:    "Planned media type.",
 			BodyPath: "mediaType",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "draft",
 			Usage:    "Full post text for deterministic editorial checks.",
 			BodyPath: "draft",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:     "has-link",
 			Usage:    "True when a separate link card is attached.",
 			Default:  false,
 			BodyPath: "hasLink",
 		},
-		&requestflag.Flag[bool]{
+		&requestflag.Bool{
 			Name:     "has-media",
 			Usage:    "Accepted for backward compatibility. Text checks ignore this field.\n",
 			BodyPath: "hasMedia",
@@ -92,13 +91,7 @@ func handleComposeCreate(ctx context.Context, cmd *cli.Command) error {
 		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

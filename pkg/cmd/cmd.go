@@ -87,12 +87,12 @@ func newCommand() *cli.Command {
 				Aliases: []string{"r"},
 				Usage:   "If the result is a string, print it without JSON quotes. This can be useful for making output transforms talk to non-JSON-based systems.",
 			},
-			&requestflag.Flag[string]{
+			&requestflag.String{
 				Name:    "api-key",
 				Usage:   "Xquik API key",
 				Sources: cli.EnvVars("X_TWITTER_SCRAPER_API_KEY"),
 			},
-			&requestflag.Flag[string]{
+			&requestflag.String{
 				Name:    "bearer-token",
 				Usage:   "OAuth 2.1 access token",
 				Sources: cli.EnvVars("X_TWITTER_SCRAPER_BEARER_TOKEN"),

@@ -8,40 +8,7 @@ package apiquery
 
 import (
 	"net/url"
-	"reflect"
-)
-
-func MarshalWithSettings(value any, settings QuerySettings) (url.Values, error) {
-	val := reflect.ValueOf(value)
-	if !val.IsValid() {
-		return nil, nil
-	}
-
-	e := encoder{settings}
-	pairs, err := e.Encode("", val)
-	if err != nil {
-		return nil, err
-	}
-
-	kv := url.Values{}
-	for _, pair := range pairs {
-		kv.Add(pair.key, pair.value)
-	}
-	return kv, nil
-}
-func Marshal(value any) (url.Values, error) {
-	return MarshalWithSettings(value, QuerySettings{})
-}
-
-type Queryer interface {
-	URLQuery() (url.Values, error)
-}
-
-type NestedQueryFormat int
-
-const (
-	NestedQueryFormatBrackets NestedQueryFormat = iota
-	NestedQueryFormatDots
+	"strings"
 )
 
 type ArrayQueryFormat int
@@ -49,11 +16,43 @@ type ArrayQueryFormat int
 const (
 	ArrayQueryFormatComma ArrayQueryFormat = iota
 	ArrayQueryFormatRepeat
-	ArrayQueryFormatIndices
-	ArrayQueryFormatBrackets
 )
 
-type QuerySettings struct {
-	NestedFormat NestedQueryFormat
-	ArrayFormat  ArrayQueryFormat
+type Param struct {
+	values []string
+	list   bool
+}
+
+func Scalar(value string) Param {
+	return Param{values: []string{value}}
+}
+
+func List(values []string) Param {
+	return Param{values: values, list: true}
+}
+
+func (p Param) Map(transform func(string) (string, error)) (Param, error) {
+	values := make([]string, len(p.values))
+	for i, value := range p.values {
+		transformed, err := transform(value)
+		if err != nil {
+			return Param{}, err
+		}
+		values[i] = transformed
+	}
+	return Param{values: values, list: p.list}, nil
+}
+
+func Encode(params map[string]Param, format ArrayQueryFormat) url.Values {
+	encoded := url.Values{}
+	for key, param := range params {
+		if param.list && format == ArrayQueryFormatComma {
+			encoded.Add(key, strings.Join(param.values, ","))
+			continue
+		}
+		for _, value := range param.values {
+			encoded.Add(key, value)
+		}
+	}
+	return encoded
 }
