@@ -10,8 +10,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"runtime"
 	"strings"
+	"syscall"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/term"
@@ -26,9 +29,17 @@ const (
 )
 
 type screen struct {
-	input  io.Reader
-	output io.Writer
-	lines  int
+	input   io.Reader
+	output  io.Writer
+	lines   int
+	signals <-chan os.Signal
+	ticks   <-chan time.Time
+	measure func() (int, int)
+}
+
+type keyPress struct {
+	key tea.KeyMsg
+	err error
 }
 
 type Option func(*screen)
@@ -71,6 +82,9 @@ var controlKeys = map[rune]tea.KeyType{
 }
 
 func (s *screen) size() (int, int) {
+	if s.measure != nil {
+		return s.measure()
+	}
 	if file, ok := s.output.(*os.File); ok {
 		if width, height, err := term.GetSize(file.Fd()); err == nil {
 			return width, height
@@ -126,27 +140,68 @@ func (s *screen) run(viewer *JSONViewer) (err error) {
 		err = errors.Join(err, writeErr)
 	}()
 
+	if s.signals == nil {
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+		defer signal.Stop(signals)
+		s.signals = signals
+	}
+	if s.ticks == nil {
+		ticker := time.NewTicker(100 * time.Millisecond)
+		defer ticker.Stop()
+		s.ticks = ticker.C
+	}
+
+	done := make(chan struct{})
+	defer close(done)
+	keys := make(chan keyPress)
+	go readKeys(bufio.NewReader(s.input), keys, done)
+
 	width, height := s.size()
 	viewer.resize(width-borderPadding, height)
-	reader := bufio.NewReader(s.input)
+	stale := true
 	for {
-		if drawErr := s.draw(viewer.View()); drawErr != nil {
-			return drawErr
+		if stale {
+			if drawErr := s.draw(viewer.View()); drawErr != nil {
+				return drawErr
+			}
+			stale = false
 		}
-		pressed, readErr := readKey(reader)
-		if errors.Is(readErr, io.EOF) {
-			return nil
+		select {
+		case pressed := <-keys:
+			if errors.Is(pressed.err, io.EOF) {
+				return nil
+			}
+			if pressed.err != nil {
+				return pressed.err
+			}
+			quit, keyErr := viewer.handleKey(pressed.key)
+			if keyErr != nil || quit {
+				return keyErr
+			}
+			stale = true
+		case received := <-s.signals:
+			return fmt.Errorf("the explorer stopped on %s", received)
+		case <-s.ticks:
+			if newWidth, newHeight := s.size(); newWidth != width || newHeight != height {
+				width, height = newWidth, newHeight
+				viewer.resize(width-borderPadding, height)
+				stale = true
+			}
 		}
-		if readErr != nil {
-			return readErr
+	}
+}
+
+func readKeys(reader *bufio.Reader, keys chan<- keyPress, done <-chan struct{}) {
+	for {
+		pressed, err := readKey(reader)
+		select {
+		case keys <- keyPress{key: pressed, err: err}:
+		case <-done:
+			return
 		}
-		if newWidth, newHeight := s.size(); newWidth != width || newHeight != height {
-			width, height = newWidth, newHeight
-			viewer.resize(width-borderPadding, height)
-		}
-		quit, keyErr := viewer.handleKey(pressed)
-		if keyErr != nil || quit {
-			return keyErr
+		if err != nil {
+			return
 		}
 	}
 }

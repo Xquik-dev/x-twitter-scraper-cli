@@ -8,9 +8,16 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"io"
 	"os"
 	"strings"
+	"sync"
+	"sync/atomic"
+	"syscall"
 	"testing"
+	"time"
+
+	"github.com/charmbracelet/bubbles/help"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -106,4 +113,69 @@ func TestExploreJSONMovesWithArrowKeys(t *testing.T) {
 	content, err := os.ReadFile(printed.Name())
 	require.NoError(t, err)
 	assert.Equal(t, "\n{\"name\":\"second\"}\n", string(content))
+}
+
+func testViewer(t *testing.T) *JSONViewer {
+	t.Helper()
+	view, err := newView("", gjson.Parse(`{"name":"xquik"}`), false)
+	require.NoError(t, err)
+	return &JSONViewer{stack: []JSONView{view}, root: "Account", help: help.New()}
+}
+
+func TestScreenStopsOnSignalAndRestoresTheCursor(t *testing.T) {
+	t.Parallel()
+
+	input, inputWriter := io.Pipe()
+	defer inputWriter.Close()
+	signals := make(chan os.Signal, 1)
+	signals <- syscall.SIGTERM
+	output := &bytes.Buffer{}
+	terminal := &screen{input: input, output: output, signals: signals, ticks: make(chan time.Time)}
+
+	require.ErrorContains(t, terminal.run(testViewer(t)), "the explorer stopped on terminated")
+	assert.True(t, strings.HasSuffix(output.String(), "\r\n"+showCursor))
+}
+
+func TestScreenRedrawsWhenTheTerminalResizes(t *testing.T) {
+	t.Parallel()
+
+	input, inputWriter := io.Pipe()
+	ticks := make(chan time.Time)
+	var width atomic.Int64
+	width.Store(80)
+	output := &lockedBuffer{}
+	terminal := &screen{
+		input:   input,
+		output:  output,
+		signals: make(chan os.Signal),
+		ticks:   ticks,
+		measure: func() (int, int) { return int(width.Load()), 24 },
+	}
+	finished := make(chan error, 1)
+	go func() { finished <- terminal.run(testViewer(t)) }()
+
+	ticks <- time.Now()
+	width.Store(120)
+	ticks <- time.Now()
+	ticks <- time.Now()
+	require.NoError(t, inputWriter.Close())
+	require.NoError(t, <-finished)
+	assert.Equal(t, 2, strings.Count(output.String(), clearBelow))
+}
+
+type lockedBuffer struct {
+	mutex  sync.Mutex
+	buffer bytes.Buffer
+}
+
+func (b *lockedBuffer) Write(data []byte) (int, error) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	return b.buffer.Write(data)
+}
+
+func (b *lockedBuffer) String() string {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	return b.buffer.String()
 }
