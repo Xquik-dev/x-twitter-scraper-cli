@@ -14,7 +14,6 @@ import (
 	"unicode"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
-	"github.com/goccy/go-yaml"
 	"github.com/urfave/cli/v3"
 )
 
@@ -199,14 +198,6 @@ func parseJSON(input string) (json.RawMessage, error) {
 		return nil, fmt.Errorf("failed to parse as YAML: %w", err)
 	}
 	return converted, nil
-}
-
-func YAMLToJSON(data []byte) (json.RawMessage, error) {
-	converted, err := yaml.YAMLToJSON(data)
-	if err != nil {
-		return nil, err
-	}
-	return compactJSON(converted)
 }
 
 func parseObject(input string) (map[string]json.RawMessage, error) {

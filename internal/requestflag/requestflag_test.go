@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
@@ -465,4 +466,18 @@ func TestFlagMetadata(t *testing.T) {
 	assert.Nil(t, inner.GetEnvVars())
 	assert.False(t, inner.IsDefaultVisible())
 	assert.Contains(t, inner.String(), "--row.name")
+	assert.False(t, inner.IsVisible())
+	assert.True(t, inner.IsLocal())
+}
+
+func TestHelpHidesInnerFlags(t *testing.T) {
+	t.Parallel()
+
+	command := objectListCommand()
+	var help strings.Builder
+	command.Writer = &help
+	require.NoError(t, command.Run(context.Background(), []string{"probe", "--help"}))
+	assert.Contains(t, help.String(), "--relation-target")
+	assert.NotContains(t, help.String(), "--relation-target.relation")
+	assert.NotContains(t, help.String(), "--parent.name")
 }

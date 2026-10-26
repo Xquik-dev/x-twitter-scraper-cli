@@ -100,6 +100,14 @@ func (f *InnerFlag[T, C]) IsSet() bool {
 	return false
 }
 
+func (f *InnerFlag[T, C]) IsVisible() bool {
+	return false
+}
+
+func (f *InnerFlag[T, C]) IsLocal() bool {
+	return true
+}
+
 func (f *InnerFlag[T, C]) Names() []string {
 	return cli.FlagNames(f.Name, f.Aliases)
 }
