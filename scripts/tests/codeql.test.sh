@@ -17,6 +17,9 @@ EOF
   write_file pkg/lib.go <<'EOF'
 package lib
 EOF
+  write_file pkg/lib_test.go <<'EOF'
+package lib
+EOF
   write_file codeql/no-code-comments/qlpack.yml <<'EOF'
 name: xquik/no-code-comments
 EOF
@@ -63,7 +66,8 @@ case "$1 $2" in
     mkdir -p "$3"
     echo "built" >"$source_root/build-output.txt"
     files=""
-    for file in main.go pkg/lib.go; do
+    [ "${CODEQL_EXTRACTOR_GO_OPTION_EXTRACT_TESTS:-}" = true ] || exit 96
+    for file in main.go pkg/lib.go pkg/lib_test.go; do
       [ "$file" = "${FAKE_SKIPPED_FILE:-}" ] || files="$files ${source_root#/}/$file"
     done
     (cd / && zip -q "$3/src.zip" $files)
@@ -93,7 +97,7 @@ EOF
 [ "$*" = "list -json ./..." ] || exit 97
 here="$(pwd -P)"
 echo "{\"Dir\": \"$here\", \"GoFiles\": [\"main.go\"]}"
-echo "{\"Dir\": \"$here/pkg\", \"GoFiles\": [\"lib.go\"]}"
+echo "{\"Dir\": \"$here/pkg\", \"GoFiles\": [\"lib.go\"], \"TestGoFiles\": [\"lib_test.go\"]}"
 EOF
   commit_repo
 }
@@ -105,7 +109,7 @@ test_codeql_scans_a_copy_with_the_pinned_pack_and_leaves_the_working_tree_alone(
 
   assert_equal "" "$run_stderr" "stderr"
   assert_equal 0 "$run_status" "the exit code"
-  assert_ends_with "$run_stdout" "CodeQL read all 2 Go files and found no results." "stdout"
+  assert_ends_with "$run_stdout" "CodeQL read all 3 Go files and found no results." "stdout"
   assert_equal "" "$(sandbox_git status --porcelain)" "the working tree changes"
   assert_contains "$(log_of source-root)" "$sandbox/tmp/xquik-cli-codeql." "the scanned folder"
   assert_contains "$(log_of codeql)" "pack download codeql/go-queries@1.6.12 --dir=$sandbox/tmp/" "the pack download"

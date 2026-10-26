@@ -115,7 +115,7 @@ git ls-files --cached --others --exclude-standard -z |
   tar -xf - -C "$source_root"
 
 echo "==> Building the CodeQL database"
-codeql database create "$database" \
+CODEQL_EXTRACTOR_GO_OPTION_EXTRACT_TESTS=true codeql database create "$database" \
   --language=go \
   --build-mode=autobuild \
   --source-root="$source_root" \
@@ -124,7 +124,7 @@ codeql database create "$database" \
 
 expected="$(
   cd -- "$source_root"
-  go list -json ./... | jq -r '.Dir as $dir | (.GoFiles // [])[] | "\($dir)/\(.)"' |
+  go list -json ./... | jq -r '.Dir as $dir | ((.GoFiles // []) + (.TestGoFiles // []) + (.XTestGoFiles // []))[] | "\($dir)/\(.)"' |
     sed "s|^.*${source_root#/}/||" | LC_ALL=C sort -u
 )"
 scanned="$(
