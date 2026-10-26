@@ -18,7 +18,8 @@ import (
 )
 
 type yamlDocument struct {
-	anchors map[string]json.RawMessage
+	anchors     map[string]json.RawMessage
+	anchorNodes map[string]ast.Node
 }
 
 func YAMLToJSON(data []byte) (json.RawMessage, error) {
@@ -27,10 +28,13 @@ func YAMLToJSON(data []byte) (json.RawMessage, error) {
 		return nil, err
 	}
 	var body ast.Node
-	if len(file.Docs) > 0 {
-		body = file.Docs[0].Body
+	for _, document := range file.Docs {
+		if _, isDirective := document.Body.(*ast.DirectiveNode); !isDirective {
+			body = document.Body
+			break
+		}
 	}
-	document := yamlDocument{anchors: map[string]json.RawMessage{}}
+	document := yamlDocument{anchors: map[string]json.RawMessage{}, anchorNodes: map[string]ast.Node{}}
 	return document.convert(body)
 }
 
@@ -42,6 +46,7 @@ func (d yamlDocument) convert(node ast.Node) (json.RawMessage, error) {
 		raw, err := d.convert(node.Value)
 		if err == nil {
 			d.anchors[node.Name.GetToken().Value] = raw
+			d.anchorNodes[node.Name.GetToken().Value] = node.Value
 		}
 		return raw, err
 	case *ast.AliasNode:
@@ -91,26 +96,48 @@ var timestampFormats = []string{
 	"2006-1-2",
 }
 
-func (d yamlDocument) tagged(node *ast.TagNode) (json.RawMessage, error) {
-	if node.Directive != nil {
-		return d.taggedText(node.Value)
+func (d yamlDocument) resolve(node ast.Node) (ast.Node, error) {
+	for {
+		switch reference := node.(type) {
+		case *ast.AnchorNode:
+			if _, err := d.convert(reference); err != nil {
+				return nil, err
+			}
+			node = reference.Value
+		case *ast.AliasNode:
+			name := reference.Value.GetToken().Value
+			target, found := d.anchorNodes[name]
+			if !found {
+				return nil, fmt.Errorf("alias %q has no anchor", name)
+			}
+			node = target
+		default:
+			return node, nil
+		}
 	}
-	switch node.Start.Value {
+}
+
+func (d yamlDocument) tagged(tag *ast.TagNode) (json.RawMessage, error) {
+	node, err := d.resolve(tag.Value)
+	if err != nil {
+		return nil, err
+	}
+	switch tag.Start.Value {
 	case "!!str":
-		return d.taggedText(node.Value)
+		return d.taggedText(node)
 	case "!!null":
 		return json.RawMessage("null"), nil
 	case "!!int":
-		text, _, err := scalarText(node.Value)
+		text, _, err := scalarText(node)
 		if err != nil {
 			return nil, err
 		}
 		whole, _ := strconv.Atoi(text)
 		return json.Marshal(whole)
 	case "!!float":
-		return taggedFloat(node.Value)
+		return taggedFloat(node)
 	case "!!bool":
-		text, _, err := scalarText(node.Value)
+		text, _, err := scalarText(node)
 		if err != nil {
 			return nil, err
 		}
@@ -126,8 +153,8 @@ func (d yamlDocument) tagged(node *ast.TagNode) (json.RawMessage, error) {
 		}
 	case "!!timestamp":
 		var moment time.Time
-		if _, isText := node.Value.(*ast.StringNode); isText {
-			text, _, err := scalarText(node.Value)
+		if _, isText := node.(*ast.StringNode); isText {
+			text, _, err := scalarText(node)
 			if err != nil {
 				return nil, err
 			}
@@ -140,17 +167,19 @@ func (d yamlDocument) tagged(node *ast.TagNode) (json.RawMessage, error) {
 		}
 		return json.Marshal(moment)
 	case "!!binary":
-		if _, isText := node.Value.(*ast.StringNode); !isText {
-			return nil, fmt.Errorf("cannot convert %s to binary", node.Value.String())
+		switch node.(type) {
+		case *ast.StringNode, *ast.LiteralNode:
+		default:
+			return nil, fmt.Errorf("cannot convert %s to binary", node.String())
 		}
-		text, _, err := scalarText(node.Value)
+		text, _, err := scalarText(node)
 		if err != nil {
 			return nil, err
 		}
 		decoded, _ := base64.StdEncoding.DecodeString(text)
 		return json.Marshal(decoded)
 	default:
-		return d.convert(node.Value)
+		return d.convert(node)
 	}
 }
 
