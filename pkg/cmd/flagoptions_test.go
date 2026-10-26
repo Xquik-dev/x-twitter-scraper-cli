@@ -55,16 +55,26 @@ func TestEmbedJSON(t *testing.T) {
 	jpegHeader := []byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46}
 	writeTestFile(t, tmpDir, "image.jpg", string(jpegHeader))
 
-	path := func(name string) string {
-		encoded, err := json.Marshal(filepath.Join(tmpDir, name))
+	text := func(value string) json.RawMessage {
+		encoded, err := json.Marshal(value)
 		require.NoError(t, err)
-		return strings.Trim(string(encoded), `"`)
+		return encoded
 	}
-	quoted := func(text string) string {
-		encoded, err := json.Marshal(text)
+	file := func(prefix, name string) json.RawMessage {
+		return text(prefix + filepath.Join(tmpDir, name))
+	}
+	object := func(fields map[string]json.RawMessage) json.RawMessage {
+		encoded, err := json.Marshal(fields)
 		require.NoError(t, err)
-		return string(encoded)
+		return encoded
 	}
+	list := func(items ...json.RawMessage) json.RawMessage {
+		encoded, err := json.Marshal(items)
+		require.NoError(t, err)
+		return encoded
+	}
+	number := json.RawMessage(`42`)
+	truth := json.RawMessage(`true`)
 
 	tests := []struct {
 		name    string
@@ -74,23 +84,23 @@ func TestEmbedJSON(t *testing.T) {
 	}{
 		{
 			name:  "object with file references",
-			input: `{"config":"@` + path("config.txt") + `","template":"@file://` + path("template.html") + `","count":42}`,
-			want:  `{"config":` + quoted(configContent) + `,"template":` + quoted(templateContent) + `,"count":42}`,
+			input: string(object(map[string]json.RawMessage{"config": file("@", "config.txt"), "template": file("@file://", "template.html"), "count": number})),
+			want:  string(object(map[string]json.RawMessage{"config": text(configContent), "template": text(templateContent), "count": number})),
 		},
 		{
 			name:  "list with file references",
-			input: `["@` + path("config.txt") + `",42,true,"@file://` + path("data.json") + `"]`,
-			want:  `[` + quoted(configContent) + `,42,true,` + quoted(dataContent) + `]`,
+			input: string(list(file("@", "config.txt"), number, truth, file("@file://", "data.json"))),
+			want:  string(list(text(configContent), number, truth, text(dataContent))),
 		},
 		{
 			name:  "nested structures",
-			input: `{"outer":{"inner":["@` + path("config.txt") + `",{"data":"@` + path("data.json") + `"}]}}`,
-			want:  `{"outer":{"inner":[` + quoted(configContent) + `,{"data":` + quoted(dataContent) + `}]}}`,
+			input: string(object(map[string]json.RawMessage{"outer": object(map[string]json.RawMessage{"inner": list(file("@", "config.txt"), object(map[string]json.RawMessage{"data": file("@", "data.json")}))})})),
+			want:  string(object(map[string]json.RawMessage{"outer": object(map[string]json.RawMessage{"inner": list(text(configContent), object(map[string]json.RawMessage{"data": text(dataContent)}))})})),
 		},
 		{
 			name:  "base64 encoding",
-			input: `{"encoded":"@data://` + path("config.txt") + `","image":"@` + path("image.jpg") + `"}`,
-			want:  `{"encoded":"` + base64.StdEncoding.EncodeToString([]byte(configContent)) + `","image":"` + base64.StdEncoding.EncodeToString(jpegHeader) + `"}`,
+			input: string(object(map[string]json.RawMessage{"encoded": file("@data://", "config.txt"), "image": file("@", "image.jpg")})),
+			want:  string(object(map[string]json.RawMessage{"encoded": text(base64.StdEncoding.EncodeToString([]byte(configContent))), "image": text(base64.StdEncoding.EncodeToString(jpegHeader))})),
 		},
 		{
 			name:    "missing file with @ prefix",
