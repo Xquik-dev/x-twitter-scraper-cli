@@ -10,6 +10,10 @@ cd "$(dirname "$0")/.."
 
 export GOPRIVATE="${GOPRIVATE:+$GOPRIVATE,}github.com/Xquik-dev/x-twitter-scraper-go"
 
+platforms=(darwin linux windows)
+workspace="$(mktemp -d "${TMPDIR:-/tmp}/xquik-cli-lint.XXXXXX")"
+trap 'rm -rf -- "${workspace:?}"' EXIT
+
 echo "==> Checking Go formatting"
 unformatted_files="$(gofmt -l .)"
 if [[ -n "$unformatted_files" ]]; then
@@ -17,11 +21,16 @@ if [[ -n "$unformatted_files" ]]; then
   exit 1
 fi
 
-echo "==> Running Go vet"
-go vet ./...
-
 echo "==> Checking module metadata"
 go mod tidy -diff
 
 echo "==> Running Go build"
 go build ./...
+
+go build -modfile=tools/staticcheck/go.mod -o "$workspace/staticcheck" honnef.co/go/tools/cmd/staticcheck
+for platform in "${platforms[@]}"; do
+  echo "==> Running Go vet for $platform"
+  GOOS="$platform" go vet ./...
+  echo "==> Running staticcheck for $platform"
+  GOOS="$platform" "$workspace/staticcheck" -checks all -show-ignored ./...
+done

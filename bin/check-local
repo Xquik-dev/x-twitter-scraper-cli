@@ -112,7 +112,7 @@ start_check "REUSE licensing" "REUSE" "Add the missing license notice or REUSE.t
 uvx --from "reuse==$reuse_version" reuse lint
 pass_check
 
-start_check "Lint" "lint" "Run ./scripts/format and go mod tidy, fix the go vet findings above, then rerun."
+start_check "Lint" "lint" "Run ./scripts/format and go mod tidy, fix the go vet and staticcheck findings above, then rerun."
 ./scripts/lint
 pass_check
 
