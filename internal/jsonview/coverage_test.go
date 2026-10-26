@@ -6,11 +6,9 @@ package jsonview
 
 import (
 	"bytes"
-	"context"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
@@ -25,11 +23,11 @@ type invalidView struct {
 	data gjson.Result
 }
 
-func (view *invalidView) GetPath() string                 { return "invalid" }
-func (view *invalidView) GetData() gjson.Result           { return view.data }
-func (view *invalidView) Update(tea.KeyMsg, bool) tea.Cmd { return nil }
-func (view *invalidView) View() string                    { return "invalid" }
-func (view *invalidView) Resize(width, height int)        {}
+func (view *invalidView) GetPath() string          { return "invalid" }
+func (view *invalidView) GetData() gjson.Result    { return view.data }
+func (view *invalidView) Update(tea.KeyMsg, bool)  {}
+func (view *invalidView) View() string             { return "invalid" }
+func (view *invalidView) Resize(width, height int) {}
 
 func keyMessage(value string) tea.KeyMsg {
 	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(value)}
@@ -73,7 +71,7 @@ func TestViewConstructionAndFormatting(t *testing.T) {
 	text.Resize(40, 12)
 	assert.Equal(t, 40, text.viewport.Width)
 	_ = text.View()
-	assert.Nil(t, text.Update(keyMessage("j"), false))
+	text.Update(keyMessage("j"), false)
 
 	_, err = newTextView("", gjson.Parse("1"))
 	require.Error(t, err)
@@ -90,7 +88,7 @@ func TestViewConstructionAndFormatting(t *testing.T) {
 	primitive.Resize(200, 20)
 	_ = primitive.View()
 	_ = primitive.GetData()
-	assert.Nil(t, primitive.Update(keyMessage("j"), false))
+	primitive.Update(keyMessage("j"), false)
 
 	objects, err := newTableView("", gjson.Parse(`[{"a":1},{"a":2,"b":"x"}]`), false)
 	require.NoError(t, err)
@@ -124,43 +122,40 @@ func TestJSONViewerNavigationAndModes(t *testing.T) {
 		help:  help.New(),
 	}
 
-	require.Nil(t, viewer.Init())
-	model, command := viewer.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	viewer.resize(98, 30)
 	assert.Equal(t, 98, viewer.width)
 	assert.NotEmpty(t, viewer.View())
 	assert.Equal(t, "Root", viewer.buildTitle(root))
 
-	model, command = viewer.Update(keyMessage("l"))
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	quit, err := viewer.handleKey(keyMessage("l"))
+	require.NoError(t, err)
+	require.False(t, quit)
 	require.Len(t, viewer.stack, 2)
 	assert.Contains(t, viewer.buildTitle(viewer.current()), "nested")
 
-	model, command = viewer.Update(keyMessage("h"))
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	quit, err = viewer.handleKey(keyMessage("h"))
+	require.NoError(t, err)
+	require.False(t, quit)
 	require.Len(t, viewer.stack, 1)
 
-	model, command = viewer.Update(keyMessage("r"))
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	quit, err = viewer.handleKey(keyMessage("r"))
+	require.NoError(t, err)
+	require.False(t, quit)
 	assert.True(t, viewer.rawMode)
 	assert.Contains(t, viewer.buildTitle(viewer.current()), "JSON")
 
-	model, command = viewer.Update(keyMessage("p"))
-	require.Same(t, viewer, model)
-	require.NotNil(t, command)
+	quit, err = viewer.handleKey(keyMessage("j"))
+	require.NoError(t, err)
+	require.False(t, quit)
+
+	quit, err = viewer.handleKey(keyMessage("p"))
+	require.NoError(t, err)
+	require.True(t, quit)
 	assert.NotEmpty(t, viewer.message)
 
-	model, command = viewer.Update(keyMessage("q"))
-	require.Same(t, viewer, model)
-	require.NotNil(t, command)
-
-	model, command = viewer.Update(keyMessage("j"))
-	require.Same(t, viewer, model)
-	_ = command
+	quit, err = viewer.handleKey(keyMessage("q"))
+	require.NoError(t, err)
+	require.True(t, quit)
 
 	text, err := newTextView("", gjson.Parse(`"content"`))
 	require.NoError(t, err)
@@ -175,23 +170,21 @@ func TestJSONViewerNavigationAndModes(t *testing.T) {
 	assert.False(t, viewer.canNavigateInto(gjson.Parse(`1`)))
 
 	viewer.stack = []JSONView{&invalidView{data: gjson.Parse("1")}}
-	_, command = viewer.toggleRaw()
-	require.NotNil(t, command)
+	require.Error(t, viewer.toggleRaw())
+	_, err = viewer.handleKey(keyMessage("r"))
+	require.Error(t, err)
 
 	assert.Equal(t, stringStyle, viewer.getStyleForData(gjson.Parse(`"x"`)))
 	assert.Equal(t, arrayStyle, viewer.getStyleForData(gjson.Parse(`[1]`)))
 	assert.Equal(t, objectStyle, viewer.getStyleForData(gjson.Parse(`{"a":1}`)))
 }
 
-func typedKeys(t *testing.T, typed string) ([]tea.ProgramOption, *bytes.Buffer) {
+func typedKeys(t *testing.T, typed string) ([]Option, *bytes.Buffer) {
 	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	t.Cleanup(cancel)
 	screen := &bytes.Buffer{}
-	return []tea.ProgramOption{
-		tea.WithContext(ctx),
-		tea.WithInput(strings.NewReader(typed)),
-		tea.WithOutput(screen),
+	return []Option{
+		WithInput(strings.NewReader(typed)),
+		WithOutput(screen),
 	}, screen
 }
 
@@ -248,10 +241,12 @@ func TestTextViewUpdateUsesViewport(t *testing.T) {
 
 	text := &TextView{
 		data:     gjson.Parse(`"content"`),
-		viewport: viewport.New(20, 4),
+		viewport: viewport.New(20, 2),
 		ready:    true,
 	}
-	assert.Nil(t, text.Update(keyMessage("j"), false))
+	text.viewport.SetContent("a\nb\nc\nd")
+	text.Update(keyMessage("j"), false)
+	assert.Equal(t, 1, text.viewport.YOffset)
 }
 
 func TestTableViewNarrowColumns(t *testing.T) {

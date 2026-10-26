@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -103,7 +104,7 @@ var (
 type JSONView interface {
 	GetPath() string
 	GetData() gjson.Result
-	Update(tea.KeyMsg, bool) tea.Cmd
+	Update(tea.KeyMsg, bool)
 	View() string
 	Resize(width, height int)
 }
@@ -122,10 +123,8 @@ func (tv *TableView) GetPath() string       { return tv.path }
 func (tv *TableView) GetData() gjson.Result { return tv.data }
 func (tv *TableView) View() string          { return tv.table.View() }
 
-func (tv *TableView) Update(msg tea.KeyMsg, raw bool) tea.Cmd {
-	var cmd tea.Cmd
-	tv.table, cmd = tv.table.Update(msg)
-	return cmd
+func (tv *TableView) Update(msg tea.KeyMsg, raw bool) {
+	tv.table, _ = tv.table.Update(msg)
 }
 
 func (tv *TableView) Resize(width, height int) {
@@ -198,10 +197,8 @@ func (tv *TextView) GetPath() string       { return tv.path }
 func (tv *TextView) GetData() gjson.Result { return tv.data }
 func (tv *TextView) View() string          { return tv.viewport.View() }
 
-func (tv *TextView) Update(msg tea.KeyMsg, raw bool) tea.Cmd {
-	var cmd tea.Cmd
-	tv.viewport, cmd = tv.viewport.Update(msg)
-	return cmd
+func (tv *TextView) Update(msg tea.KeyMsg, raw bool) {
+	tv.viewport, _ = tv.viewport.Update(msg)
 }
 
 func (tv *TextView) Resize(width, height int) {
@@ -226,7 +223,7 @@ type JSONViewer struct {
 	help    help.Model
 }
 
-func ExploreJSON(title string, json gjson.Result, options ...tea.ProgramOption) error {
+func ExploreJSON(title string, json gjson.Result, options ...Option) error {
 	view, err := newView("", json, false)
 	if err != nil {
 		return err
@@ -234,7 +231,11 @@ func ExploreJSON(title string, json gjson.Result, options ...tea.ProgramOption) 
 
 	viewer := &JSONViewer{stack: []JSONView{view}, root: title, rawMode: false, help: help.New()}
 
-	_, err = tea.NewProgram(viewer, options...).Run()
+	terminal := &screen{output: os.Stdout}
+	for _, option := range options {
+		option(terminal)
+	}
+	err = terminal.run(viewer)
 	if viewer.message != "" {
 		_, msgErr := fmt.Println("\n" + viewer.message)
 		err = errors.Join(err, msgErr)
@@ -243,7 +244,6 @@ func ExploreJSON(title string, json gjson.Result, options ...tea.ProgramOption) 
 }
 
 func (v *JSONViewer) current() JSONView { return v.stack[len(v.stack)-1] }
-func (v *JSONViewer) Init() tea.Cmd     { return nil }
 
 func (v *JSONViewer) resize(width, height int) {
 	v.width, v.height = width, height
@@ -253,32 +253,23 @@ func (v *JSONViewer) resize(width, height int) {
 	}
 }
 
-func (v *JSONViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		v.resize(msg.Width-borderPadding, msg.Height)
-		return v, nil
-	case tea.KeyMsg:
-		return v.handleKey(msg)
-	}
-	return v, nil
-}
-
-func (v *JSONViewer) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (v *JSONViewer) handleKey(msg tea.KeyMsg) (bool, error) {
 	switch {
 	case key.Matches(msg, keys.Quit):
-		return v, tea.Quit
+		return true, nil
 	case key.Matches(msg, keys.Enter):
-		return v.navigateForward()
+		v.navigateForward()
 	case key.Matches(msg, keys.Back):
-		return v.navigateBack()
+		v.navigateBack()
 	case key.Matches(msg, keys.Raw):
-		return v.toggleRaw()
+		return false, v.toggleRaw()
 	case key.Matches(msg, keys.PrintValue):
 		v.message = v.getSelectedContent()
-		return v, tea.Quit
+		return true, nil
+	default:
+		v.current().Update(msg, v.rawMode)
 	}
-	return v, v.current().Update(msg, v.rawMode)
+	return false, nil
 }
 
 func (v *JSONViewer) getSelectedContent() string {
@@ -294,31 +285,30 @@ func (v *JSONViewer) getSelectedContent() string {
 	return selected.Raw
 }
 
-func (v *JSONViewer) navigateForward() (tea.Model, tea.Cmd) {
+func (v *JSONViewer) navigateForward() {
 	tableView, ok := v.current().(*TableView)
 	if !ok {
-		return v, nil
+		return
 	}
 
 	if len(tableView.rowData) < 1 {
-		return v, nil
+		return
 	}
 
 	cursor := tableView.table.Cursor()
 	selected := tableView.rowData[cursor]
 	if !v.canNavigateInto(selected) {
-		return v, nil
+		return
 	}
 
 	path := v.buildNavigationPath(tableView, cursor)
 	forwardView, err := newView(path, selected, v.rawMode)
 	if err != nil {
-		return v, nil
+		return
 	}
 
 	v.stack = append(v.stack, forwardView)
 	v.resize(v.width, v.height)
-	return v, nil
 }
 
 func (v *JSONViewer) buildNavigationPath(tableView *TableView, cursor int) string {
@@ -348,26 +338,25 @@ func (v *JSONViewer) canNavigateInto(data gjson.Result) bool {
 	return false
 }
 
-func (v *JSONViewer) navigateBack() (tea.Model, tea.Cmd) {
+func (v *JSONViewer) navigateBack() {
 	if len(v.stack) > 1 {
 		v.stack = v.stack[:len(v.stack)-1]
 	}
-	return v, nil
 }
 
-func (v *JSONViewer) toggleRaw() (tea.Model, tea.Cmd) {
+func (v *JSONViewer) toggleRaw() error {
 	v.rawMode = !v.rawMode
 
 	for i, view := range v.stack {
 		viewWithRaw, err := newView(view.GetPath(), view.GetData(), v.rawMode)
 		if err != nil {
-			return v, tea.Printf("Error: %s", err)
+			return err
 		}
 		v.stack[i] = viewWithRaw
 	}
 
 	v.resize(v.width, v.height)
-	return v, nil
+	return nil
 }
 
 func (v *JSONViewer) View() string {

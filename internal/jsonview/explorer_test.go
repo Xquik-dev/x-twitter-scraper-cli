@@ -26,9 +26,7 @@ func TestNavigateForward_EmptyRowData(t *testing.T) {
 		help:  help.New(),
 	}
 
-	model, cmd := viewer.navigateForward()
-	require.Equal(t, model, viewer, "expected same viewer model returned")
-	require.Nil(t, cmd)
+	viewer.navigateForward()
 
 	require.Equal(t, 1, len(viewer.stack), "expected stack length 1, got %d", len(viewer.stack))
 }
