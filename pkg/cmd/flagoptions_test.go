@@ -54,6 +54,7 @@ func TestEmbedJSON(t *testing.T) {
 	writeTestFile(t, tmpDir, "data.json", dataContent)
 	jpegHeader := []byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46}
 	writeTestFile(t, tmpDir, "image.jpg", string(jpegHeader))
+	writeTestFile(t, tmpDir, `quo"te\back.txt`, "quoted content")
 
 	text := func(value string) json.RawMessage {
 		encoded, err := json.Marshal(value)
@@ -85,22 +86,27 @@ func TestEmbedJSON(t *testing.T) {
 		{
 			name:  "object with file references",
 			input: string(object(map[string]json.RawMessage{"config": file("@", "config.txt"), "template": file("@file://", "template.html"), "count": number})),
-			want:  string(object(map[string]json.RawMessage{"config": text(configContent), "template": text(templateContent), "count": number})),
+			want:  `{"config":"host=localhost\nport=8080","template":"<html><body>Hello</body></html>","count":42}`,
 		},
 		{
 			name:  "list with file references",
 			input: string(list(file("@", "config.txt"), number, truth, file("@file://", "data.json"))),
-			want:  string(list(text(configContent), number, truth, text(dataContent))),
+			want:  `["host=localhost\nport=8080",42,true,"{\"key\": \"value\"}"]`,
 		},
 		{
 			name:  "nested structures",
 			input: string(object(map[string]json.RawMessage{"outer": object(map[string]json.RawMessage{"inner": list(file("@", "config.txt"), object(map[string]json.RawMessage{"data": file("@", "data.json")}))})})),
-			want:  string(object(map[string]json.RawMessage{"outer": object(map[string]json.RawMessage{"inner": list(text(configContent), object(map[string]json.RawMessage{"data": text(dataContent)}))})})),
+			want:  `{"outer":{"inner":["host=localhost\nport=8080",{"data":"{\"key\": \"value\"}"}]}}`,
 		},
 		{
 			name:  "base64 encoding",
 			input: string(object(map[string]json.RawMessage{"encoded": file("@data://", "config.txt"), "image": file("@", "image.jpg")})),
-			want:  string(object(map[string]json.RawMessage{"encoded": text(base64.StdEncoding.EncodeToString([]byte(configContent))), "image": text(base64.StdEncoding.EncodeToString(jpegHeader))})),
+			want:  `{"encoded":"aG9zdD1sb2NhbGhvc3QKcG9ydD04MDgw","image":"/9j/4AAQSkZJRg=="}`,
+		},
+		{
+			name:  "path with a quote and a backslash",
+			input: string(object(map[string]json.RawMessage{"plain": file("@", `quo"te\back.txt`), "file": file("@file://", `quo"te\back.txt`)})),
+			want:  `{"plain":"quoted content","file":"quoted content"}`,
 		},
 		{
 			name:    "missing file with @ prefix",
