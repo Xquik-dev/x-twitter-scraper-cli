@@ -65,7 +65,7 @@ type pipeProbe struct {
 	consumes bool
 }
 
-func pipedInput(stdin *os.File, readsBody bool, probe pipeProbe) (io.Reader, bool) {
+func pipedInput(stdin *os.File, takesInput bool, probe pipeProbe) (io.Reader, bool) {
 	stat, err := stdin.Stat()
 	if err != nil {
 		return stdin, false
@@ -77,7 +77,7 @@ func pipedInput(stdin *os.File, readsBody bool, probe pipeProbe) (io.Reader, boo
 		return stdin, true
 	}
 
-	if mode&(os.ModeNamedPipe|os.ModeSocket) == 0 || (probe.consumes && !readsBody) {
+	if mode&(os.ModeNamedPipe|os.ModeSocket) == 0 || (probe.consumes && !takesInput) {
 		return stdin, false
 	}
 

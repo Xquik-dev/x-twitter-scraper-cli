@@ -206,7 +206,7 @@ func flagOptions(cmd *cli.Command, bodyType BodyContentType) ([]option.RequestOp
 	}
 
 	var rootBody json.RawMessage
-	stdin, piped := pipedInput(os.Stdin, bodyType == ApplicationJSON, stdinProbe)
+	stdin, piped := pipedInput(os.Stdin, takesStdinInput(cmd, bodyType), stdinProbe)
 	stdinReader := onceStdinReader{stdinReader: stdin}
 	if piped {
 		pipeData, err := io.ReadAll(stdin)
@@ -272,6 +272,19 @@ func flagOptions(cmd *cli.Command, bodyType BodyContentType) ([]option.RequestOp
 		options = append(options, option.WithRequestBody("application/json", bodyBytes))
 	}
 	return options, nil
+}
+
+func takesStdinInput(cmd *cli.Command, bodyType BodyContentType) bool {
+	if bodyType == ApplicationJSON {
+		return true
+	}
+	for _, flag := range cmd.Flags {
+		inRequest, ok := flag.(requestflag.InRequest)
+		if ok && (inRequest.GetQueryPath() != "" || inRequest.GetHeaderPath() != "" || inRequest.GetPathParam() != "") {
+			return true
+		}
+	}
+	return false
 }
 
 func applyPipedData(

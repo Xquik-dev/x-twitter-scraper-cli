@@ -16,9 +16,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
+	"github.com/urfave/cli/v3"
 )
 
 type failingReadCloser struct{}
@@ -120,45 +122,42 @@ type controlledReader struct {
 
 func (r *controlledReader) Read([]byte) (int, error) { return 0, r.err }
 
-func TestPipedInputReadsStdinOnlyWhenItMayBeTheBody(t *testing.T) {
-	t.Parallel()
+func TestReadingProbeLeavesStdinAloneWithoutRequestInput(t *testing.T) {
+	previousStdin, previousProbe := os.Stdin, stdinProbe
+	t.Cleanup(func() { os.Stdin, stdinProbe = previousStdin, previousProbe })
+	stdinProbe = pipeProbe{
+		check:    func(stdin *os.File) (io.Reader, bool) { return readWithin(stdin, time.Second) },
+		consumes: true,
+	}
+	pipe := func(t *testing.T, data string) *os.File {
+		t.Helper()
+		reader, writer, err := os.Pipe()
+		require.NoError(t, err)
+		t.Cleanup(func() { reader.Close() })
+		_, err = writer.WriteString(data)
+		require.NoError(t, err)
+		require.NoError(t, writer.Close())
+		return reader
+	}
 
-	pipe, pipeWriter, err := os.Pipe()
+	untouched := pipe(t, "id: 42\n")
+	os.Stdin = untouched
+	_, err := flagOptions(&cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "note"}}}, EmptyBody)
 	require.NoError(t, err)
-	defer pipe.Close()
-	defer pipeWriter.Close()
-
-	calls := 0
-	consuming := pipeProbe{check: func(stdin *os.File) (io.Reader, bool) {
-		calls++
-		return stdin, true
-	}, consumes: true}
-	_, piped := pipedInput(pipe, false, consuming)
-	assert.False(t, piped)
-	assert.Equal(t, 0, calls)
-	_, piped = pipedInput(pipe, true, consuming)
-	assert.True(t, piped)
-	assert.Equal(t, 1, calls)
-
-	polling := pipeProbe{check: consuming.check}
-	_, piped = pipedInput(pipe, false, polling)
-	assert.True(t, piped)
-	assert.Equal(t, 2, calls)
-
-	file, err := os.CreateTemp(t.TempDir(), "stdin")
+	left, err := io.ReadAll(untouched)
 	require.NoError(t, err)
-	defer file.Close()
-	_, piped = pipedInput(file, false, consuming)
-	assert.False(t, piped)
-	_, err = file.WriteString("{}")
-	require.NoError(t, err)
-	_, piped = pipedInput(file, false, consuming)
-	assert.True(t, piped)
-	assert.Equal(t, 2, calls)
+	assert.Equal(t, "id: 42\n", string(left))
 
-	require.NoError(t, file.Close())
-	_, piped = pipedInput(file, true, consuming)
-	assert.False(t, piped)
+	os.Stdin = pipe(t, "id: 42\n")
+	command := &cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "id", PathParam: "id"}}}
+	_, err = flagOptions(command, EmptyBody)
+	require.NoError(t, err)
+	assert.Equal(t, "42", command.String("id"))
+
+	os.Stdin = pipe(t, "text: hi\n")
+	body := &cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "text", BodyPath: "text"}}}
+	_, err = flagOptions(body, ApplicationJSON)
+	require.NoError(t, err)
 }
 
 func TestBinaryResponseFailuresAndExtensions(t *testing.T) {
