@@ -28,8 +28,8 @@ readonly status_endpoint="repos/Xquik-dev/x-twitter-scraper-cli/statuses"
 
 write_openssf() {
   write_file OPENSSF.md <<EOF
-| Statement coverage | \`./scripts/coverage\` enforces 90%. The current result is $1. |
-| Branch coverage | \`./scripts/branch-coverage\` enforces 80%. The current result is $2. |
+| Statement coverage | \`./scripts/coverage\` enforces $1. The current result is $2. |
+| Branch coverage | \`./scripts/branch-coverage\` enforces $3. The current result is $4. |
 EOF
 }
 
@@ -48,9 +48,10 @@ EOF
 echo "test" >>"$FAKE_LOGS/order"
 [[ "${FAKE_FAILING_CHECK:-}" != "test" ]] || exit 1
 echo "Total statement coverage: 92.4%"
+echo "Required statement coverage: 90.0%"
 echo "Branch coverage: 772/949 (81.35%); minimum 80.00%"
 EOF
-  write_openssf "92.4%" "772/949 (81.35%)"
+  write_openssf "90%" "92.4%" "80%" "772/949 (81.35%)"
   stub scripts/audit <<'EOF'
 #!/usr/bin/env bash
 echo "audit" >>"$FAKE_LOGS/order"
@@ -332,25 +333,39 @@ test_a_check_that_changes_the_tree_fails_the_run() {
 
 test_a_statement_coverage_result_that_differs_from_the_openssf_notes_fails_the_run() {
   prepare_checks
-  write_openssf "92.7%" "772/949 (81.35%)"
+  write_openssf "90%" "92.7%" "80%" "772/949 (81.35%)"
 
   run_in_repo bin/check-local --no-status
 
   assert_equal 1 "$run_status" "the exit code"
-  assert_equal "OPENSSF.md gives statement coverage 92.7% and branch coverage 772/949 (81.35%). This run measured 92.4% and 772/949 (81.35%).
-Check failed at OpenSSF coverage results. Set the coverage results in OPENSSF.md to the measured ones, then rerun." "$run_stderr" "stderr"
+  assert_equal "OPENSSF.md lacks this row, which the run measured.
+| Statement coverage | \`./scripts/coverage\` enforces 90%. The current result is 92.4%. |
+Check failed at OpenSSF coverage results. Put the measured row above in OPENSSF.md, then rerun." "$run_stderr" "stderr"
   assert_not_contains "$(log_of order)" "audit" "the checks that ran"
 }
 
 test_a_branch_coverage_result_that_differs_from_the_openssf_notes_fails_the_run() {
   prepare_checks
-  write_openssf "92.4%" "771/947 (81.41%)"
+  write_openssf "90%" "92.4%" "80%" "771/947 (81.41%)"
 
   run_in_repo bin/check-local --no-status
 
   assert_equal 1 "$run_status" "the exit code"
-  assert_equal "OPENSSF.md gives statement coverage 92.4% and branch coverage 771/947 (81.41%). This run measured 92.4% and 772/949 (81.35%).
-Check failed at OpenSSF coverage results. Set the coverage results in OPENSSF.md to the measured ones, then rerun." "$run_stderr" "stderr"
+  assert_equal "OPENSSF.md lacks this row, which the run measured.
+| Branch coverage | \`./scripts/branch-coverage\` enforces 80%. The current result is 772/949 (81.35%). |
+Check failed at OpenSSF coverage results. Put the measured row above in OPENSSF.md, then rerun." "$run_stderr" "stderr"
+}
+
+test_a_coverage_minimum_that_differs_from_the_openssf_notes_fails_the_run() {
+  prepare_checks
+  write_openssf "85%" "92.4%" "80%" "772/949 (81.35%)"
+
+  run_in_repo bin/check-local --no-status
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "OPENSSF.md lacks this row, which the run measured.
+| Statement coverage | \`./scripts/coverage\` enforces 90%. The current result is 92.4%. |
+Check failed at OpenSSF coverage results. Put the measured row above in OPENSSF.md, then rerun." "$run_stderr" "stderr"
 }
 
 test_an_unknown_option_stops_with_the_usage_line() {

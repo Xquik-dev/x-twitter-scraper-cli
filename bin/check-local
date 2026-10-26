@@ -134,15 +134,19 @@ start_check "Go tests and coverage" "Go tests" "Fix the failing test or add cove
 bash scripts/test | tee "$workspace/test.log"
 pass_check
 
-start_check "OpenSSF coverage results" "" "Set the coverage results in OPENSSF.md to the measured ones, then rerun."
-measured_statement="$(sed -nE 's/^Total statement coverage: (.+)$/\1/p' "$workspace/test.log")"
-measured_branch="$(sed -nE 's/^Branch coverage: ([^;]+);.*$/\1/p' "$workspace/test.log")"
-documented_statement="$(sed -nE 's/^\| Statement coverage \|.* The current result is (.+)\. \|$/\1/p' OPENSSF.md)"
-documented_branch="$(sed -nE 's/^\| Branch coverage \|.* The current result is (.+)\. \|$/\1/p' OPENSSF.md)"
-if [[ "$documented_statement" != "$measured_statement" || "$documented_branch" != "$measured_branch" ]]; then
-  echo "OPENSSF.md gives statement coverage ${documented_statement:-nothing} and branch coverage ${documented_branch:-nothing}. This run measured ${measured_statement:-nothing} and ${measured_branch:-nothing}." >&2
-  exit 1
-fi
+start_check "OpenSSF coverage results" "" "Put the measured row above in OPENSSF.md, then rerun."
+printf -v statement_minimum '%g%%' "$(sed -nE 's/^Required statement coverage: ([0-9.]+)%$/\1/p' "$workspace/test.log")"
+printf -v branch_minimum '%g%%' "$(sed -nE 's/^Branch coverage: .*; minimum ([0-9.]+)%$/\1/p' "$workspace/test.log")"
+statement_result="$(sed -nE 's/^Total statement coverage: (.+)$/\1/p' "$workspace/test.log")"
+branch_result="$(sed -nE 's/^Branch coverage: ([^;]+);.*$/\1/p' "$workspace/test.log")"
+for row in \
+  "| Statement coverage | \`./scripts/coverage\` enforces $statement_minimum. The current result is $statement_result. |" \
+  "| Branch coverage | \`./scripts/branch-coverage\` enforces $branch_minimum. The current result is $branch_result. |"; do
+  if ! grep -Fqx -- "$row" OPENSSF.md; then
+    printf 'OPENSSF.md lacks this row, which the run measured.\n%s\n' "$row" >&2
+    exit 1
+  fi
+done
 
 start_check "Dependency audit" "audit" "Upgrade each blocked module above, or raise the go line in go.mod for standard library findings."
 ./scripts/audit | tee "$workspace/audit.log"
