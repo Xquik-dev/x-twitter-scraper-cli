@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Package requestflag defines command-line flags that set the query, header,
-// path and body fields of a request, on top of
-// https://pkg.go.dev/github.com/urfave/cli/v3.
+// path and body fields of a request.
 package requestflag
 
 import (

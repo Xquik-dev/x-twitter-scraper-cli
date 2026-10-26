@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package releaseconfig reads the release settings that
-// https://goreleaser.com reads from .goreleaser.yml.
+// Package releaseconfig reads the release settings of .goreleaser.yml.
 package releaseconfig
 
 import "github.com/goccy/go-yaml"

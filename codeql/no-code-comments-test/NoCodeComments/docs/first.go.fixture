@@ -1,0 +1,21 @@
+// SPDX-FileCopyrightText: 2026 Xquik contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+
+// Package docs is the 1 package doc comment the query accepts.
+package docs
+
+// Run has a doc comment, which the query flags.
+func Run() int {
+	// A plain comment, which the query flags.
+	return 1 // A trailing comment, which the query flags.
+}
+
+// Derived from https://go.dev/ref/spec, which proves this comment.
+func Spec() {}
+
+// Deprecated: Use Run.
+func Old() {}
+
+//go:noinline
+func Inline() {}

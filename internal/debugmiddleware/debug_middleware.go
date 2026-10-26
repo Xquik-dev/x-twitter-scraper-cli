@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package debugmiddleware logs each HTTP request and response with
-// https://pkg.go.dev/net/http/httputil#DumpRequest.
+// Package debugmiddleware logs each HTTP request and response with secrets
+// redacted.
 package debugmiddleware
 
 import (

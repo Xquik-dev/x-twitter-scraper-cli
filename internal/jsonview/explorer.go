@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package jsonview shows JSON as static text or in an interactive explorer built
-// on https://github.com/charmbracelet/bubbletea.
+// Package jsonview shows JSON as static text or in an interactive terminal
+// explorer.
 package jsonview
 
 import (

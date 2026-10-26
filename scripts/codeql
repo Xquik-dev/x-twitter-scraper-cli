@@ -12,6 +12,7 @@ readonly pack_name="codeql/go-queries"
 readonly pack_version="1.6.12"
 readonly suite_path="codeql-suites/go-security-extended.qls"
 readonly comment_pack="codeql/no-code-comments"
+readonly comment_test_pack="codeql/no-code-comments-test"
 readonly extraction_diagnostic="go/diagnostics/extraction-errors"
 readonly download_limit="${CODEQL_DOWNLOAD_SECONDS:-300}"
 
@@ -29,6 +30,7 @@ readonly packs="$workspace/packs"
 readonly caches="$workspace/caches"
 readonly database="$workspace/database"
 readonly results="$workspace/results.sarif"
+readonly query_tests="$workspace/query-tests"
 
 stop_tree() {
   local child
@@ -84,6 +86,25 @@ if ((status == 124)); then
   exit 1
 elif ((status != 0)); then
   echo "CodeQL could not install the libraries of $comment_pack. Check the network and GitHub access, then rerun." >&2
+  exit 1
+fi
+
+echo "==> Testing the comment query"
+mkdir -p -- "$query_tests"
+cp -R -- "$comment_pack" "$comment_test_pack" "$query_tests/"
+while IFS= read -r -d '' fixture; do
+  mv -- "$fixture" "${fixture%.fixture}"
+done < <(find "$query_tests" -name '*.fixture' -print0)
+status=0
+run_with_limit "$download_limit" codeql pack install "$query_tests/${comment_test_pack##*/}" \
+  --additional-packs="$query_tests" --common-caches="$caches" || status=$?
+if ((status != 0)); then
+  echo "CodeQL could not install the libraries of $comment_test_pack. Check the network and GitHub access, then rerun." >&2
+  exit 1
+fi
+if ! codeql test run "$query_tests/${comment_test_pack##*/}" \
+  --additional-packs="$query_tests" --common-caches="$caches" --threads=0; then
+  echo "The comment query test failed. Fix $comment_pack or the expected results in $comment_test_pack, then rerun." >&2
   exit 1
 fi
 

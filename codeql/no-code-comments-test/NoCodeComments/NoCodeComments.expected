@@ -1,0 +1,6 @@
+| command/main.go:1:1:1:59 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/first.go:8:1:8:48 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/first.go:10:2:10:43 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/first.go:11:11:11:55 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/second.go:1:1:1:71 | comment | Code has no comments. Put the meaning in names, types and tests. |
+| docs/second.go:4:1:4:45 | comment | Code has no comments. Put the meaning in names, types and tests. |

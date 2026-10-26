@@ -1,0 +1,2 @@
+// Package other is accepted as its package's only doc comment.
+package other

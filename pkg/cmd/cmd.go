@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package cmd defines the x-twitter-scraper commands, which call the Xquik API
-// that https://docs.xquik.com/api-reference/overview documents.
+// Package cmd defines the x-twitter-scraper commands, which call the Xquik API.
 package cmd
 
 import (

@@ -17,6 +17,12 @@ EOF
   write_file pkg/lib.go <<'EOF'
 package lib
 EOF
+  write_file codeql/no-code-comments/qlpack.yml <<'EOF'
+name: xquik/no-code-comments
+EOF
+  write_file codeql/no-code-comments-test/NoCodeComments/case.go.fixture <<'EOF'
+package comments
+EOF
   fake codeql <<'EOF'
 #!/bin/sh
 echo "$*" >>"$FAKE_LOGS/codeql"
@@ -46,6 +52,10 @@ case "$1 $2" in
     ;;
   "pack install")
     [ -z "${FAKE_INSTALL_FAILS:-}" ] || exit 1
+    ;;
+  "test run")
+    [ -f "$3/NoCodeComments/case.go" ] && [ ! -e "$3/NoCodeComments/case.go.fixture" ] || exit 98
+    [ -z "${FAKE_QUERY_TEST_FAILS:-}" ] || exit 1
     ;;
   "database create")
     source_root="$(option --source-root "$@")"
@@ -102,8 +112,20 @@ test_codeql_scans_a_copy_with_the_pinned_pack_and_leaves_the_working_tree_alone(
   assert_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
   assert_contains "$(log_of codeql)" " codeql/go-queries@1.6.12:codeql-suites/go-security-extended.qls codeql/no-code-comments --additional-packs=$sandbox/tmp/" "the analysis"
   assert_contains "$(log_of codeql)" "pack install codeql/no-code-comments --common-caches=$sandbox/tmp/" "the comment query install"
-  assert_equal 4 "$(grep -c -- "--common-caches=$sandbox/tmp/xquik-cli-codeql." "$sandbox_logs/codeql")" "the calls with a private cache"
+  assert_contains "$(log_of codeql)" "test run $sandbox/tmp/" "the comment query test"
+  assert_equal 6 "$(grep -c -- "--common-caches=$sandbox/tmp/xquik-cli-codeql." "$sandbox_logs/codeql")" "the calls with a private cache"
   assert_equal "" "$(ls "$sandbox/tmp")" "the leftover temporary files"
+}
+
+test_a_failing_comment_query_test_stops_the_run() {
+  prepare_codeql
+  run_env=("FAKE_QUERY_TEST_FAILS=1")
+
+  run_in_repo scripts/codeql
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "The comment query test failed. Fix codeql/no-code-comments or the expected results in codeql/no-code-comments-test, then rerun." "$run_stderr" "stderr"
+  assert_not_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
 }
 
 test_a_codeql_result_fails_the_run_and_is_printed() {
