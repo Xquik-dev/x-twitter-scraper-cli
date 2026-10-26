@@ -95,7 +95,7 @@ func handleXCommunitiesJoinCreate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Communities.Join.New(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -144,7 +144,7 @@ func handleXCommunitiesJoinDeleteAll(ctx context.Context, cmd *cli.Command) erro
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Communities.Join.DeleteAll(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

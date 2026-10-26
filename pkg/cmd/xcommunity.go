@@ -388,7 +388,7 @@ func handleXCommunitiesDelete(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Communities.Delete(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -433,7 +433,7 @@ func handleXCommunitiesRetrieveInfo(ctx context.Context, cmd *cli.Command) error
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Communities.GetInfo(ctx, cmd.Value("id").(string), options...)
+	_, err = client.X.Communities.GetInfo(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -479,7 +479,7 @@ func handleXCommunitiesRetrieveMembers(ctx context.Context, cmd *cli.Command) er
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Communities.GetMembers(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -528,7 +528,7 @@ func handleXCommunitiesRetrieveModerators(ctx context.Context, cmd *cli.Command)
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Communities.GetModerators(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

@@ -50,7 +50,7 @@ func handleXAccountConnectionAttemptsRetrieve(ctx context.Context, cmd *cli.Comm
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.AccountConnectionAttempts.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.X.AccountConnectionAttempts.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}

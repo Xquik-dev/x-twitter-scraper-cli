@@ -173,7 +173,7 @@ func handleSupportTicketsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Support.Tickets.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Support.Tickets.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -219,7 +219,7 @@ func handleSupportTicketsUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Support.Tickets.Update(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -307,7 +307,7 @@ func handleSupportTicketsReply(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Support.Tickets.Reply(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

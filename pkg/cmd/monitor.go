@@ -165,7 +165,7 @@ func handleMonitorsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Monitors.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Monitors.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func handleMonitorsUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Monitors.Update(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -295,7 +295,7 @@ func handleMonitorsDeactivate(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Monitors.Deactivate(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Monitors.Deactivate(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}

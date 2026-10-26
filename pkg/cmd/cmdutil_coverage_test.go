@@ -25,27 +25,6 @@ type failingReadCloser struct{}
 func (failingReadCloser) Read([]byte) (int, error) { return 0, errors.New("read failed") }
 func (failingReadCloser) Close() error             { return nil }
 
-type errorIterator[T any] struct {
-	item    T
-	current bool
-	err     error
-}
-
-func (iterator *errorIterator[T]) Next() bool {
-	if iterator.current {
-		return false
-	}
-	iterator.current = true
-	return true
-}
-
-func (iterator *errorIterator[T]) Current() T { return iterator.item }
-func (iterator *errorIterator[T]) Err() error { return iterator.err }
-
-type rawJSONValue string
-
-func (value rawJSONValue) RawJSON() string { return string(value) }
-
 func TestCommandValidatorsAndManpages(t *testing.T) {
 	command := newCommand()
 	command.Writer = io.Discard
@@ -172,20 +151,5 @@ func TestShowJSONAndIteratorErrors(t *testing.T) {
 		Stdout: output,
 	}))
 
-	channelIterator := &errorIterator[any]{item: make(chan int)}
-	require.Error(t, ShowJSONIterator[any](channelIterator, -1, ShowJSONOpts{
-		Format: "json",
-		Stdout: os.Stdout,
-	}))
-
-	expected := errors.New("iterator failed")
-	failingIterator := &errorIterator[rawJSONValue]{
-		item: rawJSONValue(`{"a":1}`),
-		err:  expected,
-	}
-	require.ErrorIs(t, ShowJSONIterator[rawJSONValue](failingIterator, -1, ShowJSONOpts{
-		Format: "raw",
-		Stdout: os.Stdout,
-	}), expected)
 	assert.Greater(t, countTerminalLines([]byte("first\nsecond\n"), 80), 0)
 }

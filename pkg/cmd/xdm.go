@@ -110,7 +110,7 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Dm.GetHistory(
 		ctx,
-		cmd.Value("user-id").(string),
+		cmd.String("user-id"),
 		params,
 		options...,
 	)
@@ -159,7 +159,7 @@ func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Dm.Send(
 		ctx,
-		cmd.Value("user-id").(string),
+		cmd.String("user-id"),
 		params,
 		options...,
 	)

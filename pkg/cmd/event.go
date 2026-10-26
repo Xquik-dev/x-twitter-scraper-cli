@@ -90,7 +90,7 @@ func handleEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Events.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Events.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}

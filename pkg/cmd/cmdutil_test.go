@@ -15,8 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
-
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/jsonview"
 )
 
 func TestStreamOutput(t *testing.T) {
@@ -222,44 +220,6 @@ func TestFormatJSON(t *testing.T) {
 	})
 }
 
-func TestShowJSONIterator(t *testing.T) {
-	t.Parallel()
-
-	t.Run("RawMultipleItems", func(t *testing.T) {
-		t.Parallel()
-
-		iter := &sliceIterator[map[string]any]{items: []map[string]any{
-			{"id": "abc", "name": "first"},
-			{"id": "def", "name": "second"},
-		}}
-		captured := captureShowJSONIterator(t, iter, "raw", "", -1)
-		assert.Equal(t, `{"id":"abc","name":"first"}`+"\n"+`{"id":"def","name":"second"}`+"\n", captured)
-	})
-
-	t.Run("RawWithTransform", func(t *testing.T) {
-		t.Parallel()
-
-		iter := &sliceIterator[map[string]any]{items: []map[string]any{
-			{"id": "abc", "name": "first"},
-			{"id": "def", "name": "second"},
-		}}
-		captured := captureShowJSONIterator(t, iter, "raw", "id", -1)
-		assert.Equal(t, `"abc"`+"\n"+`"def"`+"\n", captured)
-	})
-
-	t.Run("LimitItems", func(t *testing.T) {
-		t.Parallel()
-
-		iter := &sliceIterator[map[string]any]{items: []map[string]any{
-			{"id": "abc"},
-			{"id": "def"},
-			{"id": "ghi"},
-		}}
-		captured := captureShowJSONIterator(t, iter, "raw", "", 2)
-		assert.Equal(t, `{"id":"abc"}`+"\n"+`{"id":"def"}`+"\n", captured)
-	})
-}
-
 func TestExploreFallback(t *testing.T) {
 	t.Parallel()
 
@@ -285,17 +245,6 @@ func TestExploreFallback(t *testing.T) {
 		_, _ = buf.ReadFrom(r)
 		assert.Contains(t, buf.String(), `"id"`)
 		assert.Contains(t, buf.String(), `"abc"`)
-	})
-
-	t.Run("ShowJSONIteratorFallsBackToJsonOnNonTTY", func(t *testing.T) {
-		t.Parallel()
-
-		iter := &sliceIterator[map[string]any]{items: []map[string]any{
-			{"id": "abc"},
-		}}
-		captured := captureShowJSONIterator(t, iter, "explore", "", -1)
-		assert.Contains(t, captured, `"id"`)
-		assert.Contains(t, captured, `"abc"`)
 	})
 
 	t.Run("ShowJSONWarnsWhenExplicitFormatOnNonTTY", func(t *testing.T) {
@@ -340,46 +289,4 @@ func TestExploreFallback(t *testing.T) {
 
 		assert.Empty(t, stderr.String(), "no warning expected when format was not explicit")
 	})
-}
-
-type sliceIterator[T any] struct {
-	index int
-	items []T
-}
-
-func (it *sliceIterator[T]) Next() bool {
-	it.index++
-	return it.index <= len(it.items)
-}
-
-func (it *sliceIterator[T]) Current() T {
-	return it.items[it.index-1]
-}
-
-func (it *sliceIterator[T]) Err() error {
-	return nil
-}
-
-var _ jsonview.Iterator[any] = (*sliceIterator[any])(nil)
-
-func captureShowJSONIterator[T any](t *testing.T, iter jsonview.Iterator[T], format, transform string, itemsToDisplay int64) string {
-	t.Helper()
-
-	r, w, err := os.Pipe()
-	require.NoError(t, err)
-	defer r.Close()
-
-	err = ShowJSONIterator(iter, itemsToDisplay, ShowJSONOpts{
-		Format:    format,
-		Stderr:    io.Discard,
-		Stdout:    w,
-		Title:     "test",
-		Transform: transform,
-	})
-	w.Close()
-	require.NoError(t, err)
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
 }

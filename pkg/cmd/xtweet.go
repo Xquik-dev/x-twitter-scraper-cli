@@ -412,7 +412,7 @@ var xTweetsGetQuotes = cli.Command{
 			Usage:     "Enable the safe-search filter.",
 			QueryPath: "safe",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -437,7 +437,7 @@ var xTweetsGetQuotes = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -707,7 +707,7 @@ var xTweetsGetReplies = cli.Command{
 			Default:   "all",
 			QueryPath: "scope",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -738,7 +738,7 @@ var xTweetsGetReplies = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -1025,7 +1025,7 @@ var xTweetsGetThread = cli.Command{
 			Usage:     "Only retweets of this tweet ID.",
 			QueryPath: "retweetsOfTweetId",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -1035,7 +1035,7 @@ var xTweetsGetThread = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -1292,7 +1292,7 @@ var xTweetsSearch = cli.Command{
 			Usage:     "Enable the safe-search filter.",
 			QueryPath: "safe",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -1317,7 +1317,7 @@ var xTweetsSearch = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -1417,7 +1417,7 @@ func handleXTweetsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Tweets.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.X.Tweets.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -1504,7 +1504,7 @@ func handleXTweetsDelete(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.Delete(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -1553,7 +1553,7 @@ func handleXTweetsGetFavoriters(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.GetFavoriters(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -1602,7 +1602,7 @@ func handleXTweetsGetQuotes(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.GetQuotes(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -1651,7 +1651,7 @@ func handleXTweetsGetReplies(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.GetReplies(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -1700,7 +1700,7 @@ func handleXTweetsGetRetweeters(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.GetRetweeters(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -1749,7 +1749,7 @@ func handleXTweetsGetThread(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Tweets.GetThread(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

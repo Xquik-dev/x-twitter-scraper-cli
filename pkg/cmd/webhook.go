@@ -203,7 +203,7 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Webhooks.Update(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -287,7 +287,7 @@ func handleWebhooksDeactivate(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Deactivate(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Webhooks.Deactivate(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -329,7 +329,7 @@ func handleWebhooksListDeliveries(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.ListDeliveries(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Webhooks.ListDeliveries(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -371,7 +371,7 @@ func handleWebhooksResume(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Resume(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Webhooks.Resume(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -413,7 +413,7 @@ func handleWebhooksTest(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Test(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Webhooks.Test(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}

@@ -31,7 +31,7 @@ var sensitiveHeaders = []string{
 }
 
 type RequestLogger struct {
-	logger           interface{ Printf(string, ...any) }
+	logger           *log.Logger
 	sensitiveHeaders []string
 }
 

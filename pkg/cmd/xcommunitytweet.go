@@ -149,7 +149,7 @@ func handleXCommunitiesTweetsListByCommunity(ctx context.Context, cmd *cli.Comma
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Communities.Tweets.ListByCommunity(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

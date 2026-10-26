@@ -165,7 +165,7 @@ func handleStylesRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Styles.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Styles.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func handleStylesUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Styles.Update(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -293,7 +293,7 @@ func handleStylesDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Styles.Delete(ctx, cmd.Value("id").(string), options...)
+	return client.Styles.Delete(ctx, cmd.String("id"), options...)
 }
 
 func handleStylesAnalyze(ctx context.Context, cmd *cli.Command) error {
@@ -402,7 +402,7 @@ func handleStylesGetPerformance(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Styles.GetPerformance(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Styles.GetPerformance(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}

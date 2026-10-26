@@ -155,7 +155,7 @@ func handleDraftsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Drafts.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Drafts.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -236,5 +236,5 @@ func handleDraftsDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Drafts.Delete(ctx, cmd.Value("id").(string), options...)
+	return client.Drafts.Delete(ctx, cmd.String("id"), options...)
 }

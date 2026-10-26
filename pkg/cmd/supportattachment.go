@@ -61,7 +61,7 @@ func handleSupportAttachmentsDownload(ctx context.Context, cmd *cli.Command) err
 
 	response, err := client.Support.Attachments.Download(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

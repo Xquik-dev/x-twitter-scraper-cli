@@ -64,7 +64,7 @@ func handleXAccountConnectionChallengesSubmit(ctx context.Context, cmd *cli.Comm
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.AccountConnectionChallenges.Submit(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

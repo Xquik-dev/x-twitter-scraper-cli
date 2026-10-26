@@ -1,5 +1,3 @@
-//go:build ignore
-
 // Copyright the Xquik contributors.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -15,20 +13,20 @@ import (
 
 func main() {
 	if len(os.Args) != 4 {
-		exitf("Usage: branch_coverage.go REPORT PROFILE MINIMUM")
+		exit("Usage: branch-coverage REPORT PROFILE MINIMUM")
 	}
 	minimum, err := strconv.ParseFloat(os.Args[3], 64)
 	if err != nil {
-		exitf("parse minimum: %v", err)
+		exit("parse minimum: " + err.Error())
 	}
 
 	report, err := os.ReadFile(os.Args[1])
 	if err != nil {
-		exitf("read report: %v", err)
+		exit("read report: " + err.Error())
 	}
 	profile, err := os.Open(os.Args[2])
 	if err != nil {
-		exitf("open profile: %v", err)
+		exit("open profile: " + err.Error())
 	}
 	defer profile.Close()
 
@@ -38,10 +36,10 @@ func main() {
 		"github.com/Xquik-dev/x-twitter-scraper-cli/internal/coveragebranch",
 	)
 	if err != nil {
-		exitf("measure branch coverage: %v", err)
+		exit("measure branch coverage: " + err.Error())
 	}
 	if total == 0 {
-		exitf("Branch report has no branches. Check gocove output.")
+		exit("Branch report has no branches. Check gocove output.")
 	}
 
 	percent := 100 * float64(covered) / float64(total)
@@ -57,7 +55,7 @@ func main() {
 	}
 }
 
-func exitf(format string, args ...any) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
+func exit(message string) {
+	fmt.Fprintln(os.Stderr, message)
 	os.Exit(1)
 }

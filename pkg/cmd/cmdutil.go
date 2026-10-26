@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"mime"
@@ -378,99 +377,4 @@ func ShowJSON(res gjson.Result, opts ShowJSONOpts) error {
 
 func countTerminalLines(data []byte, terminalWidth int) int {
 	return bytes.Count([]byte(wrap.String(string(data), terminalWidth)), []byte("\n"))
-}
-
-type hasRawJSON interface {
-	RawJSON() string
-}
-
-func ShowJSONIterator[T any](iter jsonview.Iterator[T], itemsToDisplay int64, opts ShowJSONOpts) error {
-	opts.setDefaults()
-
-	if opts.Format == "explore" {
-		if isTerminal(opts.Stdout) {
-			return jsonview.ExploreJSONStream(opts.Title, iter)
-		}
-		if opts.ExplicitFormat {
-			fmt.Fprint(opts.Stderr, warningExploreNotSupported)
-		}
-		opts.Format = "json"
-	}
-
-	terminalWidth, terminalHeight, err := term.GetSize(os.Stdout.Fd())
-	if err != nil {
-		terminalWidth = 100
-		terminalHeight = 40
-	}
-
-	usePager := false
-	output := []byte{}
-	numberOfNewlines := 0
-	for itemsToDisplay != 0 && iter.Next() {
-		item := iter.Current()
-		var obj gjson.Result
-		if hasRaw, ok := any(item).(hasRawJSON); ok {
-			obj = gjson.Parse(hasRaw.RawJSON())
-		} else {
-			jsonData, err := json.Marshal(item)
-			if err != nil {
-				return err
-			}
-			obj = gjson.ParseBytes(jsonData)
-		}
-		json, err := formatJSON(obj, opts)
-		if err != nil {
-			return err
-		}
-
-		output = append(output, json...)
-		itemsToDisplay -= 1
-		numberOfNewlines += countTerminalLines(json, terminalWidth)
-
-		if numberOfNewlines >= terminalHeight-3 {
-			usePager = true
-			break
-		}
-	}
-
-	if !usePager {
-		_, err := opts.Stdout.Write(output)
-		if err != nil {
-			return err
-		}
-
-		return iter.Err()
-	}
-
-	return streamOutput(opts.Title, func(pager *os.File) error {
-		_, err := pager.Write(output)
-		if err != nil {
-			return err
-		}
-
-		pagerOpts := opts
-		pagerOpts.Stdout = pager
-
-		for iter.Next() {
-			if itemsToDisplay == 0 {
-				break
-			}
-			item := iter.Current()
-			var obj gjson.Result
-			if hasRaw, ok := any(item).(hasRawJSON); ok {
-				obj = gjson.Parse(hasRaw.RawJSON())
-			} else {
-				jsonData, err := json.Marshal(item)
-				if err != nil {
-					return err
-				}
-				obj = gjson.ParseBytes(jsonData)
-			}
-			if err := ShowJSON(obj, pagerOpts); err != nil {
-				return err
-			}
-			itemsToDisplay -= 1
-		}
-		return iter.Err()
-	})
 }

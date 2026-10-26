@@ -193,7 +193,7 @@ func handleXAccountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Accounts.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.X.Accounts.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -274,7 +274,7 @@ func handleXAccountsDelete(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Accounts.Delete(ctx, cmd.Value("id").(string), options...)
+	_, err = client.X.Accounts.Delete(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -359,7 +359,7 @@ func handleXAccountsReauth(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Accounts.Reauth(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

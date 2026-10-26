@@ -165,7 +165,7 @@ func handleMonitorsKeywordsRetrieve(ctx context.Context, cmd *cli.Command) error
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Monitors.Keywords.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Monitors.Keywords.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func handleMonitorsKeywordsUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Monitors.Keywords.Update(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -295,7 +295,7 @@ func handleMonitorsKeywordsDeactivate(ctx context.Context, cmd *cli.Command) err
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Monitors.Keywords.Deactivate(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Monitors.Keywords.Deactivate(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}

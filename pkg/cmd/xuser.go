@@ -586,7 +586,7 @@ var xUsersRetrieveLikes = cli.Command{
 			Usage:     "Enable the safe-search filter.",
 			QueryPath: "safe",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -606,7 +606,7 @@ var xUsersRetrieveLikes = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -832,7 +832,7 @@ var xUsersRetrieveMedia = cli.Command{
 			Usage:     "Enable the safe-search filter.",
 			QueryPath: "safe",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -852,7 +852,7 @@ var xUsersRetrieveMedia = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -1078,7 +1078,7 @@ var xUsersRetrieveMentions = cli.Command{
 			Usage:     "Enable the safe-search filter.",
 			QueryPath: "safe",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -1103,7 +1103,7 @@ var xUsersRetrieveMentions = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -1340,7 +1340,7 @@ var xUsersRetrieveReplies = cli.Command{
 			Usage:     "Enable the safe-search filter.",
 			QueryPath: "safe",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -1360,7 +1360,7 @@ var xUsersRetrieveReplies = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -1689,7 +1689,7 @@ var xUsersRetrieveTweets = cli.Command{
 			Usage:     "Enable the safe-search filter.",
 			QueryPath: "safe",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Start date in YYYY-MM-DD format.",
 			QueryPath: "sinceDate",
@@ -1709,7 +1709,7 @@ var xUsersRetrieveTweets = cli.Command{
 			Usage:     "Filter replies sent to a username.",
 			QueryPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "End date in YYYY-MM-DD format.",
 			QueryPath: "untilDate",
@@ -1874,7 +1874,7 @@ func handleXUsersRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.Users.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.X.Users.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -1920,7 +1920,7 @@ func handleXUsersRemoveFollower(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.RemoveFollower(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2010,7 +2010,7 @@ func handleXUsersRetrieveFollowers(ctx context.Context, cmd *cli.Command) error 
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetFollowers(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2059,7 +2059,7 @@ func handleXUsersRetrieveFollowersYouKnow(ctx context.Context, cmd *cli.Command)
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetFollowersYouKnow(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2108,7 +2108,7 @@ func handleXUsersRetrieveFollowing(ctx context.Context, cmd *cli.Command) error 
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetFollowing(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2157,7 +2157,7 @@ func handleXUsersRetrieveLikes(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetLikes(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2206,7 +2206,7 @@ func handleXUsersRetrieveMedia(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetMedia(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2255,7 +2255,7 @@ func handleXUsersRetrieveMentions(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetMentions(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2304,7 +2304,7 @@ func handleXUsersRetrieveReplies(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetReplies(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2394,7 +2394,7 @@ func handleXUsersRetrieveTweets(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetTweets(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -2443,7 +2443,7 @@ func handleXUsersRetrieveVerifiedFollowers(ctx context.Context, cmd *cli.Command
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Users.GetVerifiedFollowers(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

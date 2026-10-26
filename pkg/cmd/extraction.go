@@ -470,7 +470,7 @@ var extractionsEstimateCost = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Search queries processed as one collection job.",
 			BodyPath: "searchQueries",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:     "since-date",
 			Usage:    "Start date YYYY-MM-DD (tweet_search_extractor)",
 			BodyPath: "sinceDate",
@@ -534,7 +534,7 @@ var extractionsEstimateCost = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Filter replies sent to a username (tweet_search_extractor)",
 			BodyPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:     "until-date",
 			Usage:    "End date YYYY-MM-DD (tweet_search_extractor)",
 			BodyPath: "untilDate",
@@ -682,12 +682,12 @@ var extractionsExportResults = cli.Command{
 			Usage:     "Search exported result text.",
 			QueryPath: "search",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "since-date",
 			Usage:     "Include results on or after this date.",
 			QueryPath: "sinceDate",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:      "until-date",
 			Usage:     "Include results on or before this date.",
 			QueryPath: "untilDate",
@@ -1085,7 +1085,7 @@ var extractionsRun = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Search queries processed as one collection job.",
 			BodyPath: "searchQueries",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:     "since-date",
 			Usage:    "Start date YYYY-MM-DD (tweet_search_extractor)",
 			BodyPath: "sinceDate",
@@ -1149,7 +1149,7 @@ var extractionsRun = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Filter replies sent to a username (tweet_search_extractor)",
 			BodyPath: "toUser",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[string]{
 			Name:     "until-date",
 			Usage:    "End date YYYY-MM-DD (tweet_search_extractor)",
 			BodyPath: "untilDate",
@@ -1234,7 +1234,7 @@ func handleExtractionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Extractions.Get(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)
@@ -1363,7 +1363,7 @@ func handleExtractionsExportResults(ctx context.Context, cmd *cli.Command) error
 
 	response, err := client.Extractions.ExportResults(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

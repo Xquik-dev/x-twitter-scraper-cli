@@ -169,7 +169,7 @@ func handleDrawsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Draws.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Draws.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -254,7 +254,7 @@ func handleDrawsExport(ctx context.Context, cmd *cli.Command) error {
 
 	response, err := client.Draws.Export(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

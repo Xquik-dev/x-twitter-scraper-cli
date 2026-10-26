@@ -117,7 +117,7 @@ func handleXGetArticle(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.GetArticle(ctx, cmd.Value("tweet-id").(string), options...)
+	_, err = client.X.GetArticle(ctx, cmd.String("tweet-id"), options...)
 	if err != nil {
 		return err
 	}
