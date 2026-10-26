@@ -113,6 +113,12 @@ func terminalName() string {
 }
 
 func (s *screen) run(viewer *JSONViewer) (err error) {
+	if s.signals == nil {
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+		defer signal.Stop(signals)
+		s.signals = signals
+	}
 	if s.input == nil {
 		if !term.IsTerminal(os.Stdin.Fd()) {
 			tty, openErr := os.OpenFile(terminalName(), os.O_RDWR, 0)
@@ -140,12 +146,6 @@ func (s *screen) run(viewer *JSONViewer) (err error) {
 		err = errors.Join(err, writeErr)
 	}()
 
-	if s.signals == nil {
-		signals := make(chan os.Signal, 1)
-		signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
-		defer signal.Stop(signals)
-		s.signals = signals
-	}
 	if s.ticks == nil {
 		ticker := time.NewTicker(100 * time.Millisecond)
 		defer ticker.Stop()
