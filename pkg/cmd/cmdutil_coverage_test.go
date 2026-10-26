@@ -56,26 +56,7 @@ func TestCommandValidatorsAndManpages(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestPagerAndStreamingBranches(t *testing.T) {
-	t.Setenv("PAGER", "definitely-not-an-installed-pager")
-	require.Error(t, streamToPagerWithPipe("test", func(*os.File) error { return nil }))
-	require.Error(t, streamOutputOSSpecific("test", func(*os.File) error { return nil }))
-
-	t.Setenv("PAGER", "cat")
-	require.NoError(t, streamToPagerWithPipe("test", func(writer *os.File) error {
-		_, err := writer.WriteString("pager output\n")
-		return err
-	}))
-	require.EqualError(t, streamToPagerWithPipe("test", func(*os.File) error {
-		return errors.New("generation failed")
-	}), "generation failed")
-	require.NoError(t, streamToPagerWithPipe("test", func(*os.File) error {
-		return errors.New("broken pipe")
-	}))
-	require.NoError(t, streamOutputOSSpecific("test", func(writer *os.File) error {
-		_, err := writer.WriteString("socket output\n")
-		return err
-	}))
+func TestPipedDataCheckReturns(t *testing.T) {
 	_ = isPipedDataAvailableOSSpecific()
 }
 
@@ -151,5 +132,4 @@ func TestShowJSONAndIteratorErrors(t *testing.T) {
 		Stdout: output,
 	}))
 
-	assert.Greater(t, countTerminalLines([]byte("first\nsecond\n"), 80), 0)
 }

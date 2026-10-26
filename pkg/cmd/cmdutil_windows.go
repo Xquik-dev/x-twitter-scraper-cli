@@ -29,7 +29,3 @@ func isPipedDataAvailableOSSpecific() bool {
 	)
 	return r != 0 && available > 0
 }
-
-func streamOutputOSSpecific(label string, generateOutput func(w *os.File) error) error {
-	return streamToPagerWithPipe(label, generateOutput)
-}

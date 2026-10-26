@@ -5,24 +5,19 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"mime"
 	"net/http"
 	"os"
-	"os/exec"
-	"os/signal"
 	"path/filepath"
 	"strings"
-	"syscall"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/jsonview"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 
 	"github.com/charmbracelet/x/term"
 	"github.com/itchyny/json2yaml"
-	"github.com/muesli/reflow/wrap"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
 	"github.com/urfave/cli/v3"
@@ -90,69 +85,6 @@ func isTerminal(w io.Writer) bool {
 	default:
 		return false
 	}
-}
-
-func streamOutput(label string, generateOutput func(w *os.File) error) error {
-	if !isTerminal(os.Stdout) {
-		return streamToStdout(generateOutput)
-	}
-
-	return streamOutputOSSpecific(label, generateOutput)
-}
-
-func streamToPagerWithPipe(label string, generateOutput func(w *os.File) error) error {
-	r, w, err := os.Pipe()
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-	defer w.Close()
-
-	pagerProgram := os.Getenv("PAGER")
-	if pagerProgram == "" {
-		pagerProgram = "less"
-	}
-
-	if _, err := exec.LookPath(pagerProgram); err != nil {
-		return err
-	}
-
-	cmd := exec.Command(pagerProgram)
-	cmd.Stdin = r
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Env = append(os.Environ(),
-		"LESS=-X -r -P "+label,
-		"MORE=-r -P "+label,
-	)
-
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	if err := r.Close(); err != nil {
-		return err
-	}
-
-	if isTerminal(os.Stdout) && os.Getenv("FORCE_COLOR") == "" {
-		os.Setenv("FORCE_COLOR", "1")
-	}
-
-	if err := generateOutput(w); err != nil && !strings.Contains(err.Error(), "broken pipe") {
-		return err
-	}
-
-	w.Close()
-	return cmd.Wait()
-}
-
-func streamToStdout(generateOutput func(w *os.File) error) error {
-	signal.Ignore(syscall.SIGPIPE)
-	err := generateOutput(os.Stdout)
-	if err != nil && strings.Contains(err.Error(), "broken pipe") {
-		return nil
-	}
-	return err
 }
 
 func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile string) (string, error) {
@@ -373,8 +305,4 @@ func ShowJSON(res gjson.Result, opts ShowJSONOpts) error {
 		_, err = opts.Stdout.Write(bytes)
 		return err
 	}
-}
-
-func countTerminalLines(data []byte, terminalWidth int) int {
-	return bytes.Count([]byte(wrap.String(string(data), terminalWidth)), []byte("\n"))
 }
