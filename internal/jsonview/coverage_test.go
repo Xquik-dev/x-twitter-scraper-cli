@@ -6,12 +6,9 @@ package jsonview
 
 import (
 	"bytes"
-	"context"
-	"errors"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
@@ -22,37 +19,15 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type sliceAnyIterator struct {
-	items   []any
-	current int
-	err     error
-}
-
-func (iterator *sliceAnyIterator) Next() bool {
-	if iterator.current >= len(iterator.items) {
-		return false
-	}
-	iterator.current++
-	return true
-}
-
-func (iterator *sliceAnyIterator) Err() error {
-	return iterator.err
-}
-
-func (iterator *sliceAnyIterator) Current() any {
-	return iterator.items[iterator.current-1]
-}
-
 type invalidView struct {
 	data gjson.Result
 }
 
-func (view *invalidView) GetPath() string              { return "invalid" }
-func (view *invalidView) GetData() gjson.Result        { return view.data }
-func (view *invalidView) Update(tea.Msg, bool) tea.Cmd { return nil }
-func (view *invalidView) View() string                 { return "invalid" }
-func (view *invalidView) Resize(width, height int)     {}
+func (view *invalidView) GetPath() string          { return "invalid" }
+func (view *invalidView) GetData() gjson.Result    { return view.data }
+func (view *invalidView) Update(tea.KeyMsg, bool)  {}
+func (view *invalidView) View() string             { return "invalid" }
+func (view *invalidView) Resize(width, height int) {}
 
 func keyMessage(value string) tea.KeyMsg {
 	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(value)}
@@ -96,7 +71,7 @@ func TestViewConstructionAndFormatting(t *testing.T) {
 	text.Resize(40, 12)
 	assert.Equal(t, 40, text.viewport.Width)
 	_ = text.View()
-	assert.Nil(t, text.Update(keyMessage("j"), false))
+	text.Update(keyMessage("j"), false)
 
 	_, err = newTextView("", gjson.Parse("1"))
 	require.Error(t, err)
@@ -113,7 +88,7 @@ func TestViewConstructionAndFormatting(t *testing.T) {
 	primitive.Resize(200, 20)
 	_ = primitive.View()
 	_ = primitive.GetData()
-	assert.Nil(t, primitive.Update(keyMessage("j"), false))
+	primitive.Update(keyMessage("j"), false)
 
 	objects, err := newTableView("", gjson.Parse(`[{"a":1},{"a":2,"b":"x"}]`), false)
 	require.NoError(t, err)
@@ -136,39 +111,6 @@ func TestViewConstructionAndFormatting(t *testing.T) {
 	assert.Contains(t, quoteString(`a\"b`), `\\`)
 }
 
-func TestTableViewLoadsIteratorResults(t *testing.T) {
-	t.Parallel()
-
-	view, err := newTableView("", gjson.Parse(`[{"a":1,"b":2}]`), false)
-	require.NoError(t, err)
-	view.iterator = &sliceAnyIterator{items: []any{map[string]any{"a": 3, "b": 4}}}
-	view.Resize(80, 20)
-	command := view.Update(keyMessage("j"), false)
-	require.NotNil(t, command)
-	require.Nil(t, command())
-	require.Len(t, view.rowData, 2)
-	require.Len(t, view.table.Rows(), 2)
-
-	view.iterator = &sliceAnyIterator{err: errors.New("iterator failed")}
-	view.isLoading = false
-	view.table.SetCursor(len(view.table.Rows()) - 1)
-	command = view.Update(keyMessage("j"), false)
-	require.EqualError(t, command().(error), "iterator failed")
-
-	view.iterator = &sliceAnyIterator{items: []any{make(chan int)}}
-	view.isLoading = false
-	command = view.loadMoreData(false)
-	require.Error(t, command().(error))
-
-	view.iterator = &sliceAnyIterator{items: []any{nil}}
-	view.isLoading = false
-	command = view.loadMoreData(false)
-	require.Nil(t, command())
-
-	view.iterator = nil
-	require.Nil(t, view.loadMoreData(false)())
-}
-
 func TestJSONViewerNavigationAndModes(t *testing.T) {
 	t.Parallel()
 
@@ -180,43 +122,40 @@ func TestJSONViewerNavigationAndModes(t *testing.T) {
 		help:  help.New(),
 	}
 
-	require.Nil(t, viewer.Init())
-	model, command := viewer.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	viewer.resize(98, 30)
 	assert.Equal(t, 98, viewer.width)
 	assert.NotEmpty(t, viewer.View())
 	assert.Equal(t, "Root", viewer.buildTitle(root))
 
-	model, command = viewer.Update(keyMessage("l"))
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	quit, err := viewer.handleKey(keyMessage("l"))
+	require.NoError(t, err)
+	require.False(t, quit)
 	require.Len(t, viewer.stack, 2)
 	assert.Contains(t, viewer.buildTitle(viewer.current()), "nested")
 
-	model, command = viewer.Update(keyMessage("h"))
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	quit, err = viewer.handleKey(keyMessage("h"))
+	require.NoError(t, err)
+	require.False(t, quit)
 	require.Len(t, viewer.stack, 1)
 
-	model, command = viewer.Update(keyMessage("r"))
-	require.Same(t, viewer, model)
-	require.Nil(t, command)
+	quit, err = viewer.handleKey(keyMessage("r"))
+	require.NoError(t, err)
+	require.False(t, quit)
 	assert.True(t, viewer.rawMode)
 	assert.Contains(t, viewer.buildTitle(viewer.current()), "JSON")
 
-	model, command = viewer.Update(keyMessage("p"))
-	require.Same(t, viewer, model)
-	require.NotNil(t, command)
+	quit, err = viewer.handleKey(keyMessage("j"))
+	require.NoError(t, err)
+	require.False(t, quit)
+
+	quit, err = viewer.handleKey(keyMessage("p"))
+	require.NoError(t, err)
+	require.True(t, quit)
 	assert.NotEmpty(t, viewer.message)
 
-	model, command = viewer.Update(keyMessage("q"))
-	require.Same(t, viewer, model)
-	require.NotNil(t, command)
-
-	model, command = viewer.Update(keyMessage("j"))
-	require.Same(t, viewer, model)
-	_ = command
+	quit, err = viewer.handleKey(keyMessage("q"))
+	require.NoError(t, err)
+	require.True(t, quit)
 
 	text, err := newTextView("", gjson.Parse(`"content"`))
 	require.NoError(t, err)
@@ -231,40 +170,21 @@ func TestJSONViewerNavigationAndModes(t *testing.T) {
 	assert.False(t, viewer.canNavigateInto(gjson.Parse(`1`)))
 
 	viewer.stack = []JSONView{&invalidView{data: gjson.Parse("1")}}
-	_, command = viewer.toggleRaw()
-	require.NotNil(t, command)
+	require.Error(t, viewer.toggleRaw())
+	_, err = viewer.handleKey(keyMessage("r"))
+	require.Error(t, err)
 
 	assert.Equal(t, stringStyle, viewer.getStyleForData(gjson.Parse(`"x"`)))
 	assert.Equal(t, arrayStyle, viewer.getStyleForData(gjson.Parse(`[1]`)))
 	assert.Equal(t, objectStyle, viewer.getStyleForData(gjson.Parse(`{"a":1}`)))
 }
 
-func TestIteratorAdaptersAndEarlyExplorerErrors(t *testing.T) {
-	t.Parallel()
-
-	source := &sliceAnyIterator{items: []any{"first"}, err: errors.New("done")}
-	adapted := genericToAnyIterator[any](source)
-	require.True(t, adapted.Next())
-	assert.Equal(t, "first", adapted.Current())
-	require.False(t, adapted.Next())
-	assert.EqualError(t, adapted.Err(), "done")
-
-	badIterator := &sliceAnyIterator{err: errors.New("stream failed")}
-	require.EqualError(t, ExploreJSONStream[any]("test", badIterator), "stream failed")
-
-	marshalIterator := &sliceAnyIterator{items: []any{make(chan int)}}
-	require.Error(t, ExploreJSONStream[any]("test", marshalIterator))
-}
-
-func typedKeys(t *testing.T, typed string) ([]tea.ProgramOption, *bytes.Buffer) {
+func typedKeys(t *testing.T, typed string) ([]Option, *bytes.Buffer) {
 	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	t.Cleanup(cancel)
 	screen := &bytes.Buffer{}
-	return []tea.ProgramOption{
-		tea.WithContext(ctx),
-		tea.WithInput(strings.NewReader(typed)),
-		tea.WithOutput(screen),
+	return []Option{
+		WithInput(strings.NewReader(typed)),
+		WithOutput(screen),
 	}, screen
 }
 
@@ -292,29 +212,27 @@ func TestExploreJSONPrintsTheSelectedValueOnP(t *testing.T) {
 	assert.Equal(t, "\nxquik\n", string(content))
 }
 
-func TestExploreJSONStreamPrintsTheSelectedRowOnP(t *testing.T) {
+func TestExploreJSONPrintsTheSelectedRowOnP(t *testing.T) {
 	stdout := os.Stdout
 	printed, err := os.CreateTemp(t.TempDir(), "printed")
 	require.NoError(t, err)
 	os.Stdout = printed
 	t.Cleanup(func() { os.Stdout = stdout })
 	options, _ := typedKeys(t, "p")
-	accounts := &sliceAnyIterator{items: []any{map[string]any{"name": "xquik"}}}
 
-	require.NoError(t, ExploreJSONStream[any]("Accounts", accounts, options...))
+	require.NoError(t, ExploreJSON("Accounts", gjson.Parse(`[{"name":"xquik"}]`), options...))
 
 	content, err := os.ReadFile(printed.Name())
 	require.NoError(t, err)
 	assert.Equal(t, "\n{\"name\":\"xquik\"}\n", string(content))
 }
 
-func TestExploreJSONStreamDrawsTheTitleAndQuitsOnQ(t *testing.T) {
+func TestExploreJSONDrawsAnArrayTitleAndQuitsOnQ(t *testing.T) {
 	t.Parallel()
 
 	options, screen := typedKeys(t, "q")
-	accounts := &sliceAnyIterator{items: []any{map[string]any{"name": "xquik"}}}
 
-	require.NoError(t, ExploreJSONStream[any]("Accounts", accounts, options...))
+	require.NoError(t, ExploreJSON("Accounts", gjson.Parse(`[{"name":"xquik"}]`), options...))
 	assert.Contains(t, screen.String(), "Accounts")
 }
 
@@ -323,10 +241,12 @@ func TestTextViewUpdateUsesViewport(t *testing.T) {
 
 	text := &TextView{
 		data:     gjson.Parse(`"content"`),
-		viewport: viewport.New(20, 4),
+		viewport: viewport.New(20, 2),
 		ready:    true,
 	}
-	assert.Nil(t, text.Update(keyMessage("j"), false))
+	text.viewport.SetContent("a\nb\nc\nd")
+	text.Update(keyMessage("j"), false)
+	assert.Equal(t, 1, text.viewport.YOffset)
 }
 
 func TestTableViewNarrowColumns(t *testing.T) {

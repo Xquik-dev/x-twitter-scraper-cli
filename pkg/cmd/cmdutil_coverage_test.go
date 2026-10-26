@@ -14,37 +14,19 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
+	"github.com/urfave/cli/v3"
 )
 
 type failingReadCloser struct{}
 
 func (failingReadCloser) Read([]byte) (int, error) { return 0, errors.New("read failed") }
 func (failingReadCloser) Close() error             { return nil }
-
-type errorIterator[T any] struct {
-	item    T
-	current bool
-	err     error
-}
-
-func (iterator *errorIterator[T]) Next() bool {
-	if iterator.current {
-		return false
-	}
-	iterator.current = true
-	return true
-}
-
-func (iterator *errorIterator[T]) Current() T { return iterator.item }
-func (iterator *errorIterator[T]) Err() error { return iterator.err }
-
-type rawJSONValue string
-
-func (value rawJSONValue) RawJSON() string { return string(value) }
 
 func TestCommandValidatorsAndManpages(t *testing.T) {
 	command := newCommand()
@@ -77,27 +59,113 @@ func TestCommandValidatorsAndManpages(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestPagerAndStreamingBranches(t *testing.T) {
-	t.Setenv("PAGER", "definitely-not-an-installed-pager")
-	require.Error(t, streamToPagerWithPipe("test", func(*os.File) error { return nil }))
-	require.Error(t, streamOutputOSSpecific("test", func(*os.File) error { return nil }))
+func TestPipedDataIsDetected(t *testing.T) {
+	t.Parallel()
 
-	t.Setenv("PAGER", "cat")
-	require.NoError(t, streamToPagerWithPipe("test", func(writer *os.File) error {
-		_, err := writer.WriteString("pager output\n")
-		return err
-	}))
-	require.EqualError(t, streamToPagerWithPipe("test", func(*os.File) error {
-		return errors.New("generation failed")
-	}), "generation failed")
-	require.NoError(t, streamToPagerWithPipe("test", func(*os.File) error {
-		return errors.New("broken pipe")
-	}))
-	require.NoError(t, streamOutputOSSpecific("test", func(writer *os.File) error {
-		_, err := writer.WriteString("socket output\n")
-		return err
-	}))
-	_ = isPipedDataAvailableOSSpecific()
+	idle, idleWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer idle.Close()
+	defer idleWriter.Close()
+	_, ready := stdinProbe.check(idle)
+	assert.False(t, ready)
+
+	filled, filledWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer filled.Close()
+	_, err = filledWriter.WriteString("piped data")
+	require.NoError(t, err)
+	require.NoError(t, filledWriter.Close())
+	input, ready := stdinProbe.check(filled)
+	require.True(t, ready)
+	content, err := io.ReadAll(input)
+	require.NoError(t, err)
+	assert.Equal(t, "piped data", string(content))
+}
+
+func TestReadWithinKeepsEveryByte(t *testing.T) {
+	t.Parallel()
+
+	idle, idleWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer idle.Close()
+	input, ready := readWithin(idle, 10*time.Millisecond)
+	assert.False(t, ready)
+	_, err = idleWriter.WriteString("late data")
+	require.NoError(t, err)
+	require.NoError(t, idleWriter.Close())
+	content, err := io.ReadAll(input)
+	require.NoError(t, err)
+	assert.Equal(t, "late data", string(content))
+
+	filled, filledWriter, err := os.Pipe()
+	require.NoError(t, err)
+	defer filled.Close()
+	_, err = filledWriter.WriteString(strings.Repeat("x", 40*1024))
+	require.NoError(t, err)
+	require.NoError(t, filledWriter.Close())
+	input, ready = readWithin(filled, time.Second)
+	require.True(t, ready)
+	content, err = io.ReadAll(input)
+	require.NoError(t, err)
+	assert.Len(t, content, 40*1024)
+
+	failing := &controlledReader{err: errors.New("read failed")}
+	input, ready = readWithin(failing, time.Second)
+	require.True(t, ready)
+	_, err = io.ReadAll(input)
+	require.EqualError(t, err, "read failed")
+}
+
+type controlledReader struct {
+	err error
+}
+
+func (r *controlledReader) Read([]byte) (int, error) { return 0, r.err }
+
+func TestReadingProbeLeavesStdinAloneWithoutRequestInput(t *testing.T) {
+	previousStdin, previousProbe := os.Stdin, stdinProbe
+	t.Cleanup(func() { os.Stdin, stdinProbe = previousStdin, previousProbe })
+	stdinProbe = pipeProbe{
+		check:    func(stdin *os.File) (io.Reader, bool) { return readWithin(stdin, time.Second) },
+		consumes: true,
+	}
+	pipe := func(t *testing.T, data string) *os.File {
+		t.Helper()
+		reader, writer, err := os.Pipe()
+		require.NoError(t, err)
+		t.Cleanup(func() { reader.Close() })
+		_, err = writer.WriteString(data)
+		require.NoError(t, err)
+		require.NoError(t, writer.Close())
+		return reader
+	}
+
+	untouched := pipe(t, "id: 42\n")
+	os.Stdin = untouched
+	_, err := flagOptions(&cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "note"}}}, EmptyBody)
+	require.NoError(t, err)
+	left, err := io.ReadAll(untouched)
+	require.NoError(t, err)
+	assert.Equal(t, "id: 42\n", string(left))
+
+	pathInput := pipe(t, "id: 42\n")
+	os.Stdin = pathInput
+	command := &cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "id", PathParam: "id"}}}
+	_, err = flagOptions(command, EmptyBody)
+	require.NoError(t, err)
+	assert.Equal(t, "42", command.String("id"))
+	left, err = io.ReadAll(pathInput)
+	require.NoError(t, err)
+	assert.Empty(t, left)
+
+	bodyInput := pipe(t, "text: hi\n")
+	os.Stdin = bodyInput
+	body := &cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "note"}}}
+	_, err = flagOptions(body, ApplicationJSON)
+	require.NoError(t, err)
+	left, err = io.ReadAll(bodyInput)
+	require.NoError(t, err)
+	assert.Empty(t, left)
 }
 
 func TestBinaryResponseFailuresAndExtensions(t *testing.T) {
@@ -172,20 +240,4 @@ func TestShowJSONAndIteratorErrors(t *testing.T) {
 		Stdout: output,
 	}))
 
-	channelIterator := &errorIterator[any]{item: make(chan int)}
-	require.Error(t, ShowJSONIterator[any](channelIterator, -1, ShowJSONOpts{
-		Format: "json",
-		Stdout: os.Stdout,
-	}))
-
-	expected := errors.New("iterator failed")
-	failingIterator := &errorIterator[rawJSONValue]{
-		item: rawJSONValue(`{"a":1}`),
-		err:  expected,
-	}
-	require.ErrorIs(t, ShowJSONIterator[rawJSONValue](failingIterator, -1, ShowJSONOpts{
-		Format: "raw",
-		Stdout: os.Stdout,
-	}), expected)
-	assert.Greater(t, countTerminalLines([]byte("first\nsecond\n"), 80), 0)
 }

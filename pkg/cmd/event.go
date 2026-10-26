@@ -6,9 +6,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -21,7 +19,7 @@ var eventsRetrieve = cli.Command{
 	Usage:   "Get event",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
@@ -36,28 +34,28 @@ var eventsList = cli.Command{
 	Usage:   "List events",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Previous nextCursor.",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "event-type",
 			Usage:     "Type of monitor event fired when account activity occurs.",
 			QueryPath: "eventType",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "keyword-monitor-id",
 			Usage:     "Keyword monitor ID.",
 			QueryPath: "keywordMonitorId",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "limit",
 			Usage:     "Maximum number of items to return (1-100, default 50). For paid per-result endpoints, the returned count may be lower when remaining credits cannot cover the requested page. If zero paid results are affordable, the endpoint returns 402 insufficient_credits.\n",
 			Default:   50,
 			QueryPath: "limit",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "monitor-id",
 			Usage:     "Account monitor ID.",
 			QueryPath: "monitorId",
@@ -75,23 +73,17 @@ func handleEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Events.Get(ctx, cmd.Value("id").(string), options...)
+	_, err = client.Events.Get(ctx, cmd.String("id"), options...)
 	if err != nil {
 		return err
 	}
@@ -114,16 +106,10 @@ func handleEventsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

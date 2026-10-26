@@ -1,0 +1,5 @@
+// Package docs is a second package doc comment, which the query flags.
+package docs
+
+/* A block comment, which the query flags. */
+var Second = 2

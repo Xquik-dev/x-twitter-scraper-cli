@@ -6,9 +6,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -21,13 +19,13 @@ var xFollowersCheck = cli.Command{
 	Usage:   "Check if one user follows another",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "source",
 			Usage:     "Source username, @username, or X or Twitter profile URL",
 			Required:  true,
 			QueryPath: "source",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "target",
 			Usage:     "Target username, @username, or X or Twitter profile URL",
 			Required:  true,
@@ -43,16 +41,10 @@ func handleXFollowersCheck(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

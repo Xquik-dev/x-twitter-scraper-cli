@@ -1,0 +1,4 @@
+// Package main documents a command, which the query flags.
+package main
+
+func main() {}

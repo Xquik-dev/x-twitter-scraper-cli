@@ -1,0 +1,205 @@
+// SPDX-FileCopyrightText: 2026 Xquik contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package main
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func module(t *testing.T, files map[string]string) string {
+	t.Helper()
+	directory := t.TempDir()
+	files["go.mod"] = "module example.com/probe\n\ngo 1.27\n"
+	for name, content := range files {
+		path := filepath.Join(directory, name)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, arguments := range [][]string{{"init", "-q"}, {"add", "."}} {
+		command := exec.Command("git", arguments...)
+		command.Dir = directory
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v %s", arguments, err, output)
+		}
+	}
+	return directory
+}
+
+func check(t *testing.T, directory string, platforms ...string) (bool, string) {
+	t.Helper()
+	var output strings.Builder
+	passed, err := run(&output, directory, platforms)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return passed, output.String()
+}
+
+func TestTypedModulePasses(t *testing.T) {
+	t.Parallel()
+	directory := module(t, map[string]string{"probe.go": `// Package probe is typed.
+package probe
+
+import "fmt"
+
+// Identity returns its argument.
+func Identity[T any](value T) T { return value }
+
+// Describe names the error kind.
+func Describe(err error) string {
+	if stringer, ok := err.(fmt.Stringer); ok {
+		return stringer.String()
+	}
+	switch err.(type) {
+	case nil:
+		return "none"
+	}
+	return err.Error()
+}
+`})
+	passed, output := check(t, directory, "linux")
+	if !passed || !strings.Contains(output, "Type coverage 100.00%, 6 of 6 declarations typed.\nEscape hatches 0.\n") {
+		t.Fatalf("passed %v with output\n%s", passed, output)
+	}
+}
+
+func TestEscapeHatchesFail(t *testing.T) {
+	t.Parallel()
+	for name, test := range map[string]struct {
+		files map[string]string
+		want  string
+	}{
+		"any field": {
+			map[string]string{"probe.go": "package probe\n\ntype Box struct{ Value any }\n"},
+			"probe.go:3:18: Value has type any, which holds an empty interface",
+		},
+		"interface literal": {
+			map[string]string{"probe.go": "package probe\n\nvar Values []interface{}\n"},
+			"probe.go:3:14: interface{} written outside a type parameter constraint",
+		},
+		"inferred declaration": {
+			map[string]string{"probe.go": "package probe\n\nimport \"reflect\"\n\nvar Value = reflect.ValueOf(1).Interface()\n"},
+			"probe.go:5:5: Value has type any, which holds an empty interface",
+		},
+		"conversion": {
+			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nvar Text = fmt.Sprint(any(1))\n"},
+			"probe.go:5:23: any written outside a type parameter constraint",
+		},
+		"type declaration": {
+			map[string]string{"probe.go": "package probe\n\ntype Bag map[string]interface{}\n"},
+			"probe.go:3:6: type Bag, which holds an empty interface",
+		},
+		"unchecked assertion": {
+			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nfunc Name(err error) string { return err.(fmt.Stringer).String() }\n"},
+			"probe.go:5:42: type assertion without the comma-ok form",
+		},
+		"discarded ok": {
+			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nfunc Name(err error) string {\n\ts, _ := err.(fmt.Stringer)\n\treturn s.String()\n}\n"},
+			"probe.go:6:14: type assertion discards its ok result",
+		},
+		"discarded ok in a declaration": {
+			map[string]string{"probe.go": "package probe\n\nimport \"fmt\"\n\nvar failure error\n\nvar Stringer, _ = failure.(fmt.Stringer)\n"},
+			"probe.go:7:27: type assertion discards its ok result",
+		},
+		"discarded reflect ok": {
+			map[string]string{"probe.go": "package probe\n\nimport (\n\t\"fmt\"\n\t\"reflect\"\n)\n\nfunc Name(v reflect.Value) string {\n\ts, _ := reflect.TypeAssert[fmt.Stringer](v)\n\treturn s.String()\n}\n"},
+			"probe.go:9:42: reflect TypeAssert discards its ok result",
+		},
+		"unsafe import": {
+			map[string]string{"probe.go": "package probe\n\nimport \"unsafe\"\n\nvar Size = unsafe.Sizeof(0)\n"},
+			"probe.go:3:8: import of package unsafe",
+		},
+		"reflect bypass": {
+			map[string]string{"probe.go": "package probe\n\nimport \"reflect\"\n\nvar Pointer = reflect.NewAt\n"},
+			"probe.go:5:23: reflect NewAt bypasses type safety",
+		},
+		"reflect set": {
+			map[string]string{"probe.go": "package probe\n\nimport \"reflect\"\n\nfunc Fill(v reflect.Value) (t int) {\n\treflect.ValueOf(&t).Elem().Set(v)\n\treturn t\n}\n"},
+			"probe.go:6:29: reflect Value.Set panics when the types differ, like an assertion without the comma-ok form",
+		},
+		"reflect map set": {
+			map[string]string{"probe.go": "package probe\n\nimport \"reflect\"\n\nfunc Fill(fields map[string]int, v reflect.Value) {\n\treflect.ValueOf(fields).SetMapIndex(reflect.ValueOf(\"a\"), v)\n}\n"},
+			"probe.go:6:26: reflect Value.SetMapIndex panics when the types differ, like an assertion without the comma-ok form",
+		},
+		"nolint": {
+			map[string]string{"probe.go": "package probe\n\nvar Flag = true //nolint:gochecknoglobals\n"},
+			"probe.go:3:17: //nolint directive escapes a check",
+		},
+		"lint ignore": {
+			map[string]string{"probe.go": "package probe\n\n//lint:ignore U1000 kept\nvar flag = true\n"},
+			"probe.go:3:1: //lint:ignore directive escapes a check",
+		},
+		"lint file ignore": {
+			map[string]string{"probe.go": "//lint:file-ignore ST1000 kept\npackage probe\n"},
+			"probe.go:1:1: //lint:file-ignore directive escapes a check",
+		},
+		"linkname": {
+			map[string]string{"probe.go": "package probe\n\nimport _ \"unsafe\"\n\n//go:linkname now\nfunc now() int64 { return 0 }\n"},
+			"probe.go:5:1: //go:linkname directive escapes a check",
+		},
+		"generated header": {
+			map[string]string{"probe.go": "// Code generated by hand. DO NOT EDIT.\n\npackage probe\n"},
+			"probe.go:3:1: generated-code header makes linters skip this file",
+		},
+		"staticcheck config": {
+			map[string]string{"probe.go": "package probe\n", "staticcheck.conf": "dot_import_whitelist = [\"strings\"]\n"},
+			"staticcheck.conf: staticcheck.conf can exempt code from the checks that -checks all enables",
+		},
+		"nested staticcheck config": {
+			map[string]string{"probe.go": "package probe\n", "inner/staticcheck.conf": "initialisms = []\n"},
+			"inner/staticcheck.conf: staticcheck.conf can exempt code from the checks that -checks all enables",
+		},
+		"staticcheck config in another case": {
+			map[string]string{"probe.go": "package probe\n", "Staticcheck.CONF": "dot_import_whitelist = [\"strings\"]\n"},
+			"Staticcheck.CONF: staticcheck.conf can exempt code from the checks that -checks all enables",
+		},
+		"skipped file": {
+			map[string]string{"probe.go": "package probe\n", "skipped.go": "//go:build ignore\n\npackage probe\n"},
+			"skipped.go: no checked platform compiles this tracked file",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			passed, output := check(t, module(t, test.files), "linux")
+			if passed || !strings.Contains(output, test.want+"\n") {
+				t.Fatalf("passed %v, want a line %q in\n%s", passed, test.want, output)
+			}
+		})
+	}
+}
+
+func TestPlatformsCoverTheirFiles(t *testing.T) {
+	t.Parallel()
+	directory := module(t, map[string]string{
+		"probe.go":         "package probe\n",
+		"probe_windows.go": "package probe\n\n// Separator is the path separator.\nconst Separator = '\\\\'\n",
+	})
+	if passed, output := check(t, directory, "linux"); passed {
+		t.Fatalf("linux alone passed with output\n%s", output)
+	}
+	if passed, output := check(t, directory, "linux", "windows"); !passed {
+		t.Fatalf("linux and windows failed with output\n%s", output)
+	}
+}
+
+func TestBrokenModuleErrors(t *testing.T) {
+	t.Parallel()
+	directory := module(t, map[string]string{"probe.go": "package probe\n\nvar Broken int = \"text\"\n"})
+	var output strings.Builder
+	if _, err := run(&output, directory, []string{"linux"}); err == nil || !strings.Contains(err.Error(), "probe.go:3:18") {
+		t.Fatalf("got error %v", err)
+	}
+	if _, err := run(&output, t.TempDir(), []string{"linux"}); err == nil || !strings.Contains(err.Error(), "git ls-files failed") {
+		t.Fatalf("got error %v outside a repository", err)
+	}
+}

@@ -6,12 +6,14 @@ package cmd
 
 import (
 	"encoding/base64"
-	"io"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,7 +40,7 @@ func TestIsUTF8TextFile(t *testing.T) {
 	}
 }
 
-func TestEmbedFiles(t *testing.T) {
+func TestEmbedJSON(t *testing.T) {
 	t.Parallel()
 
 	tmpDir := t.TempDir()
@@ -52,334 +54,189 @@ func TestEmbedFiles(t *testing.T) {
 	writeTestFile(t, tmpDir, "data.json", dataContent)
 	jpegHeader := []byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46}
 	writeTestFile(t, tmpDir, "image.jpg", string(jpegHeader))
+	writeTestFile(t, tmpDir, `quo"te\back.txt`, "quoted content")
+
+	text := func(value string) json.RawMessage {
+		encoded, err := json.Marshal(value)
+		require.NoError(t, err)
+		return encoded
+	}
+	file := func(prefix, name string) json.RawMessage {
+		return text(prefix + filepath.Join(tmpDir, name))
+	}
+	object := func(fields map[string]json.RawMessage) json.RawMessage {
+		encoded, err := json.Marshal(fields)
+		require.NoError(t, err)
+		return encoded
+	}
+	list := func(items ...json.RawMessage) json.RawMessage {
+		encoded, err := json.Marshal(items)
+		require.NoError(t, err)
+		return encoded
+	}
+	number := json.RawMessage(`42`)
+	truth := json.RawMessage(`true`)
 
 	tests := []struct {
 		name    string
-		input   any
-		want    any
+		input   string
+		want    string
 		wantErr bool
 	}{
 		{
-			name: "map[string]any with file references",
-			input: map[string]any{
-				"config":   "@" + filepath.Join(tmpDir, "config.txt"),
-				"template": "@file://" + filepath.Join(tmpDir, "template.html"),
-				"count":    42,
-			},
-			want: map[string]any{
-				"config":   configContent,
-				"template": templateContent,
-				"count":    42,
-			},
-			wantErr: false,
+			name:  "object with file references",
+			input: string(object(map[string]json.RawMessage{"config": file("@", "config.txt"), "template": file("@file://", "template.html"), "count": number})),
+			want:  `{"config":"host=localhost\nport=8080","template":"<html><body>Hello</body></html>","count":42}`,
 		},
 		{
-			name: "map[string]string with file references",
-			input: map[string]any{
-				"config": "@" + filepath.Join(tmpDir, "config.txt"),
-				"name":   "test",
-			},
-			want: map[string]any{
-				"config": configContent,
-				"name":   "test",
-			},
-			wantErr: false,
+			name:  "list with file references",
+			input: string(list(file("@", "config.txt"), number, truth, file("@file://", "data.json"))),
+			want:  `["host=localhost\nport=8080",42,true,"{\"key\": \"value\"}"]`,
 		},
 		{
-			name: "[]any with file references",
-			input: []any{
-				"@" + filepath.Join(tmpDir, "config.txt"),
-				42,
-				true,
-				"@file://" + filepath.Join(tmpDir, "data.json"),
-			},
-			want: []any{
-				configContent,
-				42,
-				true,
-				dataContent,
-			},
-			wantErr: false,
+			name:  "nested structures",
+			input: string(object(map[string]json.RawMessage{"outer": object(map[string]json.RawMessage{"inner": list(file("@", "config.txt"), object(map[string]json.RawMessage{"data": file("@", "data.json")}))})})),
+			want:  `{"outer":{"inner":["host=localhost\nport=8080",{"data":"{\"key\": \"value\"}"}]}}`,
 		},
 		{
-			name: "[]string with file references",
-			input: []any{
-				"@" + filepath.Join(tmpDir, "config.txt"),
-				"normal string",
-			},
-			want: []any{
-				configContent,
-				"normal string",
-			},
-			wantErr: false,
+			name:  "base64 encoding",
+			input: string(object(map[string]json.RawMessage{"encoded": file("@data://", "config.txt"), "image": file("@", "image.jpg")})),
+			want:  `{"encoded":"aG9zdD1sb2NhbGhvc3QKcG9ydD04MDgw","image":"/9j/4AAQSkZJRg=="}`,
 		},
 		{
-			name: "nested structures",
-			input: map[string]any{
-				"outer": map[string]any{
-					"inner": []any{
-						"@" + filepath.Join(tmpDir, "config.txt"),
-						map[string]any{
-							"data": "@" + filepath.Join(tmpDir, "data.json"),
-						},
-					},
-				},
-			},
-			want: map[string]any{
-				"outer": map[string]any{
-					"inner": []any{
-						configContent,
-						map[string]any{
-							"data": dataContent,
-						},
-					},
-				},
-			},
-			wantErr: false,
+			name:  "path with a quote and a backslash",
+			input: string(object(map[string]json.RawMessage{"plain": file("@", `quo"te\back.txt`), "file": file("@file://", `quo"te\back.txt`)})),
+			want:  `{"plain":"quoted content","file":"quoted content"}`,
 		},
 		{
-			name: "base64 encoding",
-			input: map[string]any{
-				"encoded": "@data://" + filepath.Join(tmpDir, "config.txt"),
-				"image":   "@" + filepath.Join(tmpDir, "image.jpg"),
-			},
-			want: map[string]any{
-				"encoded": base64.StdEncoding.EncodeToString([]byte(configContent)),
-				"image":   base64.StdEncoding.EncodeToString(jpegHeader),
-			},
-			wantErr: false,
-		},
-		{
-			name: "non-existent file with @ prefix",
-			input: map[string]any{
-				"missing": "@file.txt",
-			},
-			want:    nil,
+			name:    "missing file with @ prefix",
+			input:   `{"missing":"@file.txt"}`,
 			wantErr: true,
 		},
 		{
-			name: "non-file-like thing with @ prefix",
-			input: map[string]any{
-				"username":        "@user",
-				"favorite_symbol": "@",
-			},
-			want: map[string]any{
-				"username":        "@user",
-				"favorite_symbol": "@",
-			},
-			wantErr: false,
+			name:  "non-file-like thing with @ prefix",
+			input: `{"username":"@user","favorite_symbol":"@"}`,
+			want:  `{"username":"@user","favorite_symbol":"@"}`,
 		},
 		{
-			name: "non-existent file with @file:// prefix (error)",
-			input: map[string]any{
-				"missing": "@file:///nonexistent/file.txt",
-			},
-			want:    nil,
+			name:    "missing file with @file:// prefix",
+			input:   `{"missing":"@file:///nonexistent/file.txt"}`,
 			wantErr: true,
 		},
 		{
-			name: "escaping",
-			input: map[string]any{
-				"simple":      "\\@file.txt",
-				"file":        "\\@file://file.txt",
-				"data":        "\\@data://file.txt",
-				"keep_escape": "user\\@example.com",
-			},
-			want: map[string]any{
-				"simple":      "@file.txt",
-				"file":        "@file://file.txt",
-				"data":        "@data://file.txt",
-				"keep_escape": "user\\@example.com",
-			},
-			wantErr: false,
+			name:    "missing file with @data:// prefix",
+			input:   `{"missing":"@data:///nonexistent/file.txt"}`,
+			wantErr: true,
 		},
 		{
-			name: "primitive types",
-			input: map[string]any{
-				"int":    123,
-				"float":  45.67,
-				"bool":   true,
-				"null":   nil,
-				"string": "no prefix",
-				"email":  "user@example.com",
-			},
-			want: map[string]any{
-				"int":    123,
-				"float":  45.67,
-				"bool":   true,
-				"null":   nil,
-				"string": "no prefix",
-				"email":  "user@example.com",
-			},
-			wantErr: false,
+			name:  "escaping",
+			input: `{"simple":"\\@file.txt","file":"\\@file://file.txt","data":"\\@data://file.txt","keep_escape":"user\\@example.com"}`,
+			want:  `{"simple":"@file.txt","file":"@file://file.txt","data":"@data://file.txt","keep_escape":"user\\@example.com"}`,
 		},
 		{
-			name:    "[]int values unchanged",
-			input:   []int{1, 2, 3, 4, 5},
-			want:    []any{1, 2, 3, 4, 5},
-			wantErr: false,
+			name:  "primitive types",
+			input: `{"int":123,"float":45.67,"bool":true,"null":null,"string":"no prefix","email":"user@example.com"}`,
+			want:  `{"int":123,"float":45.67,"bool":true,"null":null,"string":"no prefix","email":"user@example.com"}`,
+		},
+		{
+			name:  "bare scalars",
+			input: `[1,2,3]`,
+			want:  `[1,2,3]`,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name+" text", func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := embedFiles(tt.input, EmbedText, nil)
+			got, err := embedJSON(json.RawMessage(tt.input), &onceStdinReader{})
 			if tt.wantErr {
 				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tt.want, got)
+				return
 			}
-		})
-
-		t.Run(tt.name+" io.Reader", func(t *testing.T) {
-			t.Parallel()
-
-			_, err := embedFiles(tt.input, EmbedIOReader, nil)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
+			require.NoError(t, err)
+			require.JSONEq(t, tt.want, string(got))
 		})
 	}
 }
 
-func TestEmbedFilesStdin(t *testing.T) {
+func TestEmbedJSONRejectsMalformedJSON(t *testing.T) {
 	t.Parallel()
 
-	t.Run("FilePathValueDash", func(t *testing.T) {
-		t.Parallel()
+	for _, input := range []string{`"open`, `[1,`, `{"a":`} {
+		_, err := embedJSON(json.RawMessage(input), &onceStdinReader{})
+		require.Error(t, err, input)
+	}
+	_, err := embedJSON(json.RawMessage(`[{"a":"@missing.txt"}]`), &onceStdinReader{})
+	require.Error(t, err)
+	_, err = embedJSON(json.RawMessage(`{"a":{"b":"@missing.txt"}}`), &onceStdinReader{})
+	require.Error(t, err)
+}
 
-		stdin := &onceStdinReader{stdinReader: strings.NewReader("stdin content")}
+func TestEmbedStdin(t *testing.T) {
+	t.Parallel()
 
-		withEmbedded, err := embedFiles(map[string]any{"file": FilePathValue("-")}, EmbedText, stdin)
-		require.NoError(t, err)
-		require.Equal(t, map[string]any{"file": "stdin content"}, withEmbedded)
-	})
-
-	t.Run("FilePathValueDevStdin", func(t *testing.T) {
-		t.Parallel()
-
-		stdin := &onceStdinReader{stdinReader: strings.NewReader("stdin content")}
-
-		withEmbedded, err := embedFiles(map[string]any{"file": FilePathValue("/dev/stdin")}, EmbedText, stdin)
-		require.NoError(t, err)
-		require.Equal(t, map[string]any{"file": "stdin content"}, withEmbedded)
-	})
-
-	t.Run("MultipleFilePathValueDashesError", func(t *testing.T) {
-		t.Parallel()
-
-		stdin := &onceStdinReader{stdinReader: strings.NewReader("stdin content")}
-
-		_, err := embedFiles(map[string]any{
-			"file1": FilePathValue("-"),
-			"file2": FilePathValue("-"),
-		}, EmbedText, stdin)
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "already been read")
-	})
-
-	t.Run("FilePathValueDashUnavailableStdin", func(t *testing.T) {
-		t.Parallel()
-
-		stdin := &onceStdinReader{failureReason: "stdin is already being used for the request body"}
-
-		_, err := embedFiles(map[string]any{"file": FilePathValue("-")}, EmbedText, stdin)
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "cannot read from stdin")
-		require.Contains(t, err.Error(), "request body")
-	})
-
-	t.Run("AtDashEmbedText", func(t *testing.T) {
+	t.Run("AtDash", func(t *testing.T) {
 		t.Parallel()
 
 		stdin := &onceStdinReader{stdinReader: strings.NewReader("piped content")}
-
-		withEmbedded, err := embedFiles(map[string]any{"data": "@-"}, EmbedText, stdin)
+		got, err := embedJSON(json.RawMessage(`{"data":"@-"}`), stdin)
 		require.NoError(t, err)
-		require.Equal(t, map[string]any{"data": "piped content"}, withEmbedded)
+		require.JSONEq(t, `{"data":"piped content"}`, string(got))
 	})
 
-	t.Run("AtDashEmbedIOReader", func(t *testing.T) {
+	t.Run("AtDevStdinAsBase64", func(t *testing.T) {
 		t.Parallel()
 
 		stdin := &onceStdinReader{stdinReader: strings.NewReader("piped content")}
-
-		withEmbedded, err := embedFiles(map[string]any{"data": "@-"}, EmbedIOReader, stdin)
+		got, err := embedText("@data:///dev/stdin", stdin)
 		require.NoError(t, err)
-
-		withEmbeddedMap := withEmbedded.(map[string]any)
-		r := withEmbeddedMap["data"].(io.ReadCloser)
-
-		content, err := io.ReadAll(r)
-		require.NoError(t, err)
-		require.Equal(t, "piped content", string(content))
+		require.Equal(t, base64.StdEncoding.EncodeToString([]byte("piped content")), got)
 	})
 
-	t.Run("FilePathValueRealFile", func(t *testing.T) {
+	t.Run("StdinReadsOnce", func(t *testing.T) {
+		t.Parallel()
+
+		stdin := &onceStdinReader{stdinReader: strings.NewReader("stdin content")}
+		_, err := embedJSON(json.RawMessage(`["@-","@file://-"]`), stdin)
+		require.ErrorContains(t, err, "already been read")
+	})
+
+	t.Run("UnavailableStdin", func(t *testing.T) {
+		t.Parallel()
+
+		stdin := &onceStdinReader{failureReason: "stdin was already consumed by piped YAML/JSON input"}
+		_, err := embedText("@-", stdin)
+		require.ErrorContains(t, err, "cannot read from stdin")
+	})
+
+	t.Run("RealFile", func(t *testing.T) {
 		t.Parallel()
 
 		tmpDir := t.TempDir()
 		writeTestFile(t, tmpDir, "test.txt", "file content")
-
 		stdin := &onceStdinReader{stdinReader: strings.NewReader("unused stdin")}
-
-		withEmbedded, err := embedFiles(map[string]any{"file": FilePathValue(filepath.Join(tmpDir, "test.txt"))}, EmbedText, stdin)
+		got, err := embedText("@"+filepath.Join(tmpDir, "test.txt"), stdin)
 		require.NoError(t, err)
-		require.Equal(t, map[string]any{"file": "file content"}, withEmbedded)
+		require.Equal(t, "file content", got)
 	})
 }
 
-func TestEmbedFilesUploadMetadata(t *testing.T) {
+func TestEmbedParams(t *testing.T) {
 	t.Parallel()
 
 	tmpDir := t.TempDir()
-	writeTestFile(t, tmpDir, "hello.txt", "hi")
-	writeTestFile(t, tmpDir, "page.html", "<html/>")
-	writeTestFile(t, tmpDir, "blob.bin", "\x00\x01")
-
-	cases := []struct {
-		basename        string
-		wantContentType string
-	}{
-		{"hello.txt", "text/plain; charset=utf-8"},
-		{"page.html", "text/html; charset=utf-8"},
-		{"blob.bin", "application/octet-stream"},
+	writeTestFile(t, tmpDir, "token.txt", "secret")
+	params := map[string]apiquery.Param{
+		"token": apiquery.Scalar("@" + filepath.Join(tmpDir, "token.txt")),
+		"tags":  apiquery.List([]string{"\\@a", "b"}),
 	}
+	embedded, err := embedParams(params, &onceStdinReader{})
+	require.NoError(t, err)
+	assert.Equal(t, "tags=%40a%2Cb&token=secret", apiquery.Encode(embedded, apiquery.ArrayQueryFormatComma).Encode())
 
-	for _, tc := range cases {
-		t.Run("AtPrefix_"+tc.basename, func(t *testing.T) {
-			t.Parallel()
-
-			path := filepath.Join(tmpDir, tc.basename)
-			withEmbedded, err := embedFiles(map[string]any{"file": "@" + path}, EmbedIOReader, nil)
-			require.NoError(t, err)
-
-			upload, ok := withEmbedded.(map[string]any)["file"].(fileUpload)
-			require.True(t, ok, "expected fileUpload, got %T", withEmbedded.(map[string]any)["file"])
-			require.Equal(t, tc.basename, upload.Filename())
-			require.Equal(t, upload.ContentType(), tc.wantContentType)
-			require.NoError(t, upload.Close())
-		})
-
-		t.Run("FilePathValue_"+tc.basename, func(t *testing.T) {
-			t.Parallel()
-
-			path := filepath.Join(tmpDir, tc.basename)
-			withEmbedded, err := embedFiles(map[string]any{"file": FilePathValue(path)}, EmbedIOReader, nil)
-			require.NoError(t, err)
-
-			upload, ok := withEmbedded.(map[string]any)["file"].(fileUpload)
-			require.True(t, ok, "expected fileUpload, got %T", withEmbedded.(map[string]any)["file"])
-			require.Equal(t, tc.basename, upload.Filename())
-			require.Equal(t, upload.ContentType(), tc.wantContentType)
-			require.NoError(t, upload.Close())
-		})
-	}
+	_, err = embedParams(map[string]apiquery.Param{"missing": apiquery.Scalar("@missing.txt")}, &onceStdinReader{})
+	require.Error(t, err)
 }
 
 func writeTestFile(t *testing.T, dir, filename, content string) {

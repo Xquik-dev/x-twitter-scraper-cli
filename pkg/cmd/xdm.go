@@ -6,9 +6,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -21,23 +19,23 @@ var xDmRetrieveHistory = cli.Command{
 	Usage:   "Get DM conversation history",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "user-id",
 			Required:  true,
 			PathParam: "userId",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "account",
 			Usage:     "X handle (without the `@` prefix) of the connected X account used to read the conversation. The account must be a participant in the conversation.\n",
 			Required:  true,
 			QueryPath: "account",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for DM history",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "max-id",
 			Usage:     "Legacy pagination cursor (backward compat)",
 			QueryPath: "maxId",
@@ -52,28 +50,28 @@ var xDmSend = cli.Command{
 	Usage:   "Send direct message",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "user-id",
 			Required:  true,
 			PathParam: "userId",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "account",
 			Usage:    "X account (@username or ID) sending the DM",
 			Required: true,
 			BodyPath: "account",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "text",
 			Required: true,
 			BodyPath: "text",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "idempotency-key",
 			Required:   true,
 			HeaderPath: "Idempotency-Key",
 		},
-		&requestflag.Flag[[]string]{
+		&requestflag.StringList{
 			Name:     "media-id",
 			Usage:    "Optional array containing exactly 1 uploaded media ID.",
 			BodyPath: "media_ids",
@@ -91,16 +89,10 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -111,7 +103,7 @@ func handleXDmRetrieveHistory(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Dm.GetHistory(
 		ctx,
-		cmd.Value("user-id").(string),
+		cmd.String("user-id"),
 		params,
 		options...,
 	)
@@ -140,16 +132,10 @@ func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}
@@ -160,7 +146,7 @@ func handleXDmSend(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.X.Dm.Send(
 		ctx,
-		cmd.Value("user-id").(string),
+		cmd.String("user-id"),
 		params,
 		options...,
 	)

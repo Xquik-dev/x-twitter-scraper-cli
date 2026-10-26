@@ -7,4 +7,4 @@ set -euo pipefail
 
 cd -- "$(dirname -- "$0")/.."
 
-go run ./scripts/release_archives.go "${1:-dist/artifacts.json}"
+go run ./cmd/release-archives "${1:-dist/artifacts.json}"

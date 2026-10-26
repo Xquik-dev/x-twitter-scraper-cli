@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package autocomplete prints and answers shell completion for the CLI commands.
 package autocomplete
 
 import (
