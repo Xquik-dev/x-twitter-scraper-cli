@@ -148,16 +148,24 @@ func TestReadingProbeLeavesStdinAloneWithoutRequestInput(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "id: 42\n", string(left))
 
-	os.Stdin = pipe(t, "id: 42\n")
+	pathInput := pipe(t, "id: 42\n")
+	os.Stdin = pathInput
 	command := &cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "id", PathParam: "id"}}}
 	_, err = flagOptions(command, EmptyBody)
 	require.NoError(t, err)
 	assert.Equal(t, "42", command.String("id"))
+	left, err = io.ReadAll(pathInput)
+	require.NoError(t, err)
+	assert.Empty(t, left)
 
-	os.Stdin = pipe(t, "text: hi\n")
-	body := &cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "text", BodyPath: "text"}}}
+	bodyInput := pipe(t, "text: hi\n")
+	os.Stdin = bodyInput
+	body := &cli.Command{Name: "probe", Flags: []cli.Flag{&requestflag.String{Name: "note"}}}
 	_, err = flagOptions(body, ApplicationJSON)
 	require.NoError(t, err)
+	left, err = io.ReadAll(bodyInput)
+	require.NoError(t, err)
+	assert.Empty(t, left)
 }
 
 func TestBinaryResponseFailuresAndExtensions(t *testing.T) {
