@@ -5,8 +5,12 @@
 package requestflag
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
@@ -48,10 +52,7 @@ func (d yamlDocument) convert(node ast.Node) (json.RawMessage, error) {
 		}
 		return raw, nil
 	case *ast.TagNode:
-		if node.Start.Value == "!!str" {
-			return encodeScalar[string](node.Value)
-		}
-		return d.convert(node.Value)
+		return d.tagged(node)
 	case *ast.MappingNode:
 		return d.mapping(node.Values)
 	case *ast.MappingValueNode:
@@ -80,6 +81,131 @@ func (d yamlDocument) convert(node ast.Node) (json.RawMessage, error) {
 		return encodeScalar[bool](node)
 	default:
 		return encodeScalar[string](node)
+	}
+}
+
+var timestampFormats = []string{
+	"2006-1-2T15:4:5.999999999Z07:00",
+	"2006-1-2t15:4:5.999999999Z07:00",
+	"2006-1-2 15:4:5.999999999",
+	"2006-1-2",
+}
+
+func (d yamlDocument) tagged(node *ast.TagNode) (json.RawMessage, error) {
+	if node.Directive != nil {
+		return d.taggedText(node.Value)
+	}
+	switch node.Start.Value {
+	case "!!str":
+		return d.taggedText(node.Value)
+	case "!!null":
+		return json.RawMessage("null"), nil
+	case "!!int":
+		text, _, err := scalarText(node.Value)
+		if err != nil {
+			return nil, err
+		}
+		whole, _ := strconv.Atoi(text)
+		return json.Marshal(whole)
+	case "!!float":
+		return taggedFloat(node.Value)
+	case "!!bool":
+		text, _, err := scalarText(node.Value)
+		if err != nil {
+			return nil, err
+		}
+		switch lowered := strings.ToLower(text); lowered {
+		case "yes", "no":
+			return json.Marshal(lowered == "yes")
+		default:
+			truth, err := strconv.ParseBool(lowered)
+			if err != nil {
+				return nil, fmt.Errorf("cannot convert %q to boolean", text)
+			}
+			return json.Marshal(truth)
+		}
+	case "!!timestamp":
+		var moment time.Time
+		if _, isText := node.Value.(*ast.StringNode); isText {
+			text, _, err := scalarText(node.Value)
+			if err != nil {
+				return nil, err
+			}
+			for _, format := range timestampFormats {
+				if parsed, err := time.Parse(format, text); err == nil {
+					moment = parsed
+					break
+				}
+			}
+		}
+		return json.Marshal(moment)
+	case "!!binary":
+		if _, isText := node.Value.(*ast.StringNode); !isText {
+			return nil, fmt.Errorf("cannot convert %s to binary", node.Value.String())
+		}
+		text, _, err := scalarText(node.Value)
+		if err != nil {
+			return nil, err
+		}
+		decoded, _ := base64.StdEncoding.DecodeString(text)
+		return json.Marshal(decoded)
+	default:
+		return d.convert(node.Value)
+	}
+}
+
+func (d yamlDocument) taggedText(node ast.Node) (json.RawMessage, error) {
+	text, _, err := scalarText(node)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(text)
+}
+
+func taggedFloat(node ast.Node) (json.RawMessage, error) {
+	switch node.(type) {
+	case *ast.IntegerNode, *ast.FloatNode, *ast.InfinityNode, *ast.NanNode:
+		return encodeScalar[float64](node)
+	case *ast.StringNode:
+		text, _, err := scalarText(node)
+		if err != nil {
+			return nil, err
+		}
+		number, _ := strconv.ParseFloat(text, 64)
+		return json.Marshal(number)
+	default:
+		return json.Marshal(0)
+	}
+}
+
+func scalarText(node ast.Node) (string, bool, error) {
+	switch node.(type) {
+	case nil, *ast.NullNode:
+		return "", true, nil
+	case *ast.IntegerNode:
+		var whole int64
+		if err := yaml.NodeToValue(node, &whole); err == nil {
+			return strconv.FormatInt(whole, 10), false, nil
+		}
+		var natural uint64
+		if err := yaml.NodeToValue(node, &natural); err == nil {
+			return strconv.FormatUint(natural, 10), false, nil
+		}
+		var number float64
+		err := yaml.NodeToValue(node, &number)
+		return fmt.Sprint(number), false, err
+	case *ast.FloatNode, *ast.InfinityNode, *ast.NanNode:
+		var number float64
+		err := yaml.NodeToValue(node, &number)
+		return fmt.Sprint(number), false, err
+	case *ast.BoolNode:
+		var truth bool
+		err := yaml.NodeToValue(node, &truth)
+		return strconv.FormatBool(truth), false, err
+	default:
+		var text string
+		err := yaml.NodeToValue(node, &text)
+		return text, false, err
 	}
 }
 

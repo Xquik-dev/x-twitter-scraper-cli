@@ -20,20 +20,32 @@ func TestYAMLToJSONEncodesWithEncodingJSON(t *testing.T) {
 		input string
 		want  string
 	}{
-		"whole float":       {`{"limit": 20.0}`, `{"limit":20}`},
-		"escape character":  {`{"text": "\u001b[31m"}`, `{"text":"\u001b[31m"}`},
-		"control character": {"text: \"\\x01\"", `{"text":"\u0001"}`},
-		"sorted keys":       {`{b: 1, a: 2}`, `{"a":2,"b":1}`},
-		"scalars":           {`[1, 1.5, true, null, x, ~]`, `[1,1.5,true,null,"x",null]`},
-		"large integer":     {`big: 18446744073709551615`, `{"big":18446744073709551615}`},
-		"string tag":        {`!!str 123`, `"123"`},
-		"block literal":     {"text: |\n  line\n", `{"text":"line\n"}`},
-		"anchor and merge":  {"base: &base {a: 1, b: 2}\nchild:\n  <<: *base\n  b: 3\n", `{"base":{"a":1,"b":2},"child":{"a":1,"b":3}}`},
-		"merge list":        {"one: &one {a: 1}\ntwo: &two {a: 2, b: 2}\nchild:\n  <<: [*one, *two]\n", `{"child":{"a":1,"b":2},"one":{"a":1},"two":{"a":2,"b":2}}`},
-		"empty document":    {``, `null`},
-		"comment only":      {"# nothing\n", `null`},
-		"nested sequence":   {"- [a, {b: c}]\n", `[["a",{"b":"c"}]]`},
-		"html in text":      {`text: "<b>&</b>"`, `{"text":"\u003cb\u003e\u0026\u003c/b\u003e"}`},
+		"whole float":        {`{"limit": 20.0}`, `{"limit":20}`},
+		"escape character":   {`{"text": "\u001b[31m"}`, `{"text":"\u001b[31m"}`},
+		"control character":  {"text: \"\\x01\"", `{"text":"\u0001"}`},
+		"sorted keys":        {`{b: 1, a: 2}`, `{"a":2,"b":1}`},
+		"scalars":            {`[1, 1.5, true, null, x, ~]`, `[1,1.5,true,null,"x",null]`},
+		"large integer":      {`big: 18446744073709551615`, `{"big":18446744073709551615}`},
+		"string tag":         {`!!str 123`, `"123"`},
+		"string tag float":   {`!!str 1.10`, `"1.1"`},
+		"string tag null":    {`!!str null`, `""`},
+		"integer tag":        {`!!int "3"`, `3`},
+		"integer tag float":  {`!!int 3.5`, `0`},
+		"float tag":          {`!!float "2.5"`, `2.5`},
+		"float tag text":     {`!!float abc`, `0`},
+		"bool tag":           {`!!bool yes`, `true`},
+		"null tag":           {`!!null x`, `null`},
+		"timestamp tag":      {`!!timestamp 2001-12-14`, `"2001-12-14T00:00:00Z"`},
+		"timestamp tag zero": {`!!timestamp 5`, `"0001-01-01T00:00:00Z"`},
+		"binary tag":         {`!!binary aGk=`, `"aGk="`},
+		"other tag":          {`!custom [1]`, `[1]`},
+		"block literal":      {"text: |\n  line\n", `{"text":"line\n"}`},
+		"anchor and merge":   {"base: &base {a: 1, b: 2}\nchild:\n  <<: *base\n  b: 3\n", `{"base":{"a":1,"b":2},"child":{"a":1,"b":3}}`},
+		"merge list":         {"one: &one {a: 1}\ntwo: &two {a: 2, b: 2}\nchild:\n  <<: [*one, *two]\n", `{"child":{"a":1,"b":2},"one":{"a":1},"two":{"a":2,"b":2}}`},
+		"empty document":     {``, `null`},
+		"comment only":       {"# nothing\n", `null`},
+		"nested sequence":    {"- [a, {b: c}]\n", `[["a",{"b":"c"}]]`},
+		"html in text":       {`text: "<b>&</b>"`, `{"text":"\u003cb\u003e\u0026\u003c/b\u003e"}`},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -48,7 +60,7 @@ func TestYAMLToJSONEncodesWithEncodingJSON(t *testing.T) {
 func TestYAMLToJSONRejectsInvalidInput(t *testing.T) {
 	t.Parallel()
 
-	for _, input := range []string{"{a: 1", "key: *missing", "<<: 1", "value: .inf"} {
+	for _, input := range []string{"{a: 1", "key: *missing", "<<: 1", "value: .inf", "!!bool maybe", "!!binary [1]"} {
 		_, err := YAMLToJSON([]byte(input))
 		require.Error(t, err, input)
 	}
