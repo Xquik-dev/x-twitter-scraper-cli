@@ -210,14 +210,19 @@ func TestDebugMiddleware(t *testing.T) {
 		require.NotContains(t, logBuf.String(), secretToken)
 	})
 
-	t.Run("LeavesTheResponseSetCookieOutOfTheDump", func(t *testing.T) {
+	t.Run("LeavesEverySecretOutOfTheDump", func(t *testing.T) {
 		t.Parallel()
 
 		middleware, logBuf := setup()
-		req := httptest.NewRequest("GET", "https://example.com", nil)
+		req := httptest.NewRequest("POST", "https://example.com/webhooks", strings.NewReader(`{"password":"`+secretToken+`-request-body"}`))
+		req.Header.Set("Authorization", "Bearer "+secretToken+"-authorization")
+		req.Header.Set("Cookie", "session="+secretToken+"-cookie")
+		req.Header.Set("X-Api-Key", secretToken+"-x-api-key")
+		req.Header.Set("Api-Key", secretToken+"-api-key")
 		header := http.Header{}
-		header.Set("Set-Cookie", "session="+secretToken)
+		header.Set("Set-Cookie", "session="+secretToken+"-set-cookie")
 		header.Set("Content-Type", "application/json")
+		responseBody := `{"secret":"` + secretToken + `-response-body"}`
 
 		resp, err := middleware.Middleware()(req, func(*http.Request) (*http.Response, error) {
 			return &http.Response{
@@ -225,16 +230,16 @@ func TestDebugMiddleware(t *testing.T) {
 				ProtoMajor: 1,
 				ProtoMinor: 1,
 				Header:     header,
-				Body:       io.NopCloser(strings.NewReader(`{"ok":true}`)),
+				Body:       io.NopCloser(strings.NewReader(responseBody)),
 			}, nil
 		})
 		require.NoError(t, err)
 		require.NotContains(t, logBuf.String(), secretToken)
-		require.Contains(t, logBuf.String(), `{"ok":true}`)
-		require.Equal(t, "session="+secretToken, resp.Header.Get("Set-Cookie"))
+		require.Contains(t, logBuf.String(), "Content-Type: application/json")
+		require.Equal(t, "session="+secretToken+"-set-cookie", resp.Header.Get("Set-Cookie"))
 		received, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
-		require.Equal(t, `{"ok":true}`, string(received))
+		require.Equal(t, responseBody, string(received))
 	})
 
 	t.Run("DoesNotConsumeRequestBodyWhenIoReader", func(t *testing.T) {

@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package debugmiddleware logs each HTTP request without its body or
-// credentials, and each response without its cookies.
+// Package debugmiddleware logs the headers of each HTTP request and response,
+// without credentials or cookies.
 package debugmiddleware
 
 import (
@@ -33,10 +33,6 @@ type RequestLogger struct {
 	sensitiveHeaders []string
 }
 
-type redactedRequest struct {
-	request *http.Request
-}
-
 func NewRequestLogger() *RequestLogger {
 	return &RequestLogger{
 		logger:           log.Default(),
@@ -46,7 +42,7 @@ func NewRequestLogger() *RequestLogger {
 
 func (m *RequestLogger) Middleware() Middleware {
 	return func(req *http.Request, mn MiddlewareNext) (*http.Response, error) {
-		if reqBytes, err := httputil.DumpRequest(m.redact(req).request, false); err == nil {
+		if reqBytes, err := httputil.DumpRequest(m.redact(req), false); err == nil {
 			m.logger.Printf("HTTP Request:\n%s\n", reqBytes)
 		}
 
@@ -58,9 +54,7 @@ func (m *RequestLogger) Middleware() Middleware {
 		shown := *resp
 		shown.Header = resp.Header.Clone()
 		shown.Header.Del("Set-Cookie")
-		respBytes, dumpErr := httputil.DumpResponse(&shown, true)
-		resp.Body = shown.Body
-		if dumpErr == nil {
+		if respBytes, err := httputil.DumpResponse(&shown, false); err == nil {
 			m.logger.Printf("HTTP Response:\n%s\n", respBytes)
 		}
 
@@ -68,7 +62,7 @@ func (m *RequestLogger) Middleware() Middleware {
 	}
 }
 
-func (m *RequestLogger) redact(req *http.Request) redactedRequest {
+func (m *RequestLogger) redact(req *http.Request) *http.Request {
 	redactedHeaders := req.Header.Clone()
 
 	if values := redactedHeaders.Values("Authorization"); len(values) > 0 {
@@ -97,10 +91,10 @@ func (m *RequestLogger) redact(req *http.Request) redactedRequest {
 	}
 
 	if reflect.DeepEqual(req.Header, redactedHeaders) {
-		return redactedRequest{request: req}
+		return req
 	}
 
 	redacted := req.Clone(req.Context())
 	redacted.Header = redactedHeaders
-	return redactedRequest{request: redacted}
+	return redacted
 }
