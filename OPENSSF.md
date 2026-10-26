@@ -20,8 +20,8 @@ No OpenSSF exclusion applies.
 | Security reporting | Private GitHub reporting, response targets, & safe harbor in `SECURITY.md` |
 | Build | Pinned Go modules, checksum verification, & `./scripts/build` |
 | Tests | Race-enabled tests, regression coverage & a second run of every package on a pseudo-terminal through `./scripts/test` |
-| Statement coverage | `./scripts/coverage` enforces 90%. The current result is 92.5%. |
-| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 783/960 (81.56%). |
+| Statement coverage | `./scripts/coverage` enforces 90%. The current result is 92.6%. |
+| Branch coverage | `./scripts/branch-coverage` enforces 80%. The current result is 780/956 (81.59%). |
 | Static analysis | `go vet`, staticcheck with every check, 100% type coverage with no escape hatch, `shellcheck` & CodeQL security-extended queries through `bin/check-local` |
 | Dynamic analysis | Race detection in `./scripts/test` & a native Go fuzz target that `bin/check-local` runs for 15 seconds |
 | Dependency review | `go mod verify` & `govulncheck` through `./scripts/audit`, with reviewed exceptions in `audit-exceptions.json` |

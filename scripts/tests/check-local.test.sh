@@ -48,8 +48,8 @@ EOF
 echo "test" >>"$FAKE_LOGS/order"
 [[ "${FAKE_FAILING_CHECK:-}" != "test" ]] || exit 1
 echo "Total statement coverage: 92.4%"
-echo "Required statement coverage: 90.0%"
-echo "Branch coverage: 772/949 (81.35%); minimum 80.00%"
+echo "Required statement coverage: ${FAKE_STATEMENT_MINIMUM:-90.0}%"
+echo "Branch coverage: 772/949 (81.35%); minimum ${FAKE_BRANCH_MINIMUM:-80.00}%"
 EOF
   write_openssf "90%" "92.4%" "80%" "772/949 (81.35%)"
   stub scripts/audit <<'EOF'
@@ -354,6 +354,17 @@ test_a_branch_coverage_result_that_differs_from_the_openssf_notes_fails_the_run(
   assert_equal "OPENSSF.md lacks this row, which the run measured.
 | Branch coverage | \`./scripts/branch-coverage\` enforces 80%. The current result is 772/949 (81.35%). |
 Check failed at OpenSSF coverage results. Put the measured row above in OPENSSF.md, then rerun." "$run_stderr" "stderr"
+}
+
+test_the_openssf_rows_take_the_minimums_that_the_run_printed() {
+  prepare_checks
+  run_env=("FAKE_STATEMENT_MINIMUM=85.5" "FAKE_BRANCH_MINIMUM=75.00")
+  write_openssf "85.5%" "92.4%" "75%" "772/949 (81.35%)"
+
+  run_in_repo bin/check-local --no-status
+
+  assert_equal "" "$run_stderr" "stderr"
+  assert_equal 0 "$run_status" "the exit code"
 }
 
 test_a_coverage_minimum_that_differs_from_the_openssf_notes_fails_the_run() {
