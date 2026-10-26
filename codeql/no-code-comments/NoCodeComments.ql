@@ -4,7 +4,7 @@
 
 /**
  * @name Code comment
- * @description Code has no comments. A comment needs a legal marker, a functional directive, an https link that proves it, or to be the 1 doc comment of a library package that staticcheck ST1000 requires.
+ * @description Code has no comments. A comment needs a legal marker, a functional directive or an https link that proves it. A library package may keep 1 doc comment for ST1000.
  * @kind problem
  * @problem.severity error
  * @id go/no-code-comments

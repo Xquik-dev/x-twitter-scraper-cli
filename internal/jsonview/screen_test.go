@@ -132,7 +132,7 @@ func TestScreenStopsOnSignalAndRestoresTheCursor(t *testing.T) {
 	output := &bytes.Buffer{}
 	terminal := &screen{input: input, output: output, signals: signals, ticks: make(chan time.Time)}
 
-	require.ErrorContains(t, terminal.run(testViewer(t)), "the explorer stopped on terminated")
+	require.ErrorContains(t, terminal.run(testViewer(t)), "the explorer stopped on SIGTERM")
 	assert.True(t, strings.HasSuffix(output.String(), "\r\n"+showCursor))
 }
 

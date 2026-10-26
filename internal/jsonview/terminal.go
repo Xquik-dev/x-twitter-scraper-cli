@@ -52,6 +52,11 @@ func WithOutput(output io.Writer) Option {
 	return func(s *screen) { s.output = output }
 }
 
+var signalNames = map[os.Signal]string{
+	os.Interrupt:    "SIGINT",
+	syscall.SIGTERM: "SIGTERM",
+}
+
 var finalKeys = map[byte]tea.KeyType{
 	'A': tea.KeyUp,
 	'B': tea.KeyDown,
@@ -181,7 +186,7 @@ func (s *screen) run(viewer *JSONViewer) (err error) {
 			}
 			stale = true
 		case received := <-s.signals:
-			return fmt.Errorf("the explorer stopped on %s", received)
+			return fmt.Errorf("the explorer stopped on %s", signalNames[received])
 		case <-s.ticks:
 			if newWidth, newHeight := s.size(); newWidth != width || newHeight != height {
 				width, height = newWidth, newHeight
