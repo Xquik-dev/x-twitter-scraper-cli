@@ -1,5 +1,7 @@
 # X API & Twitter API CLI by Xquik
 
+[![Convex Component](https://www.convex.dev/components/badge/convex-xquik)](https://www.convex.dev/components/convex-xquik)
+
 Use this Twitter CLI & X CLI to work with X from a terminal.
 Search tweets, scrape profiles & followers, export JSON and monitor accounts from scripts.
 It runs on the [Xquik REST API](https://docs.xquik.com/api-reference/overview).

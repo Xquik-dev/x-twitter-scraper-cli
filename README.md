@@ -1,6 +1,7 @@
 # X API & Twitter API CLI by Xquik
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13732/badge)](https://www.bestpractices.dev/projects/13732)
+[![Convex Component](https://www.convex.dev/components/badge/convex-xquik)](https://www.convex.dev/components/convex-xquik)
 
 Use this Twitter CLI & X CLI to work with X from a terminal.
 It works as a Twitter scraper & tweet scraper for search, profiles, followers & lists.
