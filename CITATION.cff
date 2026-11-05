@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: If you use Xquik Twitter CLI & X CLI, cite it using this metadata.
+title: Xquik Twitter CLI & X CLI
+type: software
+abstract: >-
+  Twitter CLI & X CLI for Xquik. Scrape tweets, export followers, download
+  media & manage monitors & webhooks from a terminal.
+authors:
+  - name: Xquik
+    website: https://xquik.com
+url: https://github.com/Xquik-dev/x-twitter-scraper-cli
+repository-code: https://github.com/Xquik-dev/x-twitter-scraper-cli
+license: Apache-2.0
+keywords:
+  - Xquik
+  - Twitter CLI
+  - X CLI
+  - Twitter scraper
+  - scrape tweets
+  - follower export
+  - webhooks
