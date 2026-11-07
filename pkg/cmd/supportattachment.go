@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/urfave/cli/v3"
@@ -16,16 +15,16 @@ var supportAttachmentsDownload = cli.Command{
 	Usage:   "Streams an authenticated user's support image or video. Video requests support\none standard byte range for seeking and resumable playback.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "id",
 			Required:  true,
 			PathParam: "id",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:       "range",
 			HeaderPath: "Range",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:    "output",
 			Aliases: []string{"o"},
 			Usage:   "The file where the response contents will be stored. Use the value '-' to force output to stdout.",
@@ -43,16 +42,10 @@ func handleSupportAttachmentsDownload(ctx context.Context, cmd *cli.Command) err
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -61,7 +54,7 @@ func handleSupportAttachmentsDownload(ctx context.Context, cmd *cli.Command) err
 
 	response, err := client.Support.Attachments.Download(
 		ctx,
-		cmd.Value("id").(string),
+		cmd.String("id"),
 		params,
 		options...,
 	)

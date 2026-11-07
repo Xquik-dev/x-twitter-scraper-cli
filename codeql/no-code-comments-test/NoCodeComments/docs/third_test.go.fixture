@@ -1,0 +1,2 @@
+// Package docs_test documents a test package, which the query flags.
+package docs_test

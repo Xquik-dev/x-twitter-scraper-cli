@@ -5,1160 +5,479 @@
 package requestflag
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"strings"
 	"testing"
-	"time"
 
-	"github.com/goccy/go-yaml"
+	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 )
 
-func TestDateValueParse(t *testing.T) {
+func run(t *testing.T, flags []cli.Flag, args ...string) (*cli.Command, error) {
+	t.Helper()
+	command := &cli.Command{
+		Name:   "probe",
+		Flags:  flags,
+		Action: func(context.Context, *cli.Command) error { return nil },
+	}
+	err := command.Run(context.Background(), append([]string{"probe"}, args...))
+	return command, err
+}
+
+func contents(t *testing.T, command *cli.Command) RequestContents {
+	t.Helper()
+	extracted, err := ExtractRequestContents(command)
+	require.NoError(t, err)
+	return extracted
+}
+
+func bodyJSON(t *testing.T, command *cli.Command) string {
+	t.Helper()
+	encoded, err := json.Marshal(contents(t, command).Body)
+	require.NoError(t, err)
+	return string(encoded)
+}
+
+func queryText(t *testing.T, command *cli.Command) string {
+	t.Helper()
+	return apiquery.Encode(contents(t, command).Queries, apiquery.ArrayQueryFormatComma).Encode()
+}
+
+func headerText(t *testing.T, command *cli.Command) string {
+	t.Helper()
+	return apiquery.Encode(contents(t, command).Headers, apiquery.ArrayQueryFormatRepeat).Encode()
+}
+
+func displayed(t *testing.T, flag interface {
+	PreParse() error
+	GetValue() string
+}) string {
+	t.Helper()
+	require.NoError(t, flag.PreParse())
+	return flag.GetValue()
+}
+
+func TestScalarFlagsParseTheirValues(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name    string
-		input   string
-		want    string
-		wantErr bool
-	}{
-		{
-			name:    "ISO format",
-			input:   "2023-05-15",
-			want:    "2023-05-15",
-			wantErr: false,
-		},
-		{
-			name:    "US format",
-			input:   "05/15/2023",
-			want:    "2023-05-15",
-			wantErr: false,
-		},
-		{
-			name:    "Short month format",
-			input:   "May 15, 2023",
-			want:    "2023-05-15",
-			wantErr: false,
-		},
-		{
-			name:    "Long month format",
-			input:   "January 15, 2023",
-			want:    "2023-01-15",
-			wantErr: false,
-		},
-		{
-			name:    "British format",
-			input:   "15-Jan-2023",
-			want:    "2023-01-15",
-			wantErr: false,
-		},
-		{
-			name:    "Invalid format",
-			input:   "not a date",
-			wantErr: true,
-		},
+	command, err := run(t, []cli.Flag{
+		&String{Name: "text", BodyPath: "text"},
+		&Int{Name: "count", BodyPath: "count"},
+		&Bool{Name: "safe", BodyPath: "safe"},
+		&Bool{Name: "quiet", BodyPath: "quiet"},
+		&StringList{Name: "tag", BodyPath: "tags"},
+	}, "--text", "hello", "--count", "0x10", "--safe=false", "--quiet", "--tag", "a,b", "--tag", "c")
+	require.NoError(t, err)
+	assert.Equal(t, `{"count":16,"quiet":true,"safe":false,"tags":["a,b","c"],"text":"hello"}`, bodyJSON(t, command))
+	assert.Equal(t, "hello", command.String("text"))
+}
+
+func TestInvalidScalarsFail(t *testing.T) {
+	t.Parallel()
+
+	_, err := run(t, []cli.Flag{&Int{Name: "count"}}, "--count", "many")
+	require.ErrorContains(t, err, "invalid syntax")
+	_, err = run(t, []cli.Flag{&Bool{Name: "safe"}}, "--safe=maybe")
+	require.Error(t, err)
+}
+
+func TestValidatorRunsOnDefaultAndValue(t *testing.T) {
+	t.Parallel()
+
+	tooBig := errors.New("count is too big")
+	validator := func(count int64) error {
+		if count > 10 {
+			return tooBig
+		}
+		return nil
 	}
+	_, err := run(t, []cli.Flag{&Int{Name: "count", Validator: validator}}, "--count", "11")
+	require.ErrorContains(t, err, tooBig.Error())
+	_, err = run(t, []cli.Flag{&Int{Name: "count", Default: 20, Validator: validator}})
+	require.ErrorContains(t, err, tooBig.Error())
+	_, err = run(t, []cli.Flag{&Int{Name: "count", Validator: validator}}, "--count", "3")
+	require.NoError(t, err)
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+func TestListFlagReplacesItsDefault(t *testing.T) {
+	t.Parallel()
+
+	command, err := run(t, []cli.Flag{
+		&StringList{Name: "tag", BodyPath: "tags", Default: []string{"default"}},
+	}, "--tag", "b", "--tag", "c")
+	require.NoError(t, err)
+	assert.Equal(t, `{"tags":["b","c"]}`, bodyJSON(t, command))
+}
+
+func TestJSONFlagsReadYAML(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		input string
+		want  string
+	}{
+		"object":            {`{a: 1, b: [x, "y"]}`, `{"a":1,"b":["x","y"]}`},
+		"list":              {`[1, 2]`, `[1,2]`},
+		"number":            {`1700000000`, `1700000000`},
+		"quoted text":       {`'2019-12-27'`, `"2019-12-27"`},
+		"null":              {`null`, `null`},
+		"file reference":    {`@file.txt`, `"@file.txt"`},
+		"identifier":        {`abc_def-1.2=3`, `"abc_def-1.2=3"`},
+		"text with a colon": {`key: value`, `{"key":"value"}`},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-
-			var d DateValue
-			err := d.Parse(tt.input)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, d.String())
-			}
+			command, err := run(t, []cli.Flag{&JSON{Name: "value", BodyPath: "value"}}, "--value", test.input)
+			require.NoError(t, err)
+			assert.Equal(t, `{"value":`+test.want+`}`, bodyJSON(t, command))
 		})
 	}
 }
 
-func TestDateTimeValueParse(t *testing.T) {
+func TestJSONFlagRejectsInvalidYAML(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "RFC3339",
-			input:   "2023-05-15T14:30:45Z",
-			wantErr: false,
-		},
-		{
-			name:    "ISO with timezone",
-			input:   "2023-05-15T14:30:45+02:00",
-			wantErr: false,
-		},
-		{
-			name:    "ISO without timezone",
-			input:   "2023-05-15T14:30:45",
-			wantErr: false,
-		},
-		{
-			name:    "Space separated",
-			input:   "2023-05-15 14:30:45",
-			wantErr: false,
-		},
-		{
-			name:    "RFC1123",
-			input:   "Mon, 15 May 2023 14:30:45 GMT",
-			wantErr: false,
-		},
-		{
-			name:    "RFC822",
-			input:   "15 May 23 14:30 GMT",
-			wantErr: false,
-		},
-		{
-			name:    "ANSIC",
-			input:   "Mon Jan 2 15:04:05 2006",
-			wantErr: false,
-		},
-		{
-			name:    "Invalid format",
-			input:   "not a datetime",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var d DateTimeValue
-			err := d.Parse(tt.input)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-
-				_, parseErr := time.Parse(time.RFC3339, d.String())
-				assert.NoError(t, parseErr)
-			}
-		})
-	}
+	_, err := run(t, []cli.Flag{&JSON{Name: "value"}}, "--value", "{a: 1")
+	require.ErrorContains(t, err, "failed to parse as YAML")
+	_, err = run(t, []cli.Flag{&Object{Name: "value"}}, "--value", "[1]")
+	require.ErrorContains(t, err, "to an object")
+	_, err = run(t, []cli.Flag{&ObjectList{Name: "value"}}, "--value", "{a: 1")
+	require.ErrorContains(t, err, "failed to parse as YAML")
+	_, err = run(t, []cli.Flag{&JSONList{Name: "value"}}, "--value", "{a: 1")
+	require.ErrorContains(t, err, "failed to parse as YAML")
 }
 
-func TestTimeValueParse(t *testing.T) {
+func TestJSONListAndObjectFlags(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name    string
-		input   string
-		want    string
-		wantErr bool
-	}{
-		{
-			name:    "24-hour format",
-			input:   "14:30:45",
-			want:    "14:30:45",
-			wantErr: false,
-		},
-		{
-			name:    "12-hour format with seconds",
-			input:   "2:30:45PM",
-			want:    "14:30:45",
-			wantErr: false,
-		},
-		{
-			name:    "12-hour format without seconds",
-			input:   "2:30 PM",
-			want:    "14:30:00",
-			wantErr: false,
-		},
-		{
-			name:    "24-hour without seconds",
-			input:   "14:30",
-			want:    "14:30:00",
-			wantErr: false,
-		},
-		{
-			name:    "Kitchen format",
-			input:   "2:30PM",
-			want:    "14:30:00",
-			wantErr: false,
-		},
-		{
-			name:    "Invalid format",
-			input:   "not a time",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var tv TimeValue
-			err := tv.Parse(tt.input)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, tv.String())
-			}
-		})
-	}
+	command, err := run(t, []cli.Flag{
+		&JSONList{Name: "target", BodyPath: "targets"},
+		&Object{Name: "meta", BodyPath: "meta"},
+		&ObjectList{Name: "row", BodyPath: "rows"},
+	}, "--target", "{kind: tweet, value: '1'}", "--target", "NASA", "--meta", "{a: 1}", "--meta", "{b: 2}",
+		"--row", "{a: 1}", "--row", "null")
+	require.NoError(t, err)
+	assert.Equal(t, `{"meta":{"b":2},"rows":[{"a":1},null],"targets":[{"kind":"tweet","value":"1"},"NASA"]}`, bodyJSON(t, command))
 }
 
-func TestRequestParams(t *testing.T) {
-	t.Parallel()
-
-	t.Run("map body type", func(t *testing.T) {
-		t.Parallel()
-
-		cmd := &cli.Command{
-			Name: "test",
-		}
-
-		stringFlag := &Flag[string]{
-			Name:       "string-flag",
-			Default:    "default-string",
-			BodyPath:   "string_field",
-			value:      &cliValue[string]{value: "test-value"},
-			hasBeenSet: true,
-		}
-
-		intFlag := &Flag[int64]{
-			Name:       "int-flag",
-			Default:    42,
-			HeaderPath: "X-Int-Value",
-			value:      &cliValue[int64]{value: 99},
-			hasBeenSet: true,
-		}
-
-		boolFlag := &Flag[bool]{
-			Name:       "bool-flag",
-			Default:    false,
-			QueryPath:  "include_details",
-			value:      &cliValue[bool]{value: true},
-			hasBeenSet: true,
-		}
-
-		dateFlag := &Flag[DateValue]{
-			Name:       "date-flag",
-			Default:    DateValue("2023-01-01"),
-			BodyPath:   "effective_date",
-			HeaderPath: "X-Effective-Date",
-			QueryPath:  "as_of_date",
-			value:      &cliValue[DateValue]{value: DateValue("2023-05-15")},
-			hasBeenSet: true,
-		}
-
-		noPathFlag := &Flag[string]{
-			Name:       "no-path-flag",
-			Default:    "no-path",
-			value:      &cliValue[string]{value: "no-path-value"},
-			hasBeenSet: true,
-		}
-
-		unsetFlag := &Flag[string]{
-			Name:       "unset-flag",
-			Default:    "unset",
-			BodyPath:   "should_not_appear",
-			value:      &cliValue[string]{value: "unset-value"},
-			hasBeenSet: false,
-		}
-
-		cmd.Flags = []cli.Flag{stringFlag, intFlag, boolFlag, dateFlag, noPathFlag, unsetFlag}
-
-		contents := ExtractRequestContents(cmd)
-
-		assert.Equal(t, true, contents.Queries["include_details"])
-		assert.Equal(t, DateValue("2023-05-15"), contents.Queries["as_of_date"])
-		assert.Len(t, contents.Queries, 2)
-
-		assert.Equal(t, int64(99), contents.Headers["X-Int-Value"])
-		assert.Equal(t, DateValue("2023-05-15"), contents.Headers["X-Effective-Date"])
-		assert.Len(t, contents.Headers, 2)
-
-		bodyMap, ok := contents.Body.(map[string]any)
-		assert.True(t, ok, "Expected body to be map[string]any, got %T", contents.Body)
-		assert.Equal(t, "test-value", bodyMap["string_field"])
-		assert.Equal(t, DateValue("2023-05-15"), bodyMap["effective_date"])
-		assert.Len(t, bodyMap, 2)
-
-		assert.NotContains(t, contents.Body, "should_not_appear")
-	})
-
-	t.Run("non-map body type", func(t *testing.T) {
-		t.Parallel()
-
-		cmd := &cli.Command{
-			Name: "test",
-			Flags: []cli.Flag{
-				&Flag[int64]{
-					Name:     "int-body-flag",
-					Default:  0,
-					BodyRoot: true,
-				},
-			},
-		}
-		cmd.Set("int-body-flag", "42")
-
-		contents := ExtractRequestContents(cmd)
-		intBody, ok := contents.Body.(int64)
-		assert.True(t, ok, "Expected body to be int64, got %T", contents.Body)
-		assert.Equal(t, int64(42), intBody)
+func objectListCommand() cli.Command {
+	return WithInnerFlags(cli.Command{
+		Name: "probe",
+		Flags: []cli.Flag{
+			&ObjectList{Name: "relation-target", BodyPath: "relationTargets"},
+			&Object{Name: "parent", BodyPath: "parent"},
+		},
+		Action: func(context.Context, *cli.Command) error { return nil },
+	}, map[string][]HasOuterFlag{
+		"relation-target": {
+			&InnerString{Name: "relation-target.relation", InnerField: "relation"},
+			&InnerString{Name: "relation-target.value", InnerField: "value"},
+		},
+		"parent": {
+			&InnerString{Name: "parent.name", InnerField: "name"},
+		},
 	})
 }
 
-func TestFlagSet(t *testing.T) {
+func TestInnerFlagsFillTheTrailingObject(t *testing.T) {
 	t.Parallel()
 
-	strFlag := &Flag[string]{
-		Name:    "string-flag",
-		Default: "default-string",
-	}
-
-	superstitiousIntFlag := &Flag[int64]{
-		Name:    "int-flag",
-		Default: 42,
-		Validator: func(val int64) error {
-			if val == 13 {
-				return fmt.Errorf("Unlucky number!")
-			}
-			return nil
-		},
-	}
-
-	boolFlag := &Flag[bool]{
-		Name:    "bool-flag",
-		Default: false,
-	}
-
-	t.Run("PreParse initialization", func(t *testing.T) {
-		assert.NoError(t, strFlag.PreParse())
-		assert.True(t, strFlag.applied)
-		assert.Equal(t, "default-string", strFlag.Get())
-	})
-
-	t.Run("Set string flag", func(t *testing.T) {
-		assert.NoError(t, strFlag.Set("string-flag", "new-value"))
-		assert.Equal(t, "new-value", strFlag.Get())
-		assert.True(t, strFlag.IsSet())
-	})
-
-	t.Run("Set int flag with valid value", func(t *testing.T) {
-		assert.NoError(t, superstitiousIntFlag.Set("int-flag", "100"))
-		assert.Equal(t, int64(100), superstitiousIntFlag.Get())
-		assert.True(t, superstitiousIntFlag.IsSet())
-	})
-
-	t.Run("Set int flag with invalid value", func(t *testing.T) {
-		assert.Error(t, superstitiousIntFlag.Set("int-flag", "not-an-int"))
-	})
-
-	t.Run("Set int flag with validator failing", func(t *testing.T) {
-		assert.Error(t, superstitiousIntFlag.Set("int-flag", "13"))
-	})
-
-	t.Run("Set bool flag", func(t *testing.T) {
-		assert.NoError(t, boolFlag.Set("bool-flag", "true"))
-		assert.Equal(t, true, boolFlag.Get())
-		assert.True(t, boolFlag.IsSet())
-	})
-
-	t.Run("Set slice flag with multiple values", func(t *testing.T) {
-		sliceFlag := &Flag[[]int64]{
-			Name:    "slice-flag",
-			Default: []int64{},
-		}
-
-		assert.NoError(t, sliceFlag.PreParse())
-
-		assert.NoError(t, sliceFlag.Set("slice-flag", "10"))
-
-		assert.NoError(t, sliceFlag.Set("slice-flag", "20"))
-		assert.NoError(t, sliceFlag.Set("slice-flag", "30"))
-
-		result := sliceFlag.Get()
-		assert.Equal(t, []int64{10, 20, 30}, result)
-		assert.True(t, sliceFlag.IsSet())
-	})
-
-	t.Run("Set slice flag with a nonempty default", func(t *testing.T) {
-		sliceFlag := &Flag[[]int64]{
-			Name:    "slice-flag",
-			Default: []int64{99, 100},
-		}
-
-		assert.NoError(t, sliceFlag.PreParse())
-		assert.NoError(t, sliceFlag.Set("slice-flag", "10"))
-		assert.NoError(t, sliceFlag.Set("slice-flag", "20"))
-		assert.NoError(t, sliceFlag.Set("slice-flag", "30"))
-
-		result := sliceFlag.Get()
-		assert.Equal(t, []int64{10, 20, 30}, result)
-		assert.True(t, sliceFlag.IsSet())
-	})
+	command := objectListCommand()
+	require.NoError(t, CheckInnerFlags(command))
+	require.NoError(t, command.Run(context.Background(), []string{
+		"probe",
+		"--relation-target.relation", "followers",
+		"--relation-target.value", "NASA",
+		"--relation-target.relation", "following",
+		"--parent", "{id: 7}",
+		"--parent.name", "root",
+	}))
+	assert.Equal(t,
+		`{"parent":{"id":7,"name":"root"},"relationTargets":[{"relation":"followers","value":"NASA"},{"relation":"following"}]}`,
+		bodyJSON(t, &command))
 }
 
-func TestParseTimeWithFormats(t *testing.T) {
+func TestInnerFlagAppendsToAnObjectList(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name     string
-		input    string
-		formats  []string
-		wantTime time.Time
-		wantErr  bool
-	}{
-		{
-			name:     "RFC3339 format",
-			input:    "2023-05-15T14:30:45Z",
-			formats:  []string{time.RFC3339},
-			wantTime: time.Date(2023, 5, 15, 14, 30, 45, 0, time.UTC),
-			wantErr:  false,
-		},
-		{
-			name:     "Multiple formats - first matches",
-			input:    "2023-05-15",
-			formats:  []string{"2006-01-02", time.RFC3339},
-			wantTime: time.Date(2023, 5, 15, 0, 0, 0, 0, time.UTC),
-			wantErr:  false,
-		},
-		{
-			name:     "Multiple formats - second matches",
-			input:    "15/05/2023",
-			formats:  []string{"2006-01-02", "02/01/2006"},
-			wantTime: time.Date(2023, 5, 15, 0, 0, 0, 0, time.UTC),
-			wantErr:  false,
-		},
-		{
-			name:     "No matching format",
-			input:    "not a date",
-			formats:  []string{"2006-01-02", time.RFC3339},
-			wantTime: time.Time{},
-			wantErr:  true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			got, err := parseTimeWithFormats(tt.input, tt.formats)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.True(t, tt.wantTime.Equal(got), "Expected %v, got %v", tt.wantTime, got)
-			}
-		})
-	}
+	command := objectListCommand()
+	require.NoError(t, command.Run(context.Background(), []string{
+		"probe",
+		"--relation-target", "{relation: followers, value: NASA}",
+		"--relation-target.relation", "following",
+		"--relation-target.value", "SpaceX",
+	}))
+	assert.Equal(t,
+		`{"relationTargets":[{"relation":"followers","value":"NASA"},{"relation":"following","value":"SpaceX"}]}`,
+		bodyJSON(t, &command))
 }
 
-func TestYamlHandling(t *testing.T) {
+func TestInnerFlagValidatorAndOuterChecks(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Parse YAML to any", func(t *testing.T) {
-		t.Parallel()
+	rejected := errors.New("rejected")
+	outer := &ObjectList{Name: "row", BodyPath: "rows"}
+	inner := &InnerString{Name: "row.name", InnerField: "name", OuterFlag: outer, Validator: func(string) error { return rejected }}
+	require.ErrorIs(t, inner.Set("row.name", "x"), rejected)
 
-		cv := &cliValue[any]{}
-		err := cv.Set("name: test\nvalue: 42\n")
-		assert.NoError(t, err)
+	scalar := &String{Name: "text"}
+	require.ErrorContains(t, (&InnerString{Name: "text.name", InnerField: "name", OuterFlag: scalar}).Set("text.name", "x"), "not an object")
+	require.ErrorContains(t, (&InnerString{Name: "orphan.name", InnerField: "name"}).Set("orphan.name", "x"), "cannot set an inner field")
 
-		val, ok := cv.Get().(map[string]any)
-		assert.True(t, ok, "Expected map[string]any, got %T", cv.Get())
-
-		if ok {
-			assert.Equal(t, "test", val["name"])
-			assert.Equal(t, uint64(42), val["value"])
-		}
-
-		strVal := cv.String()
-		var parsed map[string]any
-		err = yaml.Unmarshal([]byte(strVal), &parsed)
-		assert.NoError(t, err)
-		assert.Equal(t, "test", parsed["name"])
-		assert.Equal(t, uint64(42), parsed["value"])
+	require.ErrorContains(t, CheckInnerFlags(cli.Command{Flags: []cli.Flag{&InnerString{Name: "orphan.name"}}}), "missing an outer flag")
+	require.ErrorContains(t, CheckInnerFlags(cli.Command{Flags: []cli.Flag{&InnerString{Name: "other.name", OuterFlag: outer}}}), "must start with")
+	assert.Panics(t, func() {
+		WithInnerFlags(cli.Command{}, map[string][]HasOuterFlag{"missing": {&InnerString{Name: "missing.name"}}})
 	})
-
-	t.Run("Parse YAML array", func(t *testing.T) {
-		t.Parallel()
-
-		cv := &cliValue[any]{}
-		err := cv.Set("- item1\n- item2\n- item3\n")
-		assert.NoError(t, err)
-
-		val, ok := cv.Get().([]any)
-		assert.True(t, ok, "Expected []any, got %T", cv.Get())
-
-		if ok {
-			assert.Len(t, val, 3)
-			assert.Equal(t, "item1", val[0])
-			assert.Equal(t, "item2", val[1])
-			assert.Equal(t, "item3", val[2])
-		}
-	})
-
-	t.Run("Parse @file.txt as YAML", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[any]{
-			Name:    "file-flag",
-			Default: nil,
-		}
-		assert.NoError(t, flag.PreParse())
-		assert.NoError(t, flag.Set("file-flag", "@file.txt"))
-
-		val := flag.Get()
-		assert.Equal(t, "@file.txt", val)
-	})
-
-	t.Run("Parse @file.txt list as YAML", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[[]any]{
-			Name:    "file-flag",
-			Default: nil,
-		}
-		assert.NoError(t, flag.PreParse())
-		assert.NoError(t, flag.Set("file-flag", "@file1.txt"))
-		assert.NoError(t, flag.Set("file-flag", "@file2.txt"))
-
-		val := flag.Get()
-		assert.Equal(t, []any{"@file1.txt", "@file2.txt"}, val)
-	})
-
-	t.Run("Parse identifiers as YAML", func(t *testing.T) {
-		t.Parallel()
-
-		tests := []string{
-			"hello",
-			"e4e355fa-b03b-4c57-a73d-25c9733eec79",
-			"foo_bar",
-			"Color.Red",
-			"aGVsbG8=",
-		}
-		for _, test := range tests {
-			flag := &Flag[any]{
-				Name:    "flag",
-				Default: nil,
-			}
-			assert.NoError(t, flag.PreParse())
-			assert.NoError(t, flag.Set("flag", test))
-
-			val := flag.Get()
-			assert.Equal(t, test, val)
-		}
-
-		for _, test := range tests {
-			flag := &Flag[[]any]{
-				Name:    "identifier",
-				Default: nil,
-			}
-			assert.NoError(t, flag.PreParse())
-			assert.NoError(t, flag.Set("identifier", test))
-			assert.NoError(t, flag.Set("identifier", test))
-
-			val := flag.Get()
-			assert.Equal(t, []any{test, test}, val)
-		}
-	})
-
-	t.Run("Parse invalid YAML", func(t *testing.T) {
-		t.Parallel()
-
-		invalidYaml := `[not closed`
-		cv := &cliValue[any]{}
-		err := cv.Set(invalidYaml)
-		assert.Error(t, err)
-	})
+	unchanged := cli.Command{Name: "same"}
+	assert.Equal(t, "same", WithInnerFlags(unchanged, nil).Name)
 }
 
-func TestNullLiteralHandling(t *testing.T) {
+func TestRequestLocations(t *testing.T) {
 	t.Parallel()
 
-	assertJSONBody := func(t *testing.T, value any, expected string) {
-		t.Helper()
-		body, err := json.Marshal(map[string]any{"foo": value})
-		assert.NoError(t, err)
-		assert.JSONEq(t, expected, string(body))
-	}
-
-	t.Run("Flag[any] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[any]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[string] null is the raw string \"null\"", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[string]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":"null"}`)
-	})
-
-	t.Run("Flag[int64] null errors", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[int64]{}
-		assert.Error(t, cv.Set("null"))
-	})
-
-	t.Run("Flag[*string] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*string]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[*string] value sends the string", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*string]{}
-		assert.NoError(t, cv.Set("1.1"))
-		assertJSONBody(t, cv.Get(), `{"foo":"1.1"}`)
-	})
-
-	t.Run("Flag[*int64] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*int64]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[*int64] value sends the integer", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*int64]{}
-		assert.NoError(t, cv.Set("42"))
-		assertJSONBody(t, cv.Get(), `{"foo":42}`)
-	})
-
-	t.Run("Flag[*int64] invalid value errors", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*int64]{}
-		assert.Error(t, cv.Set("not-an-int"))
-	})
-
-	t.Run("Flag[*bool] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*bool]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[*bool] value sends the boolean", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*bool]{}
-		assert.NoError(t, cv.Set("true"))
-		assertJSONBody(t, cv.Get(), `{"foo":true}`)
-	})
-
-	t.Run("Flag[*float64] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*float64]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[*float64] value sends the float", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*float64]{}
-		assert.NoError(t, cv.Set("1.5"))
-		assertJSONBody(t, cv.Get(), `{"foo":1.5}`)
-	})
-
-	t.Run("Flag[*float64] invalid value errors", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*float64]{}
-		assert.Error(t, cv.Set("not-a-float"))
-	})
-
-	t.Run("Flag[*DateValue] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*DateValue]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[*DateValue] value sends the date", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*DateValue]{}
-		assert.NoError(t, cv.Set("2023-05-15"))
-		assertJSONBody(t, cv.Get(), `{"foo":"2023-05-15"}`)
-	})
-
-	t.Run("Flag[*DateValue] invalid value errors", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*DateValue]{}
-		assert.Error(t, cv.Set("not-a-date"))
-	})
-
-	t.Run("Flag[*DateTimeValue] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*DateTimeValue]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[*DateTimeValue] value sends the datetime", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*DateTimeValue]{}
-		assert.NoError(t, cv.Set("2023-05-15T14:30:45Z"))
-		assertJSONBody(t, cv.Get(), `{"foo":"2023-05-15T14:30:45Z"}`)
-	})
-
-	t.Run("Flag[*DateTimeValue] invalid value errors", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*DateTimeValue]{}
-		assert.Error(t, cv.Set("not-a-datetime"))
-	})
-
-	t.Run("Flag[*TimeValue] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*TimeValue]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-
-	t.Run("Flag[*TimeValue] value sends the time", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*TimeValue]{}
-		assert.NoError(t, cv.Set("14:30:45"))
-		assertJSONBody(t, cv.Get(), `{"foo":"14:30:45"}`)
-	})
-
-	t.Run("Flag[*TimeValue] invalid value errors", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[*TimeValue]{}
-		assert.Error(t, cv.Set("not-a-time"))
-	})
-
-	t.Run("Flag[map[string]any] null sends JSON null", func(t *testing.T) {
-		t.Parallel()
-		cv := &cliValue[map[string]any]{}
-		assert.NoError(t, cv.Set("null"))
-		assertJSONBody(t, cv.Get(), `{"foo":null}`)
-	})
-}
-
-func TestFlagTypeNames(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name     string
-		flag     cli.DocGenerationFlag
-		expected string
-	}{
-		{"string", &Flag[string]{}, "string"},
-		{"int64", &Flag[int64]{}, "int"},
-		{"float64", &Flag[float64]{}, "float"},
-		{"bool", &Flag[bool]{}, "boolean"},
-		{"string slice", &Flag[[]string]{}, "string"},
-		{"date", &Flag[DateValue]{}, "date"},
-		{"datetime", &Flag[DateTimeValue]{}, "datetime"},
-		{"time", &Flag[TimeValue]{}, "time"},
-		{"date slice", &Flag[[]DateValue]{}, "date"},
-		{"datetime slice", &Flag[[]DateTimeValue]{}, "datetime"},
-		{"time slice", &Flag[[]TimeValue]{}, "time"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			typeName := tt.flag.TypeName()
-			assert.Equal(t, tt.expected, typeName, "Expected type name %q, got %q", tt.expected, typeName)
-		})
-	}
-}
-
-func TestInnerFlagDispatchOnUntypedFlag(t *testing.T) {
-	t.Parallel()
-
-	t.Run("nullable array of objects appends element from inner flag", func(t *testing.T) {
-		t.Parallel()
-		outer := &Flag[any]{Name: "mcp-server"}
-		assert.NoError(t, outer.PreParse())
-
-		nameFlag := &InnerFlag[string]{
-			Name: "mcp-server.name", InnerField: "name",
-			OuterFlag: outer, OuterIsArrayOfObjects: true,
-		}
-		assert.NoError(t, nameFlag.Set("mcp-server.name", "first"))
-
-		body, err := json.Marshal(map[string]any{"foo": outer.Get()})
-		assert.NoError(t, err)
-		assert.JSONEq(t, `{"foo":[{"name":"first"}]}`, string(body))
-	})
-
-	t.Run("nullable object sets field from inner flag", func(t *testing.T) {
-		t.Parallel()
-		outer := &Flag[any]{Name: "metadata"}
-		assert.NoError(t, outer.PreParse())
-
-		keyFlag := &InnerFlag[string]{
-			Name: "metadata.key", InnerField: "key", OuterFlag: outer,
-		}
-		assert.NoError(t, keyFlag.Set("metadata.key", "value"))
-
-		body, err := json.Marshal(map[string]any{"foo": outer.Get()})
-		assert.NoError(t, err)
-		assert.JSONEq(t, `{"foo":{"key":"value"}}`, string(body))
-	})
-
-	t.Run("multiple inner flags merge into the trailing element", func(t *testing.T) {
-		t.Parallel()
-		outer := &Flag[any]{Name: "mcp-server"}
-		assert.NoError(t, outer.PreParse())
-
-		nameFlag := &InnerFlag[string]{
-			Name: "mcp-server.name", InnerField: "name",
-			OuterFlag: outer, OuterIsArrayOfObjects: true,
-		}
-		urlFlag := &InnerFlag[string]{
-			Name: "mcp-server.url", InnerField: "url",
-			OuterFlag: outer, OuterIsArrayOfObjects: true,
-		}
-		assert.NoError(t, nameFlag.Set("mcp-server.name", "first"))
-		assert.NoError(t, urlFlag.Set("mcp-server.url", "https://example.com"))
-
-		body, err := json.Marshal(map[string]any{"foo": outer.Get()})
-		assert.NoError(t, err)
-		assert.JSONEq(t, `{"foo":[{"name":"first","url":"https://example.com"}]}`, string(body))
-	})
+	command, err := run(t, []cli.Flag{
+		&String{Name: "query", QueryPath: "q"},
+		&StringList{Name: "field", QueryPath: "fields"},
+		&Int{Name: "limit", QueryPath: "limit"},
+		&Bool{Name: "safe", QueryPath: "safe"},
+		&String{Name: "key", HeaderPath: "Idempotency-Key"},
+		&StringList{Name: "trace", HeaderPath: "X-Trace"},
+		&String{Name: "id", PathParam: "id"},
+		&String{Name: "step", BodyPath: "step", Default: "compose", Const: true},
+		&String{Name: "unset", BodyPath: "unset"},
+	}, "--query", "from:nasa", "--field", "a", "--field", "b", "--limit", "5", "--safe",
+		"--key", "k1", "--trace", "t1", "--trace", "t2", "--id", "42")
+	require.NoError(t, err)
+	assert.Equal(t, "fields=a%2Cb&limit=5&q=from%3Anasa&safe=true", queryText(t, command))
+	assert.Equal(t, "Idempotency-Key=k1&X-Trace=t1&X-Trace=t2", headerText(t, command))
+	assert.Equal(t, `{"step":"compose"}`, bodyJSON(t, command))
+	assert.Equal(t, "42", command.String("id"))
 }
 
 func TestApplyStdinDataToFlags(t *testing.T) {
 	t.Parallel()
 
-	t.Run("sets query path flag from piped data", func(t *testing.T) {
-		t.Parallel()
+	tests := map[string]struct {
+		flags  []cli.Flag
+		args   []string
+		data   string
+		query  string
+		header string
+	}{
+		"query path":             {[]cli.Flag{&String{Name: "account-id", QueryPath: "account_id"}}, nil, `{"account_id":"acct_123"}`, "account_id=acct_123", ""},
+		"header path":            {[]cli.Flag{&String{Name: "key", HeaderPath: "Idempotency-Key"}}, nil, `{"Idempotency-Key":"key-xyz"}`, "", "Idempotency-Key=key-xyz"},
+		"body path untouched":    {[]cli.Flag{&String{Name: "name", BodyPath: "name"}}, nil, `{"name":"x"}`, "", ""},
+		"flag set on the line":   {[]cli.Flag{&String{Name: "account-id", QueryPath: "account_id"}}, []string{"--account-id", "cli"}, `{"account_id":"piped"}`, "account_id=cli", ""},
+		"integer":                {[]cli.Flag{&Int{Name: "limit", QueryPath: "limit"}}, nil, `{"limit":50}`, "limit=50", ""},
+		"boolean":                {[]cli.Flag{&Bool{Name: "safe", QueryPath: "safe"}}, nil, `{"safe":true}`, "safe=true", ""},
+		"object as text":         {[]cli.Flag{&String{Name: "filter", QueryPath: "filter"}}, nil, `{"filter":{"a":[1, 2]}}`, "filter=%7B%22a%22%3A%5B1%2C2%5D%7D", ""},
+		"data alias":             {[]cli.Flag{&String{Name: "account-id", QueryPath: "account_id", DataAliases: []string{"accountId"}}}, nil, `{"accountId":"acct_456"}`, "account_id=acct_456", ""},
+		"canonical before alias": {[]cli.Flag{&String{Name: "account-id", QueryPath: "account_id", DataAliases: []string{"accountId"}}}, nil, `{"accountId":"alias","account_id":"canonical"}`, "account_id=canonical", ""},
+		"no matching key":        {[]cli.Flag{&String{Name: "account-id", QueryPath: "account_id"}}, nil, `{"other":"x"}`, "", ""},
+		"no path":                {[]cli.Flag{&String{Name: "loose"}}, nil, `{"loose":"x"}`, "", ""},
+		"empty data":             {[]cli.Flag{&String{Name: "account-id", QueryPath: "account_id"}}, nil, `{}`, "", ""},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			command, err := run(t, test.flags, test.args...)
+			require.NoError(t, err)
+			data, ok := JSONObject(json.RawMessage(test.data))
+			require.True(t, ok)
+			require.NoError(t, ApplyStdinDataToFlags(command, data))
+			assert.Equal(t, test.query, queryText(t, command))
+			assert.Equal(t, test.header, headerText(t, command))
+		})
+	}
+}
 
-		flag := &Flag[string]{
-			Name:      "account-id",
-			QueryPath: "account_id",
+func TestApplyStdinDataToInnerFlags(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		data string
+		want string
+	}{
+		"nested field":      {`{"parent":{"name":"San Francisco"}}`, `{"parent":{"name":"San Francisco"}}`},
+		"nested data alias": {`{"parent":{"label":"Oakland"}}`, `{"parent":{"name":"Oakland"}}`},
+		"no nested object":  {`{"parent":"flat"}`, `{}`},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			outer := &Object{Name: "parent", BodyPath: "parent"}
+			inner := &InnerString{Name: "parent.name", InnerField: "name", DataAliases: []string{"label"}, OuterFlag: outer}
+			command := &cli.Command{Flags: []cli.Flag{outer, inner}}
+			data, ok := JSONObject(json.RawMessage(test.data))
+			require.True(t, ok)
+			require.NoError(t, ApplyStdinDataToFlags(command, data))
+			assert.Equal(t, test.want, bodyJSON(t, command))
+		})
+	}
+
+	outer := &Object{Name: "parent"}
+	inner := &InnerString{Name: "parent.name", InnerField: "name", OuterFlag: outer}
+	command := &cli.Command{Flags: []cli.Flag{outer, inner}}
+	data, ok := JSONObject(json.RawMessage(`{"parent":{"name":"x"}}`))
+	require.True(t, ok)
+	require.NoError(t, ApplyStdinDataToFlags(command, data))
+	assert.False(t, outer.IsSet())
+}
+
+func TestApplyStdinDataReportsBadValues(t *testing.T) {
+	t.Parallel()
+
+	command := &cli.Command{Flags: []cli.Flag{&Int{Name: "limit", QueryPath: "limit"}}}
+	require.ErrorContains(t, ApplyStdinDataToFlags(command, map[string]json.RawMessage{"limit": json.RawMessage(`"many"`)}), `cannot set flag "limit"`)
+	require.ErrorContains(t, ApplyStdinDataToFlags(command, map[string]json.RawMessage{"limit": json.RawMessage(`{`)}), `cannot format piped value`)
+}
+
+func TestRequiredFlags(t *testing.T) {
+	t.Parallel()
+
+	bodyFlag := &String{Name: "text", Required: true, BodyPath: "text"}
+	plainFlag := &String{Name: "mode", Required: true}
+	constFlag := &String{Name: "step", Required: true, Const: true, BodyPath: "step"}
+	assert.False(t, bodyFlag.IsRequired())
+	assert.True(t, bodyFlag.IsRequiredAsFlagOrStdin())
+	assert.True(t, plainFlag.IsRequired())
+	assert.False(t, constFlag.IsRequired())
+	assert.False(t, constFlag.IsRequiredAsFlagOrStdin())
+
+	command := &cli.Command{Flags: []cli.Flag{bodyFlag, plainFlag, constFlag, &String{Name: "free"}}}
+	names := func(flags []cli.Flag) []string {
+		result := []string{}
+		for _, flag := range flags {
+			result = append(result, flag.Names()[0])
 		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"account_id": "acct_123"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.True(t, flag.IsSet())
-		assert.Equal(t, "acct_123", flag.Get())
-	})
-
-	t.Run("sets header path flag from piped data", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:       "idempotency-key",
-			HeaderPath: "Idempotency-Key",
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"Idempotency-Key": "key-xyz"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.True(t, flag.IsSet())
-		assert.Equal(t, "key-xyz", flag.Get())
-	})
-
-	t.Run("does not set body path flag from piped data", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:     "message",
-			BodyPath: "message",
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"message": "hello world"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.False(t, flag.IsSet())
-	})
-
-	t.Run("does not override flag already set via CLI", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:      "account-id",
-			QueryPath: "account_id",
-		}
-		assert.NoError(t, flag.PreParse())
-		assert.NoError(t, flag.Set("account-id", "explicit_value"))
-
-		data := map[string]any{"account_id": "piped_value"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.Equal(t, "explicit_value", flag.Get())
-	})
-
-	t.Run("sets integer query flag from piped data", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[int64]{
-			Name:      "page-size",
-			QueryPath: "page_size",
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"page_size": int64(50)}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.True(t, flag.IsSet())
-		assert.Equal(t, int64(50), flag.Get())
-	})
-
-	t.Run("sets boolean query flag from piped data", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[bool]{
-			Name:      "include-deleted",
-			QueryPath: "include_deleted",
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"include_deleted": true}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.True(t, flag.IsSet())
-		assert.Equal(t, true, flag.Get())
-	})
-
-	t.Run("resolves query path flag via data alias", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:        "account-id",
-			QueryPath:   "account_id",
-			DataAliases: []string{"accountId", "account"},
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"accountId": "acct_alias"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.True(t, flag.IsSet())
-		assert.Equal(t, "acct_alias", flag.Get())
-	})
-
-	t.Run("does not set body path flag via data alias", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:        "user-name",
-			BodyPath:    "user_name",
-			DataAliases: []string{"userName", "username"},
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"userName": "alice"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.False(t, flag.IsSet())
-	})
-
-	t.Run("ignores flags with no matching key in piped data", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:      "account-id",
-			QueryPath: "account_id",
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"other_key": "value"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.False(t, flag.IsSet())
-	})
-
-	t.Run("ignores flags with no path set", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name: "some-flag",
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{"some-flag": "value"}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.False(t, flag.IsSet())
-	})
-
-	t.Run("handles multiple flags from piped data", func(t *testing.T) {
-		t.Parallel()
-
-		accountFlag := &Flag[string]{
-			Name:      "account-id",
-			QueryPath: "account_id",
-		}
-		limitFlag := &Flag[int64]{
-			Name:      "limit",
-			QueryPath: "limit",
-		}
-		assert.NoError(t, accountFlag.PreParse())
-		assert.NoError(t, limitFlag.PreParse())
-
-		data := map[string]any{
-			"account_id": "acct_abc",
-			"limit":      int64(25),
-		}
-		cmd := &cli.Command{Flags: []cli.Flag{accountFlag, limitFlag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.True(t, accountFlag.IsSet())
-		assert.Equal(t, "acct_abc", accountFlag.Get())
-		assert.True(t, limitFlag.IsSet())
-		assert.Equal(t, int64(25), limitFlag.Get())
-	})
-
-	t.Run("sets inner flag from nested piped data under outer body path", func(t *testing.T) {
-		t.Parallel()
-
-		outer := &Flag[map[string]any]{
-			Name:     "address",
-			BodyPath: "address",
-		}
-		assert.NoError(t, outer.PreParse())
-
-		cityInner := &InnerFlag[string]{
-			Name:       "address.city",
-			InnerField: "city",
-			OuterFlag:  outer,
-		}
-
-		data := map[string]any{
-			"address": map[string]any{"city": "San Francisco"},
-		}
-		cmd := &cli.Command{Flags: []cli.Flag{outer, cityInner}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		outerVal, ok := outer.Get().(map[string]any)
-		assert.True(t, ok, "expected outer flag value to be map[string]any, got %T", outer.Get())
-		assert.Equal(t, "San Francisco", outerVal["city"])
-	})
-
-	t.Run("sets inner flag via data alias in nested piped data", func(t *testing.T) {
-		t.Parallel()
-
-		outer := &Flag[map[string]any]{
-			Name:     "address",
-			BodyPath: "address",
-		}
-		assert.NoError(t, outer.PreParse())
-
-		cityInner := &InnerFlag[string]{
-			Name:        "address.city",
-			InnerField:  "city",
-			DataAliases: []string{"cityName"},
-			OuterFlag:   outer,
-		}
-
-		data := map[string]any{
-			"address": map[string]any{"cityName": "Portland"},
-		}
-		cmd := &cli.Command{Flags: []cli.Flag{outer, cityInner}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		outerVal, ok := outer.Get().(map[string]any)
-		assert.True(t, ok, "expected outer flag value to be map[string]any, got %T", outer.Get())
-		assert.Equal(t, "Portland", outerVal["city"])
-	})
-
-	t.Run("does not set inner flag when outer flag has no body path", func(t *testing.T) {
-		t.Parallel()
-
-		outer := &Flag[map[string]any]{
-			Name: "options",
-		}
-		assert.NoError(t, outer.PreParse())
-
-		inner := &InnerFlag[string]{
-			Name:       "options.key",
-			InnerField: "key",
-			OuterFlag:  outer,
-		}
-
-		data := map[string]any{
-			"options": map[string]any{"key": "value"},
-		}
-		cmd := &cli.Command{Flags: []cli.Flag{outer, inner}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.False(t, inner.IsSet())
-	})
-
-	t.Run("does not set inner flag when piped data has no nested map for outer path", func(t *testing.T) {
-		t.Parallel()
-
-		outer := &Flag[map[string]any]{
-			Name:     "address",
-			BodyPath: "address",
-		}
-		assert.NoError(t, outer.PreParse())
-
-		inner := &InnerFlag[string]{
-			Name:       "address.city",
-			InnerField: "city",
-			OuterFlag:  outer,
-		}
-
-		data := map[string]any{"other": "value"}
-		cmd := &cli.Command{Flags: []cli.Flag{outer, inner}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.False(t, inner.IsSet())
-	})
-
-	t.Run("canonical path key takes precedence over alias when both are present", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:        "account-id",
-			QueryPath:   "account_id",
-			DataAliases: []string{"accountId"},
-		}
-		assert.NoError(t, flag.PreParse())
-
-		data := map[string]any{
-			"account_id": "canonical_value",
-			"accountId":  "alias_value",
-		}
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, data))
-
-		assert.True(t, flag.IsSet())
-		assert.Equal(t, "canonical_value", flag.Get())
-	})
-
-	t.Run("empty data map does not set any flags", func(t *testing.T) {
-		t.Parallel()
-
-		flag := &Flag[string]{
-			Name:      "account-id",
-			QueryPath: "account_id",
-		}
-		assert.NoError(t, flag.PreParse())
-
-		cmd := &cli.Command{Flags: []cli.Flag{flag}}
-		assert.NoError(t, ApplyStdinDataToFlags(cmd, map[string]any{}))
-
-		assert.False(t, flag.IsSet())
-	})
+		return result
+	}
+	assert.Equal(t, []string{"text", "mode"}, names(GetMissingRequiredFlags(command, nil)))
+	assert.Equal(t, []string{"mode"}, names(GetMissingRequiredFlags(command, map[string]json.RawMessage{"text": json.RawMessage(`"x"`)})))
+}
+
+func TestEnvironmentSources(t *testing.T) {
+	t.Setenv("REQUESTFLAG_TEXT", "")
+	t.Setenv("REQUESTFLAG_SAFE", "")
+	t.Setenv("REQUESTFLAG_LIMIT", "")
+	t.Setenv("REQUESTFLAG_BAD", "many")
+	t.Setenv("REQUESTFLAG_KEY", "secret")
+
+	command, err := run(t, []cli.Flag{
+		&String{Name: "text", BodyPath: "text", Sources: cli.EnvVars("REQUESTFLAG_TEXT")},
+		&Bool{Name: "safe", BodyPath: "safe", Default: true, Sources: cli.EnvVars("REQUESTFLAG_SAFE")},
+		&Int{Name: "limit", BodyPath: "limit", Default: 20, Sources: cli.EnvVars("REQUESTFLAG_LIMIT")},
+		&String{Name: "key", Sources: cli.EnvVars("REQUESTFLAG_KEY")},
+		&String{Name: "cli", BodyPath: "cli", Sources: cli.EnvVars("REQUESTFLAG_KEY")},
+	}, "--cli", "line")
+	require.NoError(t, err)
+	assert.Equal(t, `{"cli":"line","limit":20,"safe":false,"text":""}`, bodyJSON(t, command))
+	assert.Equal(t, "secret", command.String("key"))
+
+	_, err = run(t, []cli.Flag{&Int{Name: "bad", Sources: cli.EnvVars("REQUESTFLAG_BAD")}})
+	require.ErrorContains(t, err, `could not parse "many" as int value`)
+}
+
+func TestHelpTraits(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		flag       cli.DocGenerationMultiValueFlag
+		typeName   string
+		takesValue bool
+		multiValue bool
+	}{
+		{&String{}, "string", true, false},
+		{&Int{}, "int", true, false},
+		{&Bool{}, "boolean", false, false},
+		{&StringList{}, "string", true, true},
+		{&JSON{}, "", true, false},
+		{&JSONList{}, "any", true, true},
+		{&Object{}, "string=any", true, true},
+		{&ObjectList{}, "any", true, true},
+		{&InnerString{}, "string", true, false},
+	}
+	for _, test := range tests {
+		assert.Equal(t, test.typeName, test.flag.TypeName())
+		assert.Equal(t, test.takesValue, test.flag.TakesValue())
+		assert.Equal(t, test.multiValue, test.flag.IsMultiValueFlag())
+	}
+	assert.True(t, (&Bool{}).IsBoolFlag())
+	assert.False(t, (&InnerString{}).IsBoolFlag())
+}
+
+func TestFlagMetadata(t *testing.T) {
+	t.Parallel()
+
+	flag := &Int{
+		Name:        "limit",
+		Aliases:     []string{"l"},
+		Category:    "paging",
+		DefaultText: "twenty",
+		HideDefault: true,
+		Usage:       "How many to return.",
+		Hidden:      true,
+		Default:     20,
+		Sources:     cli.EnvVars("REQUESTFLAG_LIMIT_HELP"),
+		QueryPath:   "limit",
+		DataAliases: []string{"max"},
+	}
+	assert.Equal(t, "", flag.GetValue())
+	require.NoError(t, flag.PreParse())
+	assert.Equal(t, "20", flag.GetValue())
+	assert.Equal(t, []string{"limit", "l"}, flag.Names())
+	assert.Equal(t, "paging", flag.GetCategory())
+	flag.SetCategory("other")
+	assert.Equal(t, "other", flag.GetCategory())
+	assert.Equal(t, "twenty", flag.GetDefaultText())
+	assert.False(t, flag.IsDefaultVisible())
+	assert.False(t, flag.IsVisible())
+	assert.Equal(t, "How many to return.", flag.GetUsage())
+	assert.Equal(t, []string{"REQUESTFLAG_LIMIT_HELP"}, flag.GetEnvVars())
+	assert.Equal(t, "limit", flag.GetQueryPath())
+	assert.Equal(t, []string{"max"}, flag.GetDataAliases())
+	assert.True(t, flag.IsLocal())
+	assert.Equal(t, 0, flag.Count())
+	require.NoError(t, flag.Set("limit", "3"))
+	assert.Equal(t, 1, flag.Count())
+	assert.Contains(t, flag.String(), "--limit")
+
+	assert.Equal(t, "[a b]", displayed(t, &StringList{Default: []string{"a", "b"}, Name: "tag"}))
+	assert.Equal(t, `{"a":1}`, displayed(t, &Object{Default: map[string]json.RawMessage{"a": json.RawMessage(`1`)}, Name: "meta"}))
+	assert.Equal(t, `[{"a":1}]`, displayed(t, &ObjectList{Default: []map[string]json.RawMessage{{"a": json.RawMessage(`1`)}}, Name: "rows"}))
+	assert.Equal(t, `["x"]`, displayed(t, &JSONList{Default: []json.RawMessage{json.RawMessage(`"x"`)}, Name: "targets"}))
+	assert.Equal(t, `{"a":1}`, displayed(t, &JSON{Default: json.RawMessage(`{"a":1}`), Name: "value"}))
+	assert.Equal(t, "true", displayed(t, &Bool{Default: true, Name: "safe"}))
+
+	inner := &InnerString{Name: "row.name", Aliases: []string{"n"}, Usage: "Name.", DefaultText: "none", DataAliases: []string{"label"}}
+	require.NoError(t, inner.PreParse())
+	require.NoError(t, inner.PostParse())
+	assert.False(t, inner.IsSet())
+	assert.Equal(t, []string{"row.name", "n"}, inner.Names())
+	assert.Equal(t, "Name.", inner.GetUsage())
+	assert.Equal(t, "none", inner.GetDefaultText())
+	assert.Equal(t, "", inner.GetValue())
+	assert.Nil(t, inner.GetEnvVars())
+	assert.False(t, inner.IsDefaultVisible())
+	assert.Contains(t, inner.String(), "--row.name")
+	assert.False(t, inner.IsVisible())
+	assert.True(t, inner.IsLocal())
+}
+
+func TestHelpHidesInnerFlags(t *testing.T) {
+	t.Parallel()
+
+	command := objectListCommand()
+	var help strings.Builder
+	command.Writer = &help
+	require.NoError(t, command.Run(context.Background(), []string{"probe", "--help"}))
+	assert.Contains(t, help.String(), "--relation-target")
+	assert.NotContains(t, help.String(), "--relation-target.relation")
+	assert.NotContains(t, help.String(), "--parent.name")
 }
