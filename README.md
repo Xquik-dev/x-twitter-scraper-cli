@@ -1,23 +1,20 @@
 # X API & Twitter API CLI by Xquik
 
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13732/badge)](https://www.bestpractices.dev/projects/13732)
-[![Convex Component](https://www.convex.dev/components/badge/convex-xquik)](https://www.convex.dev/components/convex-xquik)
-
-Use the Xquik Twitter CLI & X CLI to work with X from a terminal.
-It works as a Twitter scraper & tweet scraper for search, profiles, followers & lists.
-Scrape Twitter timelines, communities & trends into JSON, YAML or an interactive view.
-Download media, monitor accounts, manage webhooks & run X automation from scripts.
-It is a Twitter API alternative built on the [Xquik REST API](https://docs.xquik.com/api-reference/overview).
+Use this Twitter CLI by Xquik to search tweets & export followers as JSON.
+It runs in a terminal or a script. Public reads need no X developer account.
 
 Xquik is the world's fastest and cheapest X Twitter scraper service with the most complete X data.
+Most other Apify Actors charge before filtering or deduplication.
 Xquik charges only for delivered, unique, filter-matching results and never pads rows.
+Xquik is independent and not affiliated with X Corp.
 
-> Xquik is an independent third-party service. Not affiliated with X Corp.
-> "Twitter" and "X" are trademarks of X Corp.
+<!-- trust:win:start -->
+The Xquik REST API read 45 tweets per second at $0.15 per 1,000 on 2026-10-15. The fastest of 4 rival Actors read 12.5 per second. The cheapest cost $0.173 per 1,000. [Compare each run](https://xquik.com/benchmarks#benchmark-x-tweet-scraper).
+<!-- trust:win:end -->
 
 ## Install the Twitter CLI
 
-Install [Node.js](https://nodejs.org) 18 or later.
+Install [Node.js](https://nodejs.org) 18 or later, then install the [npm package](https://www.npmjs.com/package/x-twitter-scraper-cli).
 
 ```sh
 npm install --global x-twitter-scraper-cli
@@ -30,6 +27,42 @@ npx x-twitter-scraper-cli --help
 ```
 
 npm installs only the build for your platform. Nothing downloads when the CLI runs.
+
+## Scrape tweets from the X CLI
+
+Create an API key in the [Xquik dashboard](https://dashboard.xquik.com) and export it.
+
+```sh
+export X_TWITTER_SCRAPER_API_KEY="your-api-key"
+```
+
+This command returns 10 recent posts from 1 account.
+
+```sh
+x-twitter-scraper x:tweets search \
+  --q from:elonmusk \
+  --limit 10
+```
+
+Next, read the [CLI guide](https://docs.xquik.com/sdks/cli), [REST API reference](https://docs.xquik.com/api-reference/overview) or [search operators](https://github.com/Xquik-dev/x-twitter-advanced-search).
+
+<!-- trust:start -->
+
+## Benchmarks & usage
+
+[![Twitter API package downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Fdownloads.json)](https://xquik.com/benchmarks#downloads)
+[![Twitter API p99 server read time](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Frest-p99.json)](https://xquik.com/benchmarks#speed)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13732/badge)](https://www.bestpractices.dev/projects/13732)
+
+- 63,000+ downloads of Xquik's Twitter API packages on npm, PyPI, RubyGems, NuGet, Packagist & Terraform ([source](https://xquik.com/benchmarks#downloads)) <!-- trust:downloads 63178 -->
+- 6.4 s p99 REST API server read time over 7 days, failed reads included ([source](https://xquik.com/benchmarks#speed)) <!-- trust:rest-p99 6317 -->
+- This repo meets the OpenSSF Best Practices passing criteria ([source](https://www.bestpractices.dev/projects/13732)) <!-- trust:openssf-x-twitter-scraper-cli 1 -->
+
+Checked on 2026-11-06. See each number with its date & source on [xquik.com/benchmarks](https://xquik.com/benchmarks) or as [JSON](https://xquik.com/trust.json).
+
+<!-- trust:end -->
+
+## More ways to install
 
 ### Install with Go
 
@@ -54,61 +87,15 @@ Compare each download with the release's checksums file.
 
 From a cloned repository, run `./scripts/run args...` instead.
 
-## Scrape tweets from the X CLI
+## Twitter scraper commands
 
-The CLI follows a resource-based command structure.
+Each command follows the same shape.
 
 ```sh
 x-twitter-scraper [resource] <command> [flags...]
 ```
 
-This command returns 10 recent posts from 1 account.
-
-```sh
-x-twitter-scraper x:tweets search \
-  --q from:elonmusk \
-  --limit 10
-```
-
-<!-- trust:start -->
-
-## Trust & usage
-
-[![Twitter API package downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Fdownloads.json)](https://xquik.com/trust#downloads)
-[![Twitter scraper users on Apify](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Fapify-users.json)](https://apify.com/xquik)
-[![Twitter scraper runs on Apify](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Fapify-runs.json)](https://apify.com/xquik)
-[![Tweet scraper rating on Apify](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Fapify-rating.json)](https://apify.com/xquik/x-tweet-scraper/reviews)
-[![Xquik Twitter API accounts](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Faccounts.json)](https://xquik.com/trust#accounts)
-[![Twitter Skill installs](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Fskill-installs.json)](https://xquik.com/trust#skill-installs)
-[![Xquik verified revenue on TrustMRR](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Frevenue.json)](https://trustmrr.com/startup/xquik)
-[![Twitter API p99 server read time](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Frest-p99.json)](https://xquik.com/trust#speed)
-[![Xquik GitHub stars](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Fgithub-stars.json)](https://github.com/Xquik-dev)
-[![x-twitter-scraper-cli downloads on GitHub Releases](https://img.shields.io/endpoint?url=https%3A%2F%2Fxquik.com%2Fbadges%2Freleases-x-twitter-scraper-cli.json)](https://github.com/Xquik-dev/x-twitter-scraper-cli/releases)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13732/badge)](https://www.bestpractices.dev/projects/13732)
-
-- 53,000+ downloads of Xquik's Twitter API packages on npm, PyPI, RubyGems, NuGet, Packagist & Terraform ([source](https://xquik.com/trust#downloads)) <!-- trust:downloads 53547 -->
-- 9,500+ users of Xquik's Twitter scraper Actors on Apify ([source](https://apify.com/xquik)) <!-- trust:apify-users 9595 -->
-- 6,700,000+ runs of Xquik's Twitter scraper Actors on Apify ([source](https://apify.com/xquik)) <!-- trust:apify-runs 6765249 -->
-- 4.66 of 5 for the X Tweet Scraper from 16 Apify reviews ([source](https://apify.com/xquik/x-tweet-scraper/reviews)) <!-- trust:apify-rating 4.66 16 -->
-- 4,000+ accounts on xquik.com ([source](https://xquik.com/trust#accounts)) <!-- trust:accounts 4073 -->
-- 1,600+ installs of Xquik's Twitter Skills on skills.sh ([source](https://xquik.com/trust#skill-installs)) <!-- trust:skill-installs 1617 -->
-- $39,000+ in revenue verified by TrustMRR ([source](https://trustmrr.com/startup/xquik)) <!-- trust:revenue 39784 -->
-- 13.2 s p99 REST API server read time over 7 days, failed reads included ([source](https://xquik.com/trust#speed)) <!-- trust:rest-p99 13194 -->
-- 380+ GitHub stars across Xquik's repos ([source](https://github.com/Xquik-dev)) <!-- trust:github-stars 383 -->
-- 58 downloads of x-twitter-scraper-cli on GitHub Releases ([source](https://github.com/Xquik-dev/x-twitter-scraper-cli/releases)) <!-- trust:releases-x-twitter-scraper-cli 58 -->
-- This repo meets the OpenSSF Best Practices passing criteria ([source](https://www.bestpractices.dev/projects/13732)) <!-- trust:openssf-x-twitter-scraper-cli 1 -->
-
-Checked on 2026-10-25. See each number with its date & source on [xquik.com/trust](https://xquik.com/trust) or as [JSON](https://xquik.com/trust.json).
-
-<!-- trust:end -->
-
-## Twitter scraper commands
-
-Run each command with `--help` before adding flags.
-
-```sh
-x-twitter-scraper x:users retrieve-followers --help
-```
+Run a command with `--help` before you add flags.
 
 | Task | Start command |
 | --- | --- |
@@ -177,27 +164,12 @@ Use `@file://` for text, `@data://` for base64, and 3 slashes for absolute paths
 x-twitter-scraper <command> --arg @data://file.txt
 ```
 
-## Test another Go SDK version
-
-Pass a module version or local path to `./scripts/link`.
-
-```bash
-./scripts/link github.com/org/repo@version
-./scripts/link ../path/to/xtwitterscraper-go
-```
-
-The script defaults to `../x-twitter-scraper-go`.
-
 ## Checks & releases
 
 Run `bin/check-local` before you open a pull request.
-It runs REUSE, lint, script tests, Go tests, coverage, `govulncheck`, 2 reproducible builds, fuzzing & CodeQL.
 It posts the result as the `xquik-local-checks` commit status.
 Maintainers publish releases from `main` with `bin/release-local`.
 `bin/release-local --dry-run` builds every release asset and publishes nothing.
-After the GitHub release, `bin/release-local` runs `bin/release-npm`.
-It publishes the [x-twitter-scraper-cli](https://www.npmjs.com/package/x-twitter-scraper-cli) package and 1 package per platform.
-`bin/release-npm --dry-run` packs them from the published release and publishes nothing.
 
 ## Questions
 
@@ -208,16 +180,20 @@ need a connected X account.
 
 ### Is this the official X API?
 
-No. Xquik is an independent third-party service with its own REST API. This CLI
-calls that API, not the official X API.
+No. Xquik runs its own REST API. This CLI calls that API, not the official X API.
 
 ## More Xquik tools
 
 - [X (Twitter) scraper API & Twitter MCP server](https://github.com/Xquik-dev/x-twitter-scraper) with REST, MCP & Skill setup.
-- Twitter API SDKs for [TypeScript](https://github.com/Xquik-dev/x-twitter-scraper-typescript), [Python](https://github.com/Xquik-dev/x-twitter-scraper-python), [Go](https://github.com/Xquik-dev/x-twitter-scraper-go), [Ruby](https://github.com/Xquik-dev/x-twitter-scraper-ruby), [Java](https://github.com/Xquik-dev/x-twitter-scraper-java), [Kotlin](https://github.com/Xquik-dev/x-twitter-scraper-kotlin), [C#](https://github.com/Xquik-dev/x-twitter-scraper-csharp) & [PHP](https://github.com/Xquik-dev/x-twitter-scraper-php).
+- Twitter API SDKs for [TypeScript](https://github.com/Xquik-dev/x-twitter-scraper-typescript), [Python](https://github.com/Xquik-dev/x-twitter-scraper-python), [Go](https://github.com/Xquik-dev/x-twitter-scraper-go) & [Java](https://github.com/Xquik-dev/x-twitter-scraper-java).
+- Twitter API SDKs for [Ruby](https://github.com/Xquik-dev/x-twitter-scraper-ruby), [Kotlin](https://github.com/Xquik-dev/x-twitter-scraper-kotlin), [C#](https://github.com/Xquik-dev/x-twitter-scraper-csharp) & [PHP](https://github.com/Xquik-dev/x-twitter-scraper-php).
 - [Twitter advanced search operators](https://github.com/Xquik-dev/x-twitter-advanced-search) with tested examples.
-- Twitter agent plugins for [OpenClaw](https://github.com/Xquik-dev/tweetclaw) & [Hermes Agent](https://github.com/Xquik-dev/hermes-tweet), and the [Twitter API documentation source](https://github.com/Xquik-dev/xquik-docs).
-- [Xquik X API & Twitter scraper](https://xquik.com) and the [Twitter API documentation](https://docs.xquik.com/api-reference/overview).
+- Twitter agent plugins for [OpenClaw](https://github.com/Xquik-dev/tweetclaw) & [Hermes Agent](https://github.com/Xquik-dev/hermes-tweet).
+- Twitter integrations for [n8n](https://github.com/Xquik-dev/n8n-nodes-xquik), [Prefect](https://github.com/Xquik-dev/prefect-xquik), [Haystack](https://github.com/Xquik-dev/xquik-haystack) & [Paperclip](https://github.com/Xquik-dev/paperclip-plugin-xquik).
+- Twitter integrations for [Terraform](https://github.com/Xquik-dev/terraform-provider-x-twitter-scraper), [Convex](https://github.com/Xquik-dev/xquik-convex), [Supabase](https://github.com/Xquik-dev/xquik-supabase) & [Strapi](https://github.com/Xquik-dev/strapi-plugin-xquik).
+- Twitter MCP for [AI agents](https://github.com/Xquik-dev/xquik-mcp), [VS Code](https://github.com/Xquik-dev/xquik-vscode) & [Raycast](https://github.com/Xquik-dev/xquik-raycast).
+- [Xquik X API & Twitter scraper](https://xquik.com).
+- [Twitter API documentation](https://docs.xquik.com/api-reference/overview) and its [source](https://github.com/Xquik-dev/xquik-docs).
 
 ## Support & policies
 
