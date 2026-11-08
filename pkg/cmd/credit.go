@@ -6,9 +6,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -21,7 +19,7 @@ var creditsRedirectTopupCheckout = cli.Command{
 	Usage:   "Redirect to an active top-up payment page",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "session-id",
 			Usage:     "Billing session ID returned by the top-up billing flow.",
 			Required:  true,
@@ -46,7 +44,7 @@ var creditsRetrieveTopupStatus = cli.Command{
 	Usage:   "Get top-up billing status",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "session-id",
 			Usage:     "Top-up session ID to inspect.",
 			Required:  true,
@@ -62,13 +60,13 @@ var creditsTopupBalance = cli.Command{
 	Usage:   "Create a hosted checkout only after the user confirms. The request never\ncompletes payment or adds credits.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:     "dollars",
 			Usage:    "Amount to top up in US dollars. Minimum 10.",
 			Required: true,
 			BodyPath: "dollars",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:     "locale",
 			Usage:    "Optional checkout locale. Defaults to en.",
 			BodyPath: "locale",
@@ -83,16 +81,10 @@ func handleCreditsRedirectTopupCheckout(ctx context.Context, cmd *cli.Command) e
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -107,16 +99,10 @@ func handleCreditsRetrieveBalance(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -146,16 +132,10 @@ func handleCreditsRetrieveTopupStatus(ctx context.Context, cmd *cli.Command) err
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -187,16 +167,10 @@ func handleCreditsTopupBalance(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
+	options, err := flagOptions(cmd, ApplicationJSON)
 	if err != nil {
 		return err
 	}

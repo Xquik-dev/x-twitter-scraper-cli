@@ -112,7 +112,7 @@ start_check "REUSE licensing" "REUSE" "Add the missing license notice or REUSE.t
 uvx --from "reuse==$reuse_version" reuse lint
 pass_check
 
-start_check "Lint" "lint" "Run ./scripts/format and go mod tidy, fix the go vet findings above, then rerun."
+start_check "Lint" "lint" "Run ./scripts/format and go mod tidy, fix the go vet, staticcheck and type coverage findings above, then rerun."
 ./scripts/lint
 pass_check
 
@@ -131,8 +131,22 @@ start_check "Script tests" "script tests" "Fix the failing script tests above, t
 pass_check
 
 start_check "Go tests and coverage" "Go tests" "Fix the failing test or add coverage, then rerun."
-./scripts/test
+bash scripts/test | tee "$workspace/test.log"
 pass_check
+
+start_check "OpenSSF coverage results" "" "Put the measured row above in OPENSSF.md, then rerun."
+printf -v statement_minimum '%g%%' "$(sed -nE 's/^Required statement coverage: ([0-9.]+)%$/\1/p' "$workspace/test.log")"
+printf -v branch_minimum '%g%%' "$(sed -nE 's/^Branch coverage: .*; minimum ([0-9.]+)%$/\1/p' "$workspace/test.log")"
+statement_result="$(sed -nE 's/^Total statement coverage: (.+)$/\1/p' "$workspace/test.log")"
+branch_result="$(sed -nE 's/^Branch coverage: ([^;]+);.*$/\1/p' "$workspace/test.log")"
+for row in \
+  "| Statement coverage | \`./scripts/coverage\` enforces $statement_minimum. The current result is $statement_result. |" \
+  "| Branch coverage | \`./scripts/branch-coverage\` enforces $branch_minimum. The current result is $branch_result. |"; do
+  if ! grep -Fqx -- "$row" OPENSSF.md; then
+    printf 'OPENSSF.md lacks this row, which the run measured.\n%s\n' "$row" >&2
+    exit 1
+  fi
+done
 
 start_check "Dependency audit" "audit" "Upgrade each blocked module above, or raise the go line in go.mod for standard library findings."
 ./scripts/audit | tee "$workspace/audit.log"
@@ -163,8 +177,8 @@ start_check "Release debug information" "reproducible build" "Keep DWARF data. R
 ./bin/check-release-debug-info
 pass_check
 
-start_check "Fuzzing" "fuzzing" "Fix the crash. Go saved its input under internal/apiform/testdata/fuzz."
-go test ./internal/apiform -run '^$' -fuzz '^FuzzMarshalRoundTrip$' -fuzztime="$fuzz_time"
+start_check "Fuzzing" "fuzzing" "Fix the crash. Go saved its input under internal/requestflag/testdata/fuzz."
+go test ./internal/requestflag -run '^$' -fuzz '^FuzzJSONFlagValue$' -fuzztime="$fuzz_time"
 pass_check
 
 start_check "CodeQL security-extended queries" "CodeQL" "Fix the CodeQL error or results above, then rerun."

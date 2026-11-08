@@ -1,5 +1,3 @@
-//go:build ignore
-
 // SPDX-FileCopyrightText: 2026 Xquik contributors
 //
 // SPDX-License-Identifier: Apache-2.0
@@ -15,7 +13,7 @@ import (
 
 func main() {
 	if len(os.Args) != 2 {
-		fmt.Fprintln(os.Stderr, "Run go run ./scripts/release_archives.go <dist/artifacts.json>.")
+		fmt.Fprintln(os.Stderr, "Run go run ./cmd/release-archives <dist/artifacts.json>.")
 		os.Exit(2)
 	}
 	problems, checked, err := releasearchive.ArchiveOwners(os.Args[1])
