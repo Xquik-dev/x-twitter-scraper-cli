@@ -6,9 +6,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -21,13 +19,13 @@ var trendsList = cli.Command{
 	Usage:   "Get trending hashtags and topics by region (alias)",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "count",
 			Usage:     "Number of trending topics returned (1-50, default 30)",
 			Default:   30,
 			QueryPath: "count",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "woeid",
 			Usage:     "Region Yahoo WOEID code (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
 			Default:   1,
@@ -43,16 +41,10 @@ func handleTrendsList(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

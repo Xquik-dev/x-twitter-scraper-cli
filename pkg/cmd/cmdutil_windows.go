@@ -7,29 +7,14 @@
 package cmd
 
 import (
+	"io"
 	"os"
-	"syscall"
-	"unsafe"
+	"time"
 )
 
-var (
-	kernel32          = syscall.NewLazyDLL("kernel32.dll")
-	procPeekNamedPipe = kernel32.NewProc("PeekNamedPipe")
-)
-
-func isPipedDataAvailableOSSpecific() bool {
-	var available uint32
-	r, _, _ := procPeekNamedPipe.Call(
-		os.Stdin.Fd(),
-		0,
-		0,
-		0,
-		uintptr(unsafe.Pointer(&available)),
-		0,
-	)
-	return r != 0 && available > 0
-}
-
-func streamOutputOSSpecific(label string, generateOutput func(w *os.File) error) error {
-	return streamToPagerWithPipe(label, generateOutput)
+var stdinProbe = pipeProbe{
+	check: func(stdin *os.File) (io.Reader, bool) {
+		return readWithin(stdin, 10*time.Millisecond)
+	},
+	consumes: true,
 }

@@ -6,9 +6,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -21,7 +19,7 @@ var xGetArticle = cli.Command{
 	Usage:   "Retrieve the full content of an X Article (long-form post) by numeric tweet ID.\nReturns article_not_found when the tweet is valid but is not an X Article.",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "tweet-id",
 			Required:  true,
 			PathParam: "tweetId",
@@ -36,12 +34,12 @@ var xGetHomeTimeline = cli.Command{
 	Usage:   "Get home timeline",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for timeline",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "seen-tweet-ids",
 			Usage:     "Comma-separated tweet IDs to exclude from results. Empty entries are ignored.",
 			QueryPath: "seenTweetIds",
@@ -56,12 +54,12 @@ var xGetNotifications = cli.Command{
 	Usage:   "Get notifications",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "cursor",
 			Usage:     "Pagination cursor for notifications",
 			QueryPath: "cursor",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "type",
 			Usage:     "Notification type filter. Unrecognized values fall back to All.",
 			Default:   "All",
@@ -77,13 +75,13 @@ var xGetTrends = cli.Command{
 	Usage:   "Get trending hashtags and topics from X by region",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "count",
 			Usage:     "Number of trending topics to return (1-50, default 30)",
 			Default:   30,
 			QueryPath: "count",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "woeid",
 			Usage:     "Region WOEID (1=Worldwide, 23424977=US, 23424975=UK, 23424969=Turkey)",
 			Default:   1,
@@ -102,23 +100,17 @@ func handleXGetArticle(ctx context.Context, cmd *cli.Command) error {
 		unusedArgs = unusedArgs[1:]
 	}
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.X.GetArticle(ctx, cmd.Value("tweet-id").(string), options...)
+	_, err = client.X.GetArticle(ctx, cmd.String("tweet-id"), options...)
 	if err != nil {
 		return err
 	}
@@ -141,16 +133,10 @@ func handleXGetHomeTimeline(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -182,16 +168,10 @@ func handleXGetNotifications(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}
@@ -223,16 +203,10 @@ func handleXGetTrends(ctx context.Context, cmd *cli.Command) error {
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

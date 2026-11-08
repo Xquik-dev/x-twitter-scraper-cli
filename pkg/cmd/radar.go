@@ -6,9 +6,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/apiquery"
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/requestflag"
 	"github.com/Xquik-dev/x-twitter-scraper-go"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
@@ -21,35 +19,35 @@ var radarRetrieveTrendingTopics = cli.Command{
 	Usage:   "Get trending topics from curated sources",
 	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "after",
 			Usage:     "Cursor for pagination (from prior response nextCursor).",
 			QueryPath: "after",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "category",
 			Usage:     "Filter by category.",
 			QueryPath: "category",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "hours",
 			Usage:     "Lookback window in hours (1-72, default 6).",
 			Default:   6,
 			QueryPath: "hours",
 		},
-		&requestflag.Flag[int64]{
+		&requestflag.Int{
 			Name:      "limit",
 			Usage:     "Number of items to return (1-100, default 50).",
 			Default:   50,
 			QueryPath: "limit",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "region",
 			Usage:     "Region filter. Use `global` or a region code such as `US`, `GB`, `TR`, or `ES`.",
 			Default:   "global",
 			QueryPath: "region",
 		},
-		&requestflag.Flag[string]{
+		&requestflag.String{
 			Name:      "source",
 			Usage:     "Source filter. Choose github, google_trends, hacker_news, polymarket, reddit, trustmrr or wikipedia.",
 			QueryPath: "source",
@@ -64,16 +62,10 @@ func handleRadarRetrieveTrendingTopics(ctx context.Context, cmd *cli.Command) er
 	unusedArgs := cmd.Args().Slice()
 
 	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments %v. Remove them, then run the command again.", unusedArgs)
+		return unexpectedArgumentsError(unusedArgs)
 	}
 
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
+	options, err := flagOptions(cmd, EmptyBody)
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,4 @@
+// A note above a license marker, which the query flags.
+// SPDX-License-Identifier: Apache-2.0
+
+package borrow

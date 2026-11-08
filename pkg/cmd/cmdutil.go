@@ -5,27 +5,20 @@
 package cmd
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime"
 	"net/http"
-	"net/http/httputil"
 	"os"
-	"os/exec"
-	"os/signal"
 	"path/filepath"
 	"strings"
-	"syscall"
+	"time"
 
 	"github.com/Xquik-dev/x-twitter-scraper-cli/internal/jsonview"
 	"github.com/Xquik-dev/x-twitter-scraper-go/option"
 
 	"github.com/charmbracelet/x/term"
 	"github.com/itchyny/json2yaml"
-	"github.com/muesli/reflow/wrap"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
 	"github.com/urfave/cli/v3"
@@ -67,44 +60,53 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 	return opts
 }
 
-var debugMiddlewareOption = option.WithMiddleware(
-	func(r *http.Request, mn option.MiddlewareNext) (*http.Response, error) {
-		logger := log.Default()
+type pipeProbe struct {
+	check    func(*os.File) (io.Reader, bool)
+	consumes bool
+}
 
-		if reqBytes, err := httputil.DumpRequest(r, true); err == nil {
-			logger.Printf("HTTP Request:\n%s\n", reqBytes)
-		}
-
-		resp, err := mn(r)
-		if err != nil {
-			return resp, err
-		}
-
-		if respBytes, err := httputil.DumpResponse(resp, true); err == nil {
-			logger.Printf("HTTP Response:\n%s\n", respBytes)
-		}
-
-		return resp, err
-	},
-)
-
-func isInputPiped() bool {
-	stat, err := os.Stdin.Stat()
+func pipedInput(stdin *os.File, takesInput bool, probe pipeProbe) (io.Reader, bool) {
+	stat, err := stdin.Stat()
 	if err != nil {
-		return false
+		return stdin, false
 	}
 
 	mode := stat.Mode()
 
 	if mode.IsRegular() && stat.Size() > 0 {
-		return true
+		return stdin, true
 	}
 
-	if mode&(os.ModeNamedPipe|os.ModeSocket) != 0 {
-		return isPipedDataAvailableOSSpecific()
+	if mode&(os.ModeNamedPipe|os.ModeSocket) == 0 || (probe.consumes && !takesInput) {
+		return stdin, false
 	}
 
-	return false
+	return probe.check(stdin)
+}
+
+func readWithin(stdin io.Reader, wait time.Duration) (io.Reader, bool) {
+	reader, writer := io.Pipe()
+	ready := make(chan struct{})
+	go func() {
+		buffer := make([]byte, 32*1024)
+		n, err := stdin.Read(buffer)
+		close(ready)
+		if n > 0 {
+			if _, writeErr := writer.Write(buffer[:n]); writeErr != nil {
+				return
+			}
+		}
+		if err == nil {
+			_, err = io.Copy(writer, stdin)
+		}
+		writer.CloseWithError(err)
+	}()
+	select {
+	case <-ready:
+		return reader, true
+	case <-time.After(wait):
+		return reader, false
+	}
 }
 
 func isTerminal(w io.Writer) bool {
@@ -114,69 +116,6 @@ func isTerminal(w io.Writer) bool {
 	default:
 		return false
 	}
-}
-
-func streamOutput(label string, generateOutput func(w *os.File) error) error {
-	if !isTerminal(os.Stdout) {
-		return streamToStdout(generateOutput)
-	}
-
-	return streamOutputOSSpecific(label, generateOutput)
-}
-
-func streamToPagerWithPipe(label string, generateOutput func(w *os.File) error) error {
-	r, w, err := os.Pipe()
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-	defer w.Close()
-
-	pagerProgram := os.Getenv("PAGER")
-	if pagerProgram == "" {
-		pagerProgram = "less"
-	}
-
-	if _, err := exec.LookPath(pagerProgram); err != nil {
-		return err
-	}
-
-	cmd := exec.Command(pagerProgram)
-	cmd.Stdin = r
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Env = append(os.Environ(),
-		"LESS=-X -r -P "+label,
-		"MORE=-r -P "+label,
-	)
-
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	if err := r.Close(); err != nil {
-		return err
-	}
-
-	if isTerminal(os.Stdout) && os.Getenv("FORCE_COLOR") == "" {
-		os.Setenv("FORCE_COLOR", "1")
-	}
-
-	if err := generateOutput(w); err != nil && !strings.Contains(err.Error(), "broken pipe") {
-		return err
-	}
-
-	w.Close()
-	return cmd.Wait()
-}
-
-func streamToStdout(generateOutput func(w *os.File) error) error {
-	signal.Ignore(syscall.SIGPIPE)
-	err := generateOutput(os.Stdout)
-	if err != nil && strings.Contains(err.Error(), "broken pipe") {
-		return nil
-	}
-	return err
 }
 
 func writeBinaryResponse(response *http.Response, stdout io.Writer, outfile string) (string, error) {
@@ -327,8 +266,20 @@ func formatJSON(res gjson.Result, opts ShowJSONOpts) ([]byte, error) {
 		_, err := opts.Stdout.Write([]byte(yaml.String()))
 		return nil, err
 	default:
-		return nil, fmt.Errorf("Format %q is unknown. Choose %s.", opts.Format, formatChoices())
+		return nil, unknownFormatError(opts.Format)
 	}
+}
+
+type unknownFormatError string
+
+func (e unknownFormatError) Error() string {
+	return fmt.Sprintf("Format %q is unknown. Choose %s.", string(e), formatChoices())
+}
+
+type unexpectedArgumentsError []string
+
+func (e unexpectedArgumentsError) Error() string {
+	return fmt.Sprintf("Unexpected extra arguments %v. Remove them, then run the command again.", []string(e))
 }
 
 const warningExploreNotSupported = "Explore format requires a terminal. Using JSON instead.\n"
@@ -385,103 +336,4 @@ func ShowJSON(res gjson.Result, opts ShowJSONOpts) error {
 		_, err = opts.Stdout.Write(bytes)
 		return err
 	}
-}
-
-func countTerminalLines(data []byte, terminalWidth int) int {
-	return bytes.Count([]byte(wrap.String(string(data), terminalWidth)), []byte("\n"))
-}
-
-type hasRawJSON interface {
-	RawJSON() string
-}
-
-func ShowJSONIterator[T any](iter jsonview.Iterator[T], itemsToDisplay int64, opts ShowJSONOpts) error {
-	opts.setDefaults()
-
-	if opts.Format == "explore" {
-		if isTerminal(opts.Stdout) {
-			return jsonview.ExploreJSONStream(opts.Title, iter)
-		}
-		if opts.ExplicitFormat {
-			fmt.Fprint(opts.Stderr, warningExploreNotSupported)
-		}
-		opts.Format = "json"
-	}
-
-	terminalWidth, terminalHeight, err := term.GetSize(os.Stdout.Fd())
-	if err != nil {
-		terminalWidth = 100
-		terminalHeight = 40
-	}
-
-	usePager := false
-	output := []byte{}
-	numberOfNewlines := 0
-	for itemsToDisplay != 0 && iter.Next() {
-		item := iter.Current()
-		var obj gjson.Result
-		if hasRaw, ok := any(item).(hasRawJSON); ok {
-			obj = gjson.Parse(hasRaw.RawJSON())
-		} else {
-			jsonData, err := json.Marshal(item)
-			if err != nil {
-				return err
-			}
-			obj = gjson.ParseBytes(jsonData)
-		}
-		json, err := formatJSON(obj, opts)
-		if err != nil {
-			return err
-		}
-
-		output = append(output, json...)
-		itemsToDisplay -= 1
-		numberOfNewlines += countTerminalLines(json, terminalWidth)
-
-		if numberOfNewlines >= terminalHeight-3 {
-			usePager = true
-			break
-		}
-	}
-
-	if !usePager {
-		_, err := opts.Stdout.Write(output)
-		if err != nil {
-			return err
-		}
-
-		return iter.Err()
-	}
-
-	return streamOutput(opts.Title, func(pager *os.File) error {
-		_, err := pager.Write(output)
-		if err != nil {
-			return err
-		}
-
-		pagerOpts := opts
-		pagerOpts.Stdout = pager
-
-		for iter.Next() {
-			if itemsToDisplay == 0 {
-				break
-			}
-			item := iter.Current()
-			var obj gjson.Result
-			if hasRaw, ok := any(item).(hasRawJSON); ok {
-				obj = gjson.Parse(hasRaw.RawJSON())
-			} else {
-				jsonData, err := json.Marshal(item)
-				if err != nil {
-					return err
-				}
-				obj = gjson.ParseBytes(jsonData)
-			}
-			if err := ShowJSON(obj, pagerOpts); err != nil {
-				return err
-			}
-			itemsToDisplay -= 1
-		}
-		return iter.Err()
-	})
 }

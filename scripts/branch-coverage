@@ -42,7 +42,7 @@ go run "github.com/srvgit/gocove/cmd/gocove@${gocove_version}" \
   --meta-dir="$branch_meta" \
   --format=json > "$branch_meta/report.json"
 
-go run ./scripts/branch_coverage.go \
+go run ./cmd/branch-coverage \
   "$branch_meta/report.json" \
   "$branch_meta/_gocove/cover.profile" \
   80

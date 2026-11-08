@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package debugmiddleware logs the headers of each HTTP request and response,
+// without credentials or cookies.
 package debugmiddleware
 
 import (
-	"bytes"
-	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -29,7 +29,7 @@ var sensitiveHeaders = []string{
 }
 
 type RequestLogger struct {
-	logger           interface{ Printf(string, ...any) }
+	logger           *log.Logger
 	sensitiveHeaders []string
 }
 
@@ -42,11 +42,7 @@ func NewRequestLogger() *RequestLogger {
 
 func (m *RequestLogger) Middleware() Middleware {
 	return func(req *http.Request, mn MiddlewareNext) (*http.Response, error) {
-		redacted, err := m.redactRequest(req)
-		if err != nil {
-			return nil, err
-		}
-		if reqBytes, err := httputil.DumpRequest(redacted, true); err == nil {
+		if reqBytes, err := httputil.DumpRequest(m.redact(req), false); err == nil {
 			m.logger.Printf("HTTP Request:\n%s\n", reqBytes)
 		}
 
@@ -55,7 +51,10 @@ func (m *RequestLogger) Middleware() Middleware {
 			return resp, err
 		}
 
-		if respBytes, err := httputil.DumpResponse(resp, true); err == nil {
+		shown := *resp
+		shown.Header = resp.Header.Clone()
+		shown.Header.Del("Set-Cookie")
+		if respBytes, err := httputil.DumpResponse(&shown, false); err == nil {
 			m.logger.Printf("HTTP Response:\n%s\n", respBytes)
 		}
 
@@ -63,7 +62,7 @@ func (m *RequestLogger) Middleware() Middleware {
 	}
 }
 
-func (m *RequestLogger) redactRequest(req *http.Request) (*http.Request, error) {
+func (m *RequestLogger) redact(req *http.Request) *http.Request {
 	redactedHeaders := req.Header.Clone()
 
 	if values := redactedHeaders.Values("Authorization"); len(values) > 0 {
@@ -92,26 +91,10 @@ func (m *RequestLogger) redactRequest(req *http.Request) (*http.Request, error) 
 	}
 
 	if reflect.DeepEqual(req.Header, redactedHeaders) {
-		return req, nil
+		return req
 	}
 
 	redacted := req.Clone(req.Context())
 	redacted.Header = redactedHeaders
-	var err error
-	redacted.Body, req.Body, err = cloneBody(req.Body)
-	return redacted, err
-}
-
-func cloneBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
-	if b == nil || b == http.NoBody {
-		return http.NoBody, http.NoBody, nil
-	}
-	var buf bytes.Buffer
-	if _, err = buf.ReadFrom(b); err != nil {
-		return nil, b, err
-	}
-	if err = b.Close(); err != nil {
-		return nil, b, err
-	}
-	return io.NopCloser(&buf), io.NopCloser(bytes.NewReader(buf.Bytes())), nil
+	return redacted
 }

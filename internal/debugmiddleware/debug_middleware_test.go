@@ -6,7 +6,6 @@ package debugmiddleware
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -16,23 +15,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
-
-type controlledReadCloser struct {
-	reader   io.Reader
-	readErr  error
-	closeErr error
-}
-
-func (r *controlledReadCloser) Read(buffer []byte) (int, error) {
-	if r.readErr != nil {
-		return 0, r.readErr
-	}
-	return r.reader.Read(buffer)
-}
-
-func (r *controlledReadCloser) Close() error {
-	return r.closeErr
-}
 
 func TestDebugMiddleware(t *testing.T) {
 	t.Parallel()
@@ -185,6 +167,81 @@ func TestDebugMiddleware(t *testing.T) {
 		require.Equal(t, 2, strings.Count(logBuf.String(), customAPIKeyHeader+": "+redactedPlaceholder))
 	})
 
+	t.Run("RedactsTheDefaultSensitiveHeaders", func(t *testing.T) {
+		t.Parallel()
+
+		middleware, logBuf := setup()
+
+		req := httptest.NewRequest("GET", "https://example.com", nil)
+		req.Header.Set("Authorization", "Bearer "+secretToken+"-bearer")
+		req.Header.Set("Cookie", "session="+secretToken+"-cookie")
+		req.Header.Set("Set-Cookie", "session="+secretToken+"-set-cookie")
+		req.Header.Set("X-Api-Key", secretToken+"-x-api-key")
+		req.Header.Set("Api-Key", secretToken+"-api-key")
+
+		_, err := middleware.Middleware()(req, func(*http.Request) (*http.Response, error) {
+			return &http.Response{}, nil
+		})
+		require.NoError(t, err)
+
+		logged := logBuf.String()
+		require.NotContains(t, logged, secretToken)
+		for _, header := range []string{"Authorization: Bearer ", "Cookie: ", "Set-Cookie: ", "X-Api-Key: ", "Api-Key: "} {
+			require.Contains(t, logged, header+redactedPlaceholder)
+		}
+		require.Equal(t, "session="+secretToken+"-cookie", req.Header.Get("Cookie"))
+	})
+
+	t.Run("LeavesTheRequestBodyOutOfTheDump", func(t *testing.T) {
+		t.Parallel()
+
+		middleware, logBuf := setup()
+		const body = `{"email":"e","password":"` + secretToken + `-password","totpSecret":"` + secretToken + `-totp"}`
+		req := httptest.NewRequest("POST", "https://example.com/x/accounts", strings.NewReader(body))
+
+		_, err := middleware.Middleware()(req, func(req *http.Request) (*http.Response, error) {
+			sent, err := io.ReadAll(req.Body)
+			require.NoError(t, err)
+			require.Equal(t, body, string(sent))
+			return &http.Response{Header: http.Header{}, Body: http.NoBody}, nil
+		})
+		require.NoError(t, err)
+		require.Contains(t, logBuf.String(), "POST https://example.com/x/accounts")
+		require.NotContains(t, logBuf.String(), secretToken)
+	})
+
+	t.Run("LeavesEverySecretOutOfTheDump", func(t *testing.T) {
+		t.Parallel()
+
+		middleware, logBuf := setup()
+		req := httptest.NewRequest("POST", "https://example.com/webhooks", strings.NewReader(`{"password":"`+secretToken+`-request-body"}`))
+		req.Header.Set("Authorization", "Bearer "+secretToken+"-authorization")
+		req.Header.Set("Cookie", "session="+secretToken+"-cookie")
+		req.Header.Set("X-Api-Key", secretToken+"-x-api-key")
+		req.Header.Set("Api-Key", secretToken+"-api-key")
+		header := http.Header{}
+		header.Set("Set-Cookie", "session="+secretToken+"-set-cookie")
+		header.Set("Content-Type", "application/json")
+		responseBody := `{"secret":"` + secretToken + `-response-body"}`
+
+		resp, err := middleware.Middleware()(req, func(*http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				ProtoMajor: 1,
+				ProtoMinor: 1,
+				Header:     header,
+				Body:       io.NopCloser(strings.NewReader(responseBody)),
+			}, nil
+		})
+		require.NoError(t, err)
+		require.NotContains(t, logBuf.String(), secretToken)
+		require.Contains(t, logBuf.String(), "Content-Type: application/json")
+		require.Equal(t, "session="+secretToken+"-set-cookie", resp.Header.Get("Set-Cookie"))
+		received, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		require.Equal(t, responseBody, string(received))
+	})
+
 	t.Run("DoesNotConsumeRequestBodyWhenIoReader", func(t *testing.T) {
 		t.Parallel()
 
@@ -213,40 +270,4 @@ func TestDebugMiddleware(t *testing.T) {
 		require.True(t, nextMiddlewareRan)
 		require.Contains(t, logBuf.String(), "Authorization: "+redactedPlaceholder)
 	})
-}
-
-func TestCloneBodyHandlesEmptyAndFailedBodies(t *testing.T) {
-	t.Parallel()
-
-	for name, body := range map[string]io.ReadCloser{
-		"nil":     nil,
-		"no body": http.NoBody,
-	} {
-		t.Run(name, func(t *testing.T) {
-			first, second, err := cloneBody(body)
-			require.NoError(t, err)
-			require.Equal(t, http.NoBody, first)
-			require.Equal(t, http.NoBody, second)
-		})
-	}
-
-	readErr := errors.New("read failed")
-	failedRead := &controlledReadCloser{
-		reader:  strings.NewReader("ignored"),
-		readErr: readErr,
-	}
-	first, second, err := cloneBody(failedRead)
-	require.ErrorIs(t, err, readErr)
-	require.Nil(t, first)
-	require.Same(t, failedRead, second)
-
-	closeErr := errors.New("close failed")
-	failedClose := &controlledReadCloser{
-		reader:   strings.NewReader("body"),
-		closeErr: closeErr,
-	}
-	first, second, err = cloneBody(failedClose)
-	require.ErrorIs(t, err, closeErr)
-	require.Nil(t, first)
-	require.Same(t, failedClose, second)
 }

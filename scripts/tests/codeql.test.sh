@@ -17,6 +17,18 @@ EOF
   write_file pkg/lib.go <<'EOF'
 package lib
 EOF
+  write_file pkg/lib_test.go <<'EOF'
+package lib
+EOF
+  write_file pkg/lib_external_test.go <<'EOF'
+package lib_test
+EOF
+  write_file codeql/no-code-comments/qlpack.yml <<'EOF'
+name: xquik/no-code-comments
+EOF
+  write_file codeql/no-code-comments-test/NoCodeComments/case.go.fixture <<'EOF'
+package comments
+EOF
   fake codeql <<'EOF'
 #!/bin/sh
 echo "$*" >>"$FAKE_LOGS/codeql"
@@ -47,13 +59,18 @@ case "$1 $2" in
   "pack install")
     [ -z "${FAKE_INSTALL_FAILS:-}" ] || exit 1
     ;;
+  "test run")
+    [ -f "$3/NoCodeComments/case.go" ] && [ ! -e "$3/NoCodeComments/case.go.fixture" ] || exit 98
+    [ -z "${FAKE_QUERY_TEST_FAILS:-}" ] || exit 1
+    ;;
   "database create")
     source_root="$(option --source-root "$@")"
     echo "$source_root" >"$FAKE_LOGS/source-root"
     mkdir -p "$3"
     echo "built" >"$source_root/build-output.txt"
     files=""
-    for file in main.go pkg/lib.go; do
+    [ "${CODEQL_EXTRACTOR_GO_OPTION_EXTRACT_TESTS:-}" = true ] || exit 96
+    for file in main.go pkg/lib.go pkg/lib_test.go pkg/lib_external_test.go; do
       [ "$file" = "${FAKE_SKIPPED_FILE:-}" ] || files="$files ${source_root#/}/$file"
     done
     (cd / && zip -q "$3/src.zip" $files)
@@ -83,7 +100,7 @@ EOF
 [ "$*" = "list -json ./..." ] || exit 97
 here="$(pwd -P)"
 echo "{\"Dir\": \"$here\", \"GoFiles\": [\"main.go\"]}"
-echo "{\"Dir\": \"$here/pkg\", \"GoFiles\": [\"lib.go\"]}"
+echo "{\"Dir\": \"$here/pkg\", \"GoFiles\": [\"lib.go\"], \"TestGoFiles\": [\"lib_test.go\"], \"XTestGoFiles\": [\"lib_external_test.go\"]}"
 EOF
   commit_repo
 }
@@ -95,15 +112,27 @@ test_codeql_scans_a_copy_with_the_pinned_pack_and_leaves_the_working_tree_alone(
 
   assert_equal "" "$run_stderr" "stderr"
   assert_equal 0 "$run_status" "the exit code"
-  assert_ends_with "$run_stdout" "CodeQL read all 2 Go files and found no results." "stdout"
+  assert_ends_with "$run_stdout" "CodeQL read all 4 Go files and found no results." "stdout"
   assert_equal "" "$(sandbox_git status --porcelain)" "the working tree changes"
   assert_contains "$(log_of source-root)" "$sandbox/tmp/xquik-cli-codeql." "the scanned folder"
   assert_contains "$(log_of codeql)" "pack download codeql/go-queries@1.6.12 --dir=$sandbox/tmp/" "the pack download"
   assert_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
   assert_contains "$(log_of codeql)" " codeql/go-queries@1.6.12:codeql-suites/go-security-extended.qls codeql/no-code-comments --additional-packs=$sandbox/tmp/" "the analysis"
   assert_contains "$(log_of codeql)" "pack install codeql/no-code-comments --common-caches=$sandbox/tmp/" "the comment query install"
-  assert_equal 4 "$(grep -c -- "--common-caches=$sandbox/tmp/xquik-cli-codeql." "$sandbox_logs/codeql")" "the calls with a private cache"
+  assert_contains "$(log_of codeql)" "test run $sandbox/tmp/" "the comment query test"
+  assert_equal 6 "$(grep -c -- "--common-caches=$sandbox/tmp/xquik-cli-codeql." "$sandbox_logs/codeql")" "the calls with a private cache"
   assert_equal "" "$(ls "$sandbox/tmp")" "the leftover temporary files"
+}
+
+test_a_failing_comment_query_test_stops_the_run() {
+  prepare_codeql
+  run_env=("FAKE_QUERY_TEST_FAILS=1")
+
+  run_in_repo scripts/codeql
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "The comment query test failed. Fix codeql/no-code-comments or the expected results in codeql/no-code-comments-test, then rerun." "$run_stderr" "stderr"
+  assert_not_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
 }
 
 test_a_codeql_result_fails_the_run_and_is_printed() {
@@ -136,6 +165,18 @@ test_a_go_file_missing_from_the_database_fails_the_run() {
 
   assert_equal 1 "$run_status" "the exit code"
   assert_equal "pkg/lib.go
+CodeQL missed the Go files above. Fix the build so it compiles every package." "$run_stderr" "stderr"
+  assert_not_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
+}
+
+test_an_external_test_file_missing_from_the_database_fails_the_run() {
+  prepare_codeql
+  run_env=("FAKE_SKIPPED_FILE=pkg/lib_external_test.go")
+
+  run_in_repo scripts/codeql
+
+  assert_equal 1 "$run_status" "the exit code"
+  assert_equal "pkg/lib_external_test.go
 CodeQL missed the Go files above. Fix the build so it compiles every package." "$run_stderr" "stderr"
   assert_not_contains "$(log_of codeql)" "database analyze" "the CodeQL calls"
 }
