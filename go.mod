@@ -1,6 +1,6 @@
 module github.com/Xquik-dev/x-twitter-scraper-cli
 
-go 1.27.2
+go 1.27.4
 
 require (
 	github.com/Xquik-dev/x-twitter-scraper-go v0.18.1
