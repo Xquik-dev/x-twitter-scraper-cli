@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* Every request sends `X-Xquik-SDK: cli` beside the existing headers, so Xquik can count CLI requests.
+
 ## 0.13.6 (2026-10-14)
 
 [Full changelog from v0.13.5 to v0.13.6](https://github.com/Xquik-dev/x-twitter-scraper-cli/compare/v0.13.5...v0.13.6)
