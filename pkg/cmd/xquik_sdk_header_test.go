@@ -28,7 +28,8 @@ func TestEveryRequestNamesTheCLIForXquik(t *testing.T) {
 
 	options := append(getDefaultRequestOptions(&cli.Command{Name: "retrieve"}),
 		option.WithBaseURL(server.URL), option.WithAPIKey("My API Key"))
-	_, err := xtwitterscraper.NewClient(options...).Account.Get(context.Background())
+	client := xtwitterscraper.NewClient(options...)
+	_, err := client.Account.Get(context.Background())
 	require.NoError(t, err)
 
 	sent := <-headers
